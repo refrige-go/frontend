@@ -28,7 +28,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "src/app/add-ingredient/direct/\bpage.jsx", "src/app/add-ingredient/page.jsx", "src/app/my-ingredients/page.jsx", "src/app/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]
