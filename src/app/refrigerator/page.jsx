@@ -1,8 +1,8 @@
 'use client';
 
-import { useIngredients } from '../../../hooks/useIngredients';
+import { useIngredients } from '../../hooks/useIngredients';
 import styles from './RefrigeratorPage.module.css';
-import Header from '../../../components/layout/Header';
+import Header from '../../components/layout/Header';
 
 export default function RefrigeratorPage() {
   const { ingredients, deleteIngredient } = useIngredients();
@@ -17,7 +17,7 @@ export default function RefrigeratorPage() {
 
   return (
     <div className={styles.container}>
-      <Header /> 
+      <Header />
 
       <div className={styles.tabWrap}>
         <button className={styles.tabActive}>냉장고 재고</button>

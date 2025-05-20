@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import BookmarkCard from '../../../components/BookmarkCard';
+import BookmarkCard from '../../components/BookmarkCard';
 
-export default function RecommendationsPage() {
+export default function TypeRecommendationsPage() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +31,7 @@ export default function RecommendationsPage() {
 
   return (
     <section style={{ marginTop: '2rem' }}>
-      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>✨ 추천 레시피</h2>
+      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>사용자님의 취향 저격 레시피를 모아봤어요!</h2>
       <div className="scroll-container no-scrollbar">
         {recipes.map((recipe) => (
           <div className="slide-item" key={recipe.rcpSeq}>

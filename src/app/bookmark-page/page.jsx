@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import BookmarkCard from '../../../components/BookmarkCard';
-import Header from '../../../components/layout/Header';
-import BottomNavigation from '../../../components/layout/BottomNavigation';
+import BookmarkCard from '../../components/BookmarkCard';
+import Header from '../../components/layout/Header';
+import BottomNavigation from '../../components/layout/BottomNavigation';
 
 export default function BookmarksPage() {
   const [recipes, setRecipes] = useState([]);
