@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import Header from '../components/layout/Header'
 import BottomNavigation from '../components/layout/BottomNavigation'
-import RecommendationsPage from './pages/recommend-cuisine-type/page'
+import TypeRecommendationsPageRecommendationsPage from './recommend-cuisine-type/page'
+import IngredientRecommendationsSection from './recommend-ingredient/page'
 
 export default function Home() {
   return (
@@ -18,7 +19,9 @@ export default function Home() {
             </Link>
           </li>
         </ul>
-        <RecommendationsPage />
+        <TypeRecommendationsPageRecommendationsPage />
+        <IngredientRecommendationsSection />
+
       </main>
       <BottomNavigation />
     </>
