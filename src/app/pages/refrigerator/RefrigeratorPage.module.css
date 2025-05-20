@@ -1,0 +1,127 @@
+.container {
+  width: 100%;
+  max-width: 390px;
+  margin: 0 auto;
+  padding: 16px;
+  padding-bottom: 100px;
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #f97316;
+}
+
+.bell img {
+  width: 20px;
+  height: 20px;
+}
+
+.tabWrap {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tabActive {
+  flex: 1;
+  background: #f97316;
+  color: white;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 999px;
+  border: none;
+}
+
+.tabInactive {
+  flex: 1;
+  background: white;
+  color: #f97316;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 999px;
+  border: 1px solid #f97316;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.card {
+  background-color: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  aspect-ratio: 3 / 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  text-align: center;
+  gap: 6px;
+}
+
+.image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+
+.top {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #f97316;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 6px;
+  font-size: 10px;
+  color: #888;
+}
+
+.dDay {
+  color: #f97316;
+  font-weight: bold;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.addButton {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  background: #f97316;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  border-radius: 999px;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
