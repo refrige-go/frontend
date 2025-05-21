@@ -1,0 +1,410 @@
+.container {
+  width: 100%;
+  max-width: 390px;
+  margin: 0 auto;
+  padding: 16px;
+  padding-bottom: 140px;
+  background: #ffffff;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.scrollArea {
+  height: calc(100vh - 140px - 100px);
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #f97316;
+}
+
+.bell img {
+  width: 20px;
+  height: 20px;
+}
+
+.tabWrap {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 35px;
+  margin-top: 10px;
+}
+
+.tabActive {
+  flex: 1;
+  background: #f97316;
+  color: white;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 999px;
+  border: none;
+}
+
+.tabInactive {
+  flex: 1;
+  background: white;
+  color: #f97316;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 999px;
+  border: 1px solid #f97316;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.card {
+  background-color: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  padding: 1px 6px;
+  aspect-ratio: 3 / 2;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  text-align: left;
+}
+
+.cardContent {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  overflow: hidden; /* 내부 넘침 방지 */
+}
+
+.textContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden; /* 텍스트 넘침 방지 */
+  flex-shrink: 1;
+  min-width: 0; 
+}
+
+.category {
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #000;
+  white-space: nowrap;       /* 한 줄만 */
+  overflow: hidden;          /* 넘치면 숨기기 */
+  text-overflow: ellipsis;   /* 말줄임표 (...) 처리 */
+}
+
+.nameDday {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+
+.dDay {
+  color: #f97316;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.image {
+  width: 33px;
+  height: 40px;
+  border-radius: 8px;
+  margin-left: 15px;
+  object-fit: cover;
+}
+
+.top {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #f97316;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.frozenIcon {
+  margin-left: 3px;
+  font-size: 10px;
+  vertical-align: middle;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 20px;
+  font-size: 10px;
+  color: #888;
+}
+
+.addButton {
+  position: fixed;
+  bottom: 170px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  background: #f97316;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  border-radius: 999px;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 1100;
+}
+
+.recipeRecommendBtn {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 44px;
+  background-color: #f97316;
+  color: white;
+  border: none;
+  border-radius: 22px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+  z-index: 1000;
+}
+
+/* ============= 상세보기 모달 ============= */
+
+.detailContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;                     /* 왼쪽 끝에서 시작 */
+  width: 100vw;                /* 전체 가로 */
+  height: 50vh;                /* 세로 절반 */
+  background: #f9fafb;
+  border-radius: 24px 24px 0 0;
+  padding: 70px 50px;          /* 양쪽 패딩으로 짤림 방지 */
+  box-sizing: border-box;     /* padding 포함한 크기 계산 */
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  z-index: 2000;
+  overflow-y: auto;
+  font-family: 'Pretendard', sans-serif;
+}
+
+
+.detailHeader {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.detailHeader img {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.detailInfo {
+  flex: 1;
+}
+
+.category {
+  font-size: 14px;
+  color: #999;
+}
+
+.name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+}
+
+.dDay {
+  font-size: 15px;
+  font-weight: bold;
+  color: #f97316;
+  white-space: nowrap;
+}
+
+.detailBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.detailBody div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  color: #444;
+}
+
+.detailFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.detailFooter button {
+  flex: 1;
+  padding: 14px 0;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.detailFooter button:first-child {
+  background: #fff;
+  border: 1px solid #f97316;
+  color: #f97316;
+}
+
+.detailFooter button:last-child {
+  background: #f97316;
+  color: #fff;
+}
+
+.detailDday {
+  font-size: 30px; /* 상세보기 전용 D-day 크기 */
+}
+
+
+.toggleWrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+  color: #444;
+}
+
+.toggleSwitch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.toggleSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: not-allowed; /* 보기 전용 */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  border-radius: 34px;
+  transition: 0.4s;
+}
+
+.slider::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.4s;
+}
+
+.toggleSwitch input:checked + .slider {
+  background-color: black;
+}
+
+.toggleSwitch input:checked + .slider::before {
+  transform: translateX(22px);
+}
+
+.frozenText {
+  color: black;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-end;
+  z-index: 1999;
+}
+
+.frozenCard {
+  background-color: #f3fbff
+}
+
+/* react-datepicker 포탈용 달력 중앙 정렬 */
+#root-portal .react-datepicker__portal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+}
+
+/* 모바일 기준: 달력 사이즈 조정 */
+.react-datepicker {
+  font-size: 14px;
+}
+
+/* 버튼 등 추가 스타일 (선택사항) */
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #f97316;
+  color: white;
+}
+
+.dateInput {
+  text-align: right;       /* ← 오른쪽 정렬 */
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #f2f2f2;
+  font-size: 14px;
+  width: 110px;             /* ← 필요시 고정 너비 */
+}
+
+
