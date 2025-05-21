@@ -3,18 +3,20 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-export default function BookmarkCard({ recipe, userId }) {
-  const [bookmarked, setBookmarked] = useState(recipe.bookmarked);
-
+export default function BookmarkCard({ recipe, userId, onBookmark, onUnbookmark }) {
   const handleToggleBookmark = async () => {
     try {
       const response = await axios.post('http://localhost:8080/api/bookmark/toggle', null, {
         params: {
           userId,
-          recipeId: recipe.rcpSeq
+          recipeId: recipe.recipeId ?? recipe.rcpSeq
         }
       });
-      setBookmarked(response.data.bookmarked);
+      if (response.data.bookmarked) {
+        onBookmark && onBookmark(recipe.recipeId ?? recipe.rcpSeq);
+      } else {
+        onUnbookmark && onUnbookmark(recipe.recipeId ?? recipe.rcpSeq);
+      }
     } catch (err) {
       console.error('찜 토글 실패:', err);
     }
@@ -25,7 +27,7 @@ export default function BookmarkCard({ recipe, userId }) {
       <div className="image-wrapper">
         <img src={recipe.image} alt={recipe.rcpNm} className="recipe-img" />
         <button className="heart" onClick={handleToggleBookmark}>
-          {bookmarked ? '🧡' : '🤍'}
+          {recipe.bookmarked ? '🧡' : '🤍'}
         </button>
       </div>
       <div className="title">{recipe.rcpNm}</div>

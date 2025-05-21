@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import BookmarkCard from '../../components/BookmarkCard';
 
-export default function IngredientRecommendationsSection({ }) {
+export default function IngredientRecommendationsSection({ bookmarkedIds, onBookmark, onUnbookmark }) {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +28,7 @@ export default function IngredientRecommendationsSection({ }) {
   }, [userId]);
 
   if (loading) return <p>불러오는 중입니다...</p>;
-  if (recipes.length === 0) return <p>추천 레시피가 없습니다.</p>;
+  if (recipes.length === 0) return null;
 
   return (
     <section style={{ marginTop: '2rem' }}>
@@ -36,7 +36,15 @@ export default function IngredientRecommendationsSection({ }) {
       <div className="scroll-container no-scrollbar">
         {recipes.map((recipe) => (
           <div className="slide-item" key={recipe.rcpSeq}>
-            <BookmarkCard recipe={recipe} userId={userId} />
+            <BookmarkCard
+              recipe={{
+                ...recipe,
+                bookmarked: bookmarkedIds.includes(recipe.recipeId ?? recipe.rcpSeq)
+              }}
+              userId={userId}
+              onBookmark={onBookmark}
+              onUnbookmark={onUnbookmark}
+            />
           </div>
         ))}
       </div>
