@@ -5,7 +5,7 @@ import Header from '../components/layout/Header'
 import BottomNavigation from '../components/layout/BottomNavigation'
 import TypeRecommendationsPageRecommendationsPage from './recommend-cuisine-type/page'
 import IngredientRecommendationsSection from './recommend-ingredient/page'
-import SearchBar from '../components/SearchBar'
+import SearchWithCategory from '../components/SearchWithCategory'
 import { useState, useEffect } from 'react';
 
 export default function Home() {
@@ -36,7 +36,7 @@ export default function Home() {
       <Header />
       <div className='appContainer'>
         <main style={{ padding: '1rem', fontFamily: 'sans-serif' }}>
-          <SearchBar
+          <SearchWithCategory
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search"

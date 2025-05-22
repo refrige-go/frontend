@@ -2,8 +2,15 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 
 const Header = () => {
+  const router = useRouter();
+
+  const handleLogoClick = () => {
+    router.push('/');
+  };
+
   return (
     <header
       style={{
@@ -22,12 +29,14 @@ const Header = () => {
     >
       {/* 로고 */}
       <div
+        onClick={handleLogoClick}
         style={{
           display: 'flex',
           alignItems: 'center',
           fontWeight: 'bold',
           fontSize: '2rem',
           userSelect: 'none',
+          cursor: 'pointer', // 클릭 가능함을 표시
         }}
       >
         {/* 냉장고 이미지 */}

@@ -54,7 +54,7 @@ export default function BookmarksPage() {
 
             {/* 탭 메뉴 */}
             <div className={styles.tabContainer}>
-              {['전체', '지금 가능', '자주 만듦'].map((tab) => (
+              {['전체', '지금 가능'].map((tab) => (
                 <button
                   key={tab}
                   className={`${styles.tabButton} ${activeTab === tab ? styles.active : ''}`}
