@@ -11,12 +11,21 @@ export default function TypeRecommendationsPage({ bookmarkedIds, onBookmark, onU
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef(null);
 
-  const userId = 1; // 실제 로그인 유저 ID로 바꾸세요
-
   const fetchRecommendations = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:8080/api/bookmark/bookmark-recommend?userId=${userId}`);
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}api/bookmark/bookmark-recommend`, {
+        method: 'GET',
+        headers: headers,
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error('추천 목록을 불러오는 데 실패했습니다.');
       const data = await res.json();
       setRecipes(data.slice(0, 7)); // 최대 7개만 보여주기
@@ -86,7 +95,6 @@ export default function TypeRecommendationsPage({ bookmarkedIds, onBookmark, onU
                 ...recipe,
                 bookmarked: bookmarkedIds.includes(recipe.recipeId ?? recipe.rcpSeq),
               }}
-              userId={userId}
               onUnbookmark={handleUnbookmark}
               onBookmark={handleBookmark}
             />

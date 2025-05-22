@@ -12,17 +12,36 @@ export default function IngredientRecommendationsSection({ bookmarkedIds, onBook
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef(null);
 
-  const userId = 1; // 실제 로그인 유저 ID로 바꾸세요
-
   const fetchRecommendations = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:8080/api/bookmark/ingredient-recommend?userId=${userId}`);
-      if (!res.ok) throw new Error('추천 목록을 불러오는 데 실패했습니다.');
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}api/bookmark/ingredient-recommend`, {
+        method: 'GET',
+        headers: headers,
+        credentials: 'include'
+      });
+      if (!res.ok) {
+        if (res.status === 403) {
+          throw new Error('접근 권한이 없습니다. 로그인이 필요합니다.');
+        }
+        throw new Error(`HTTP ${res.status}: 추천 목록을 불러오는 데 실패했습니다.`);
+      }
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('서버에서 올바른 JSON 응답을 받지 못했습니다.');
+      }
       const data = await res.json();
       setRecipes(data.slice(0, 7));
     } catch (error) {
       console.error('에러:', error);
+      setRecipes([]); // 에러 발생 시 빈 배열로 설정
     } finally {
       setLoading(false);
     }
@@ -30,7 +49,7 @@ export default function IngredientRecommendationsSection({ bookmarkedIds, onBook
 
   useEffect(() => {
     fetchRecommendations();
-  }, [userId]);
+  }, []);
 
   const handleBookmark = async (recipeId) => {
     await onBookmark(recipeId);
@@ -86,7 +105,6 @@ export default function IngredientRecommendationsSection({ bookmarkedIds, onBook
                 ...recipe,
                 bookmarked: bookmarkedIds.includes(recipe.recipeId ?? recipe.rcpSeq)
               }}
-              userId={userId}
               onBookmark={handleBookmark}
               onUnbookmark={handleUnbookmark}
             />

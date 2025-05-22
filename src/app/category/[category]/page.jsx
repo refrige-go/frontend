@@ -5,6 +5,8 @@ import Header from '../../../components/layout/Header';
 import BottomNavigation from '../../../components/layout/BottomNavigation';
 import BookmarkCard from '../../../components/BookmarkCard';
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
 export default function CategoryPage() {
   const { category } = useParams();
   const [recipes, setRecipes] = useState([]);
@@ -13,7 +15,7 @@ export default function CategoryPage() {
   useEffect(() => {
     setLoading(true);
     // 실제 API 엔드포인트에 맞게 수정 필요
-    fetch(`http://localhost:8080/api/recipe/category/${encodeURIComponent(category)}`)
+    fetch(`${baseUrl}/api/recipe/category/${encodeURIComponent(category)}`)
       .then(res => res.json())
       .then(data => setRecipes(data))
       .catch(() => setRecipes([]))
