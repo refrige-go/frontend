@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Next.js 13 이상에서는 'next/navigation'에서 가져옵니다
 import Link from 'next/link';
@@ -7,6 +8,24 @@ import "@/styles/pages/login.css"
 
 export default function LoginPage() {
   const router = useRouter(); // 라우터 초기화
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
+ // 로그인 페이지 들어오면 기존 토큰 제거 (만료된 토큰 방지용)
+useEffect(() => {
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    // 로그인된 사용자는 로그인 페이지 접근 못 하게
+    router.replace('/');
+  } else {
+    // 로그인 안 된 사용자라면 혹시 모를 이전 토큰 제거
+    localStorage.removeItem('token');
+  }
+}, []);
+
+
+
   // 입력값 상태 관리
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -16,7 +35,7 @@ export default function LoginPage() {
     e.preventDefault(); // 기본 폼 제출 막기
 
     try {
-      const response = await fetch('http://localhost:8080/login', {  // 백엔드 로그인 API 주소
+      const response = await fetch(`${baseUrl}/login`, {  // 백엔드 로그인 API 주소
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
