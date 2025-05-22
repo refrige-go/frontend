@@ -35,5 +35,9 @@ export function useIngredients() {
     fetchIngredients();
   }, []);
 
-  return { ingredients, fetchIngredients, deleteIngredient };
+  return {
+    ingredients,
+    deleteIngredient,
+    refetchIngredients: fetchIngredients,
+  };
 }
