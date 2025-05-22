@@ -13,6 +13,8 @@ export default function SignupPage() {
     password: ''
   });
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
   const handleChange = (e) => {
     const { id, value } = e.target;
     setForm((prev) => ({ ...prev, [id]: value }));
@@ -24,7 +26,7 @@ export default function SignupPage() {
     const { username, password } = form;
 
     try {
-      const res = await fetch('http://localhost:8080/join', {
+      const res = await fetch(`${baseUrl}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
