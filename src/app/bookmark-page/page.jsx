@@ -13,7 +13,7 @@ export default function BookmarksPage() {
   const [recipes, setRecipes] = useState([]);
   const [activeTab, setActiveTab] = useState('전체');
   const [ingredientRecipes, setIngredientRecipes] = useState([]);
-  const userId = 1;
+  const userId = 2;
 
   // 기존 찜 레시피
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function BookmarksPage() {
 
             {/* 탭 메뉴 */}
             <div className={styles.tabContainer}>
-              {['전체', '지금 가능', '자주 만듦'].map((tab) => (
+              {['전체', '지금 가능'].map((tab) => (
                 <button
                   key={tab}
                   className={`${styles.tabButton} ${activeTab === tab ? styles.active : ''}`}

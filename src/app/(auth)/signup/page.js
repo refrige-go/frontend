@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-import "@/styles/pages/signup.css"
+import "../../../styles/pages/signup.css"
 
 export default function SignupPage() {
   const router = useRouter(); // 라우터 훅
@@ -38,8 +38,8 @@ export default function SignupPage() {
       const result = await res.text();
       alert(result);
 
-       router.push('/login');
-       
+      router.push('/login');
+
     } catch (err) {
       alert('서버 요청 실패 😢');
     }
@@ -52,13 +52,13 @@ export default function SignupPage() {
             <label htmlFor="username"><input id="username" type="text" onChange={handleChange} value={form.username} /><span>아이디</span></label>
             <label htmlFor="password"><input id="password" type="password" placeholder="비밀번호를 입력하세요." value={form.password} onChange={handleChange} /><span>비밀번호</span></label>
           <button type="submit">회원가입 완료</button>
-          </form>
+        </form>
 
-          
-          <Link href="/"> <button className='btn-gray'>이전</button></Link>
-        </div>
-    
+
+        <Link href="/"> <button className='btn-gray'>이전</button></Link>
+      </div>
+
     </div>
-   
+
   );
 }
