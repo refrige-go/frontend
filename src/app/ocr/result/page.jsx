@@ -1,46 +1,107 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function IngredientConfirm() {
   const router = useRouter();
-  // 예시 데이터
-  const [ingredients, setIngredients] = useState([
-    { name: '김치', confidence: 95, status: 'selected', text: '신선한 김치 500g', category: '채소' },
-    { name: '대파', confidence: 78, status: 'need_check', text: '대파 1단', category: '채소' },
-    { name: '소고기(?)', confidence: 45, status: 'uncertain', text: '식용우', category: '육류(추정)' },
-    { name: '돼지고기', confidence: null, status: 'manual', text: '사용자가 수동 추가한 재료', category: '육류' },
-  ]);
+  const categoryList = [
+  "과일", "채소", "육류", "수산물/해산물", "곡류/분말", "조미료/양념", "면/떡", "두류/콩류", "기타"
+  ];
+  const [ingredients, setIngredients] = useState([]);
   const [input, setInput] = useState('');
 
-  // 선택/해제/추가 핸들러
-  const handleSelect = idx => {
+  // OCR 결과 불러오기 (세션스토리지에서만!)
+  useEffect(() => {
+    const data = sessionStorage.getItem('ocr_ingredients');
+    if (data) {
+      try {
+        const parsedData = JSON.parse(data);
+        // 신뢰도에 따라 상태 부여
+        const formatted = parsedData.map(item => ({
+          ...item,
+          status: item.status || (
+            item.confidence >= 70 ? 'selected' :
+            item.confidence >= 50 ? 'need_check' :
+            item.confidence === null ? 'manual' : 'uncertain'
+          )
+        }));
+        setIngredients(formatted);
+      } catch (e) {
+        console.error('데이터 파싱 오류:', e);
+      }
+    }
+  }, []);
+
+  // 선택/해제
+  const handleToggle = idx => {
     setIngredients(ings =>
       ings.map((ing, i) =>
-        i === idx ? { ...ing, status: 'selected' } : ing
+        i === idx
+          ? { ...ing, status: ing.status === 'selected' ? 'need_check' : 'selected' }
+          : ing
       )
     );
   };
-  const handleAdd = idx => {
-    setIngredients(ings =>
-      ings.map((ing, i) =>
-        i === idx ? { ...ing, status: 'manual' } : ing
-      )
-    );
-  };
+
+  // 직접 추가
   const handleManualAdd = () => {
     if (!input.trim()) return;
     setIngredients([
       ...ingredients,
-      { name: input, confidence: null, status: 'manual', text: '사용자가 수동 추가한 재료', category: '직접입력' }
+      {
+        name: input,
+        confidence: null,
+        status: 'manual',
+        text: input,
+        category: '직접입력'
+      }
     ]);
     setInput('');
   };
 
-  // 3. 추가: 선택된 재료 추가하기 버튼 클릭 시 이동
+  // 선택된 재료만 complete로 (세션스토리지에 저장, 쿼리 없이 이동)
   const handleAddSelected = () => {
+    const selected = ingredients.filter(ing => ing.status === 'selected' || ing.status === 'manual');
+    if (selected.length === 0) {
+      alert('최소 1개 이상의 재료를 선택해주세요.');
+      return;
+    }
+    sessionStorage.setItem('ocr_selected_ingredients', JSON.stringify(selected));
     router.push('/ocr/complete');
+  };
+
+  // 색상/아이콘/버튼 등 상태별 스타일
+  const getCardStyle = status => {
+    if (status === 'selected') return { border: '1px solid #22c55e', background: '#e6fff2' };
+    if (status === 'need_check') return { border: '1px solid #ffd966', background: '#ffffff' };
+    if (status === 'uncertain') return { border: '1px solid #ff7b7b', background: '#ffffff' };
+    if (status === 'manual') return { border: '1px solid #b3c6e0', background: '#f3f6fa' };
+    return {};
+  };
+  const getBtn = (status, idx) => {
+    return (
+      <button 
+        className={`btn-${status}`} 
+        onClick={() => handleToggle(idx)}
+        style={{ 
+          background: status === 'selected' || status === 'manual' ? '#ffd966' : '#e0e0e0',
+          color: '#000',
+          border: 'none',
+          borderRadius: '50%',
+          width: '36px',
+          height: '36px',
+          fontSize: '1.1em',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        {status === 'selected' || status === 'manual' ? '✓' : ''}
+      </button>
+    );
   };
 
   return (
@@ -53,51 +114,99 @@ export default function IngredientConfirm() {
         .list-title { font-weight: bold; font-size: 1.1em; margin: 0 0 10px 0; }
         .ingredient-list { width: 92vw; max-width: 400px; margin: 0 auto 18px auto; }
         .ingredient-item { border-radius: 14px; margin-bottom: 12px; padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px #0001; }
-        .ingredient-item.selected { background: #e6fff2; border: 2px solid #22c55e; }
-        .ingredient-item.need_check { background: #fffbe6; border: 2px solid #ffd966; }
-        .ingredient-item.uncertain { background: #ffeaea; border: 2px solid #ff7b7b; }
-        .ingredient-item.manual { background: #f3f6fa; border: 2px solid #b3c6e0; }
         .ingredient-info { flex: 1; }
         .ingredient-name { font-weight: bold; font-size: 1.1em; }
         .ingredient-status { font-size: 0.95em; margin: 2px 0 4px 0; }
         .ingredient-category { font-size: 0.92em; color: #888; }
-        .btn-select, .btn-add, .btn-manual { border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.1em; font-weight: bold; cursor: pointer; }
-        .btn-select { background: #22c55e; color: #fff; }
-        .btn-add { background: #ffd966; color: #f79726; }
-        .btn-uncertain { background: #ff7b7b; color: #fff; }
-        .btn-manual { background: #b3c6e0; color: #fff; }
-        .btn-selected { background: #22c55e; color: #fff; border-radius: 12px; width: auto; padding: 0 16px; font-size: 1em; }
+        .btn-selected, .btn-add, .btn-uncertain, .btn-manual { 
+          border: none; 
+          border-radius: 50%; 
+          width: 36px; 
+          height: 36px; 
+          font-size: 1.1em; 
+          font-weight: bold; 
+          cursor: pointer; 
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .btn-add { 
+          background: #ffd966; 
+          color: #f79726; 
+        }
+        .btn-uncertain { 
+          background: #ff7b7b; 
+          color: #fff; 
+        }
+        .btn-manual { 
+          background: #ffd966; 
+          color: #f79726; 
+          border: none; 
+          border-radius: 50%; 
+          width: 36px; 
+          height: 36px; 
+          font-size: 1.1em; 
+          font-weight: bold; 
+        }
+        .btn-selected { 
+          background: #ffd966; 
+          color: #f79726; 
+          border-radius: 50%; 
+          width: 36px; 
+          height: 36px; 
+          font-size: 1.1em; 
+          font-weight: bold; 
+          border: none; 
+        }
         .manual-add-row { display: flex; align-items: center; width: 92vw; max-width: 400px; margin: 0 auto 18px auto; }
         .manual-input { flex: 1; border: 1.5px solid #f79726; border-radius: 8px; padding: 10px; font-size: 1em; margin-right: 8px; }
-        .manual-btn { background: #f79726; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-weight: bold; font-size: 1em; cursor: pointer; }
+        .manual-btn { background: #1976d2; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-weight: bold; font-size: 1em; cursor: pointer; }
         .add-btn-row { width: 92vw; max-width: 400px; margin: 0 auto; }
         .add-btn-main { width: 100%; background: #f79726; color: #fff; border: none; border-radius: 12px; padding: 16px 0; font-size: 1.15em; font-weight: bold; margin-top: 8px; cursor: pointer; }
       `}</style>
 
       <div className="header">인식된 재료 확인</div>
       <div className="summary">
-        <span role="img" aria-label="축하">🎉</span> <b>총 {ingredients.length}개의 재료를 찾았어요!</b><br />
+        <span role="img" aria-label="축하">🎉</span> <b>총 {ingredients.filter(ing => ing.status === 'selected' || ing.status === 'manual').length}개의 재료를 찾았어요!</b><br />
         확인하시고 냉장고에 추가해보세요
       </div>
       <div className="ingredient-list">
         <div className="list-title">인식된 재료</div>
         {ingredients.map((ing, idx) => (
-          <div key={idx} className={`ingredient-item ${ing.status}`}>
+          <div key={idx} className="ingredient-item" style={getCardStyle(ing.status)}>
             <div className="ingredient-info">
-              <div className="ingredient-name">{ing.name}</div>
+              <div className="ingredient-name">{typeof ing.name === 'object' && ing.name !== null ? ing.name.matchedName : ing.name}</div>
               <div className="ingredient-status">
-                {ing.status === 'selected' && <>신뢰도: {ing.confidence}% | 자동 선택됨</>}
-                {ing.status === 'need_check' && <>신뢰도: {ing.confidence}% | <span style={{color:'#f79726'}}>확인 필요</span></>}
-                {ing.status === 'uncertain' && <>신뢰도: {ing.confidence}% | <span style={{color:'#ff7b7b'}}>불확실</span></>}
+                {ing.status === 'selected' && <>자동 선택됨</>}
+                {ing.status === 'need_check' && <><span style={{color:'#f79726'}}>확인 필요</span></>}
+                {ing.status === 'uncertain' && <><span style={{color:'#ff7b7b'}}>불확실</span></>}
                 {ing.status === 'manual' && <>직접 추가</>}
               </div>
-              <div className="ingredient-status" style={{color:'#888'}}>인식된 텍스트: "{ing.text}"</div>
-              <div className="ingredient-category">카테고리: {ing.category}</div>
+              <div className="ingredient-status" style={{color:'#888'}}>인식된 텍스트: "{typeof ing.text === 'object' && ing.text !== null ? ing.text.originalName : ing.text}"</div>
+              <div className="ingredient-category">
+                {ing.status === 'manual' ? (
+                  <select
+                    value={ing.category}
+                    onChange={e => {
+                      const newCategory = e.target.value;
+                      setIngredients(ings =>
+                        ings.map((item, i) =>
+                          i === idx ? { ...item, category: newCategory } : item
+                        )
+                      );
+                    }}
+                  >
+                    {categoryList.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <>카테고리: {typeof ing.name === 'object' && ing.name !== null ? ing.name.mainCategory : '기타'}</>
+                )}
             </div>
-            {ing.status === 'selected' && <button className="btn-selected">선택됨</button>}
-            {ing.status === 'need_check' && <button className="btn-add" onClick={()=>handleSelect(idx)}>+</button>}
-            {ing.status === 'uncertain' && <button className="btn-uncertain" onClick={()=>handleSelect(idx)}>+</button>}
-            {ing.status === 'manual' && <button className="btn-manual">✓</button>}
+              
+            </div>
+            {getBtn(ing.status, idx)}
           </div>
         ))}
       </div>
@@ -107,11 +216,14 @@ export default function IngredientConfirm() {
           placeholder="재료명을 입력하세요"
           value={input}
           onChange={e => setInput(e.target.value)}
+          onKeyPress={e => e.key === 'Enter' && handleManualAdd()}
         />
         <button className="manual-btn" onClick={handleManualAdd}>추가</button>
       </div>
       <div className="add-btn-row">
-        <button className="add-btn-main" onClick={handleAddSelected}>선택된 재료 추가하기</button>
+        <button className="add-btn-main" onClick={handleAddSelected}>
+          선택된 재료 추가하기
+        </button>
       </div>
     </div>
   );

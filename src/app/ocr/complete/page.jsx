@@ -1,14 +1,22 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function CompletePage() {
   const router = useRouter();
-  const ingredients = [
-    { name: '김치' },
-    { name: '대파' },
-    { name: '돼지고기' }
-  ];
+  const [ingredients, setIngredients] = useState([]);
+
+  useEffect(() => {
+    const data = sessionStorage.getItem('ocr_selected_ingredients');
+    if (data) {
+      try {
+        setIngredients(JSON.parse(data));
+      } catch (e) {
+        setIngredients([]);
+      }
+    }
+  }, []);
 
   return (
     <div className="container">
@@ -32,7 +40,9 @@ export default function CompletePage() {
       <div className="ingredient-list">
         {ingredients.map((ing, idx) => (
           <div key={idx} className="ingredient-item">
-            <span className="ingredient-name">{ing.name}</span>
+            <span className="ingredient-name">
+              {typeof ing.name === 'object' && ing.name !== null ? ing.name.matchedName : ing.name}
+            </span>
             <span className="ingredient-check">✓</span>
           </div>
         ))}

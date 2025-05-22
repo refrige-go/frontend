@@ -1,46 +1,31 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const videoRef = useRef(null);
   const router = useRouter();
 
- // 페이지가 로드될 때 카메라 자동 시작
-  useEffect(() => {
-    startCamera();
-  }, []);
+  // 버튼 클릭 시 goodbill.jpg로 OCR 요청
+  const goToResultWithGoodBill = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/ocr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: 'goodbill.jpg' })
+      });
 
-  // 카메라 켜기
-  const startCamera = async () => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+      if (response.ok) {
+        const result = await response.json();
+        sessionStorage.setItem('ocr_ingredients', JSON.stringify(result.ingredients));
+        router.push('/ocr/result');
+      } else {
+        alert('OCR 서버 오류가 발생했습니다.');
       }
+    } catch (error) {
+      alert('OCR 처리 중 오류가 발생했습니다.');
+      console.error(error);
     }
-  };
-
-  // 사진 촬영
-  const capturePhoto = () => {
-    if (!videoRef.current) return;
-    const video = videoRef.current;
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    //alert('사진이 촬영되었습니다!');
-    router.push('/ocr/result');
-  };
-
-  // 페이지 이동
-  const goGallery = () => {
-    window.location.href = '/gallery';
-  };
-  const goHistory = () => {
-    window.location.href = '/history';
   };
 
   return (
@@ -103,13 +88,6 @@ export default function Home() {
           justify-content: center;
           overflow: hidden;
         }
-        video {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          border-radius: 18px;
-          z-index: 1;
-        }
         .camera-guide {
           position: absolute;
           top: 50%;
@@ -131,7 +109,7 @@ export default function Home() {
           color: #7a8fa6;
           margin-top: 4px;
         }
-                  .tips {
+        .tips {
           margin: 16px auto 0 auto;
           width: 92vw;
           max-width: 400px;
@@ -197,8 +175,8 @@ export default function Home() {
           margin: 0 12px;
           box-shadow: 0 2px 8px #0002;
           border: 4px solid #f79726;
-          padding: 0; /* padding 제거 */
-          flex: none; /* flex-grow, flex-shrink 모두 0 */
+          padding: 0;
+          flex: none;
         }
         .main-btn:active {
           background: #d17a00;
@@ -207,24 +185,16 @@ export default function Home() {
           .header-wrap, .header, .camera-area, .tips, .footer { max-width: 98vw; }
         }
       `}</style>
-
-      {/* 상단 헤더 */}
+            {/* 상단 헤더 */}
       <div className="header-wrap">
         <div className="header">
-          <div className="header-row">
-            <span className="header-title">재료 사진 인식</span>
-            <span className="header-info">i</span>
-          </div>
-          <div className="header-desc">
-            AI가 재료를 자동으로 찾아드려요!<br />
-            영수증이나 재료 사진을 찍어보세요
-          </div>
+          <div className="header-title" style={{textAlign:'center'}}>재료 사진 인식</div>
+          <div className="header-desc" style={{textAlign:'center'}}>AI가 재료를 자동으로 찾아드려요!<br/>영수증이나 재료 사진을 찍어보세요</div>
         </div>
       </div>
 
       {/* 카메라 영역 */}
-      <div className="camera-area" onClick={startCamera}>
-        <video ref={videoRef} autoPlay playsInline />
+      <div className="camera-area">
         <div className="camera-guide">
           <div className="camera-guide-main">재료나 영수증을 화면에 맞춰 촬영하세요</div>
           <div className="camera-guide-sub">명확하게 보이도록 가까이서 찍으면 인식률이 높아져요</div>
@@ -243,9 +213,7 @@ export default function Home() {
 
       {/* 하단 버튼 */}
       <div className="footer">
-        <button className="footer-btn" onClick={goGallery}>갤러리</button>
-        <button className="footer-btn main-btn" onClick={capturePhoto}>●</button>
-        <button className="footer-btn" onClick={goHistory}>인식 기록</button>
+        <button className="footer-btn main-btn" onClick={goToResultWithGoodBill}>●</button>
       </div>
     </div>
   );
