@@ -8,11 +8,9 @@ import "../../../styles/pages/signup.css"
 
 export default function SignupPage() {
   const router = useRouter(); // 라우터 훅
-  const [form, setForm] = useState({
-    userId: '',
-    userName: '',
-    userPassword: '',
-    passwordCheck: '',
+   const [form, setForm] = useState({
+    username: '',
+    password: ''
   });
 
   const handleChange = (e) => {
@@ -23,19 +21,17 @@ export default function SignupPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { userId, userName, userPassword } = form;
+    const { username, password } = form;
 
     try {
-      const res = await fetch('http://localhost:8080/user/signup', {
+      const res = await fetch('http://localhost:8080/join', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId,
-          userName,
-          userPassword,
-          role: 'USER', // 기본 권한
+          username,
+          password
         }),
       });
 
@@ -50,13 +46,11 @@ export default function SignupPage() {
   };
   return (
     <div className="appContainer singup">
-      <div>
-        <h1>회원가입</h1>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="userId"><input id="userId" type="text" onChange={handleChange} value={form.userId} /><span>아이디</span></label>
-          <label htmlFor="userName"><input id="userName" type="text" onChange={handleChange} value={form.userName} /><span>이름</span></label>
-          <label htmlFor="userPassword"><input id="userPassword" type="password" placeholder="비밀번호를 입력하세요." value={form.userPassword} onChange={handleChange} /><span>비밀번호</span></label>
-          <label htmlFor="passwordCheck"><input id="passwordCheck" type="password" placeholder="비밀번호를 한번 더 입력하세요." value={form.passwordCheck} onChange={handleChange} /><span>비밀번호 확인</span></label>
+        <div>
+          <h1>회원가입</h1>
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="username"><input id="username" type="text" onChange={handleChange} value={form.username} /><span>아이디</span></label>
+            <label htmlFor="password"><input id="password" type="password" placeholder="비밀번호를 입력하세요." value={form.password} onChange={handleChange} /><span>비밀번호</span></label>
           <button type="submit">회원가입 완료</button>
         </form>
 
