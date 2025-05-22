@@ -26,7 +26,8 @@ export default function SignupPage() {
     const { userId, userName, userPassword } = form;
 
     try {
-      const res = await fetch('http://localhost:8080/user/signup', {
+      const baseUrl = process.env.BASE_API_URL;
+      const res = await fetch(`${baseUrl}/user/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
