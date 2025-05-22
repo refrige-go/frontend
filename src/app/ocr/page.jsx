@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const videoRef = useRef(null);
   const router = useRouter();
+
+ // 페이지가 로드될 때 카메라 자동 시작
+  useEffect(() => {
+    startCamera();
+  }, []);
 
   // 카메라 켜기
   const startCamera = async () => {
