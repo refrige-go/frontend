@@ -18,6 +18,7 @@ export default function RefrigeratorPage() {
   const [purchaseDate, setPurchaseDate] = useState(null);
   const [expiryDate, setExpiryDate] = useState(null);
   const [activeTab, setActiveTab] = useState('stock');
+  const [showAddOptions, setShowAddOptions] = useState(false);
 
   useEffect(() => {
     if (selectedIngredient) {
