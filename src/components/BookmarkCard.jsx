@@ -3,18 +3,20 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-export default function BookmarkCard({ recipe, userId }) {
-  const [bookmarked, setBookmarked] = useState(true); // 처음엔 찜 상태라고 가정
-
+export default function BookmarkCard({ recipe, userId, onBookmark, onUnbookmark }) {
   const handleToggleBookmark = async () => {
     try {
       const response = await axios.post('http://localhost:8080/api/bookmark/toggle', null, {
         params: {
           userId,
-          recipeId: recipe.rcpSeq
+          recipeId: recipe.recipeId ?? recipe.rcpSeq
         }
       });
-      setBookmarked(response.data.bookmarked);
+      if (response.data.bookmarked) {
+        onBookmark && onBookmark(recipe.recipeId ?? recipe.rcpSeq);
+      } else {
+        onUnbookmark && onUnbookmark(recipe.recipeId ?? recipe.rcpSeq);
+      }
     } catch (err) {
       console.error('찜 토글 실패:', err);
     }
@@ -25,26 +27,41 @@ export default function BookmarkCard({ recipe, userId }) {
       <div className="image-wrapper">
         <img src={recipe.image} alt={recipe.rcpNm} className="recipe-img" />
         <button className="heart" onClick={handleToggleBookmark}>
-          {bookmarked ? '🧡' : '🤍'}
+          {recipe.bookmarked ? '🧡' : '🤍'}
         </button>
       </div>
       <div className="title">{recipe.rcpNm}</div>
+
       <style jsx>{`
         .card {
           width: 160px;
+          height: 150px;
           border-radius: 20px;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
           padding: 10px;
           text-align: center;
           background: white;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          overflow: hidden;
         }
+
         .image-wrapper {
           position: relative;
-        }
-        .recipe-img {
           width: 100%;
+          height: 120px;
+          overflow: hidden;
           border-radius: 15px;
         }
+
+        .recipe-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 15px;
+        }
+
         .heart {
           position: absolute;
           top: 8px;
@@ -56,9 +73,14 @@ export default function BookmarkCard({ recipe, userId }) {
           font-size: 16px;
           cursor: pointer;
         }
+
         .title {
           margin-top: 8px;
           font-weight: bold;
+          font-size: 0.9rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
       `}</style>
     </div>

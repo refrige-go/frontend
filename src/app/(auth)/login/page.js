@@ -81,5 +81,6 @@ export default function LoginPage() {
           <Link href="/browse"><span>냉장GO <span>둘러보기</span></span></Link>
         </div>
     </div>
+
   );
 }

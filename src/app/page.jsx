@@ -1,18 +1,59 @@
 'use client'
 
 import Link from 'next/link'
+import Header from '../components/layout/Header'
+import BottomNavigation from '../components/layout/BottomNavigation'
+import TypeRecommendationsPageRecommendationsPage from './recommend-cuisine-type/page'
+import IngredientRecommendationsSection from './recommend-ingredient/page'
+import SearchBar from '../components/SearchBar'
+import { useState, useEffect } from 'react';
 
 export default function Home() {
+  const [bookmarkedIds, setBookmarkedIds] = useState([]);
+  const [search, setSearch] = useState('');
+
+  const userId = 1;
+
+  // 마운트 시 찜한 레시피 목록 불러오기
+  useEffect(() => {
+    fetch(`http://localhost:8080/api/bookmark/${userId}`)
+      .then(res => res.json())
+      .then(data => setBookmarkedIds(data.map(r => r.recipeId ?? r.rcpSeq)));
+  }, []);
+
+  // 찜 추가
+  const handleBookmark = (id) => {
+    setBookmarkedIds((prev) => [...prev, id]);
+  };
+
+  // 찜 해제
+  const handleUnbookmark = (id) => {
+    setBookmarkedIds((prev) => prev.filter((item) => item !== id));
+  };
+
   return (
-    <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>냉장GO MVP</h1>
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        <li>
-          <Link href="/my-ingredients">
-            <button style={{ padding: '0.5rem 1rem' }}>🍱 냉장고 보러가기</button>
-          </Link>
-        </li>
-      </ul>
-    </main>
-  )
+    <div className='mainContainer'>
+      <Header />
+      <div className='appContainer'>
+        <main style={{ padding: '1rem', fontFamily: 'sans-serif' }}>
+          <SearchBar
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search"
+          />
+          <TypeRecommendationsPageRecommendationsPage
+            bookmarkedIds={bookmarkedIds}
+            onBookmark={handleBookmark}
+            onUnbookmark={handleUnbookmark}
+          />
+          <IngredientRecommendationsSection
+            bookmarkedIds={bookmarkedIds}
+            onBookmark={handleBookmark}
+            onUnbookmark={handleUnbookmark}
+          />
+        </main>
+      </div>
+      <BottomNavigation />
+    </div>
+  );
 }
