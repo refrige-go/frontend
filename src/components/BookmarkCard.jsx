@@ -6,12 +6,17 @@ import axios from 'axios';
 export default function BookmarkCard({ recipe, userId, onBookmark, onUnbookmark }) {
   const handleToggleBookmark = async () => {
     try {
+      const token = localStorage.getItem('token'); // 로그인 시 저장해둔 토큰
+
       const response = await axios.post('http://localhost:8080/api/bookmark/toggle', null, {
         params: {
-          userId,
           recipeId: recipe.recipeId ?? recipe.rcpSeq
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
         }
       });
+
       if (response.data.bookmarked) {
         onBookmark && onBookmark(recipe.recipeId ?? recipe.rcpSeq);
       } else {
@@ -21,6 +26,7 @@ export default function BookmarkCard({ recipe, userId, onBookmark, onUnbookmark 
       console.error('찜 토글 실패:', err);
     }
   };
+
 
   return (
     <div className="card">
