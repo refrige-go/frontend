@@ -13,7 +13,7 @@ export default function BookmarksPage() {
   const [recipes, setRecipes] = useState([]);
   const [activeTab, setActiveTab] = useState('전체');
   const [ingredientRecipes, setIngredientRecipes] = useState([]);
-  const userId = 1;
+  const userId = 2;
 
   // 기존 찜 레시피
   useEffect(() => {
