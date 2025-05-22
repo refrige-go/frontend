@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-import "@/styles/pages/signup.css"
+// import "../../../styles/pages/signup.css";
 
 export default function SignupPage() {
   const router = useRouter(); // 라우터 훅
