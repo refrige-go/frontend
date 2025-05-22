@@ -1,11 +1,12 @@
+// src/app/refrigerator/page.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useIngredients } from '../../hooks/useIngredients';
 import api from '../../lib/api';
-import styles from './RefrigeratorPage.module.css';
 import Header from '../../components/layout/Header';
 import BottomNavigation from '../../components/layout/BottomNavigation';
+import styles from '../../styles/pages/Refrigerator.module.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
@@ -16,7 +17,7 @@ export default function RefrigeratorPage() {
   const [isFrozenToggle, setIsFrozenToggle] = useState(false);
   const [purchaseDate, setPurchaseDate] = useState(null);
   const [expiryDate, setExpiryDate] = useState(null);
-  const [activeTab, setActiveTab] = useState('stock'); // 'stock' or 'expired'
+  const [activeTab, setActiveTab] = useState('stock');
 
   useEffect(() => {
     if (selectedIngredient) {
@@ -72,128 +73,129 @@ export default function RefrigeratorPage() {
   );
 
   return (
-    <div className={styles.container}>
+    <div className="mainContainer">
       <Header />
+      <div className="appContainer">
+        <div className={styles.tabWrap}>
+          <button
+            className={activeTab === 'stock' ? styles.tabActive : styles.tabInactive}
+            onClick={() => setActiveTab('stock')}
+          >
+            냉장고 재고
+          </button>
+          <button
+            className={activeTab === 'expired' ? styles.tabActive : styles.tabInactive}
+            onClick={() => setActiveTab('expired')}
+          >
+            유통기한 초과
+          </button>
+        </div>
 
-      <div className={styles.tabWrap}>
-        <button
-          className={activeTab === 'stock' ? styles.tabActive : styles.tabInactive}
-          onClick={() => setActiveTab('stock')}
-        >
-          냉장고 재고
-        </button>
-        <button
-          className={activeTab === 'expired' ? styles.tabActive : styles.tabInactive}
-          onClick={() => setActiveTab('expired')}
-        >
-          유통기한 초과
-        </button>
-      </div>
+        <div className={styles.scrollArea}>
+          <div className={styles.grid}>
+            {filteredIngredients.map((item) => (
+              <div
+                key={item.id}
+                className={`${styles.card} ${item.frozen ? styles.frozenCard : ''}`}
+                onClick={() => setSelectedIngredient(item)}
+              >
+                <button
+                  className={styles.top}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(item.id);
+                  }}
+                >✕</button>
 
-      <div className={styles.scrollArea}>
-        <div className={styles.grid}>
-          {filteredIngredients.map((item) => (
-            <div
-              key={item.id}
-              className={`${styles.card} ${item.frozen ? styles.frozenCard : ''}`}
-              onClick={() => setSelectedIngredient(item)}
-            >
-              <button
-                className={styles.top}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(item.id);
-                }}
-              >✕</button>
-
-              <div className={styles.cardContent}>
-                <img src={item.imageUrl || '/images/default.jpg'} alt={item.name} className={styles.image} />
-                <div className={styles.textContent}>
-                  <div className={styles.category}>
-                    {item.category || '분류 없음'}
-                    {item.frozen && <span className={styles.frozenIcon}>❄️</span>}
-                  </div>
-                  <div className={styles.nameDday}>
-                    <span className={styles.name}>{item.name}</span>
-                    {item.expiryDaysLeft !== null && item.expiryDaysLeft >= 0 && (
-                      <span className={styles.dDay}>D-{item.expiryDaysLeft}</span>
-                    )}
+                <div className={styles.cardContent}>
+                  <img src={item.imageUrl || '/images/default.jpg'} alt={item.name} className={styles.image} />
+                  <div className={styles.textContent}>
+                    <div className={styles.category}>
+                      {item.category || '분류 없음'}
+                      {item.frozen && <span className={styles.frozenIcon}>❄️</span>}
+                    </div>
+                    <div className={styles.nameDday}>
+                      <span className={styles.name}>{item.name}</span>
+                      {item.expiryDaysLeft !== null && item.expiryDaysLeft >= 0 && (
+                        <span className={styles.dDay}>D-{item.expiryDaysLeft}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {selectedIngredient && (
-        <div className={styles.overlay} onClick={() => setSelectedIngredient(null)}>
-          <div className={styles.detailContainer} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.detailHeader}>
-              <img src={selectedIngredient.imageUrl || '/images/default.jpg'} alt={selectedIngredient.name} />
-              <div className={styles.detailInfo}>
-                <div className={styles.category}>{selectedIngredient.category}</div>
-                <div className={styles.name}>{selectedIngredient.name}</div>
-              </div>
-              <div className={`${styles.dDay} ${styles.detailDday} ${isFrozenToggle ? styles.frozenText : ''}`}>
-                {isFrozenToggle
-                  ? '❄️ 냉동'
-                  : selectedIngredient.expiryDaysLeft !== null
-                    ? `D-${selectedIngredient.expiryDaysLeft}`
-                    : '기한 없음'}
-              </div>
-            </div>
-
-            <div className={styles.detailBody}>
-              <div>
-                <span>구매일자</span>
-                <DatePicker
-                  selected={purchaseDate}
-                  onChange={(date) => setPurchaseDate(date)}
-                  dateFormat="yyyy년 MM월 dd일"
-                  locale={ko}
-                  withPortal
-                  portalId="root-portal"
-                  className={styles.dateInput}
-                />
-              </div>
-              <div>
-                <span>소비기한</span>
-                <DatePicker
-                  selected={expiryDate}
-                  onChange={(date) => setExpiryDate(date)}
-                  dateFormat="yyyy년 MM월 dd일"
-                  locale={ko}
-                  withPortal
-                  portalId="root-portal"
-                  className={styles.dateInput}
-                  disabled={isFrozenToggle}
-                />
-              </div>
-
-              <div className={styles.toggleWrap}>
-                <span>냉동실 보관</span>
-                <label className={styles.toggleSwitch}>
-                  <input
-                    type="checkbox"
-                    checked={isFrozenToggle}
-                    onChange={(e) => setIsFrozenToggle(e.target.checked)}
-                  />
-                  <span className={styles.slider}></span>
-                </label>
-              </div>
-            </div>
-
-            <div className={styles.detailFooter}>
-              <button className={styles.deleteBtn} onClick={() => handleDelete(selectedIngredient.id)}>재료 삭제</button>
-              <button className={styles.completeBtn} onClick={handleComplete}>완료하기</button>
-            </div>
+            ))}
           </div>
         </div>
-      )}
 
-      <button className={styles.recipeRecommendBtn}>레시피 추천받기</button>
-      <button className={styles.addButton}>＋</button>
+        {selectedIngredient && (
+          <div className={styles.overlay} onClick={() => setSelectedIngredient(null)}>
+            <div className={styles.detailContainer} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.detailHeader}>
+                <img src={selectedIngredient.imageUrl || '/images/default.jpg'} alt={selectedIngredient.name} />
+                <div className={styles.detailInfo}>
+                  <div className={styles.category}>{selectedIngredient.category}</div>
+                  <div className={styles.name}>{selectedIngredient.name}</div>
+                </div>
+                <div className={`${styles.dDay} ${styles.detailDday} ${isFrozenToggle ? styles.frozenText : ''}`}>
+                  {isFrozenToggle
+                    ? '❄️ 냉동'
+                    : selectedIngredient.expiryDaysLeft !== null
+                      ? `D-${selectedIngredient.expiryDaysLeft}`
+                      : '기한 없음'}
+                </div>
+              </div>
+
+              <div className={styles.detailBody}>
+                <div>
+                  <span>구매일자</span>
+                  <DatePicker
+                    selected={purchaseDate}
+                    onChange={(date) => setPurchaseDate(date)}
+                    dateFormat="yyyy년 MM월 dd일"
+                    locale={ko}
+                    withPortal
+                    portalId="root-portal"
+                    className={styles.dateInput}
+                  />
+                </div>
+                <div>
+                  <span>소비기한</span>
+                  <DatePicker
+                    selected={expiryDate}
+                    onChange={(date) => setExpiryDate(date)}
+                    dateFormat="yyyy년 MM월 dd일"
+                    locale={ko}
+                    withPortal
+                    portalId="root-portal"
+                    className={styles.dateInput}
+                    disabled={isFrozenToggle}
+                  />
+                </div>
+
+                <div className={styles.toggleWrap}>
+                  <span>냉동실 보관</span>
+                  <label className={styles.toggleSwitch}>
+                    <input
+                      type="checkbox"
+                      checked={isFrozenToggle}
+                      onChange={(e) => setIsFrozenToggle(e.target.checked)}
+                    />
+                    <span className={styles.slider}></span>
+                  </label>
+                </div>
+              </div>
+
+              <div className={styles.detailFooter}>
+                <button className={styles.deleteBtn} onClick={() => handleDelete(selectedIngredient.id)}>재료 삭제</button>
+                <button className={styles.completeBtn} onClick={handleComplete}>완료하기</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <button className={styles.recipeRecommendBtn}>✨레시피 추천받기</button>
+        <button className={styles.addButton}>＋</button>
+      </div>
       <BottomNavigation />
     </div>
   );
