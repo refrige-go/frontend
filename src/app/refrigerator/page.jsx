@@ -10,6 +10,7 @@ import styles from '../../styles/pages/Refrigerator.module.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
+import axios from 'axios';
 
 export default function RefrigeratorPage() {
   const { ingredients, deleteIngredient, refetchIngredients } = useIngredients();
@@ -19,6 +20,9 @@ export default function RefrigeratorPage() {
   const [expiryDate, setExpiryDate] = useState(null);
   const [activeTab, setActiveTab] = useState('stock');
   const [showAddOptions, setShowAddOptions] = useState(false);
+  const [showRecommendModal, setShowRecommendModal] = useState(false);
+  const [modalSelectedIngredientIds, setModalSelectedIngredientIds] = useState([]);
+  const [recommendedRecipes, setRecommendedRecipes] = useState([]);
 
   useEffect(() => {
     if (selectedIngredient) {
@@ -67,6 +71,28 @@ export default function RefrigeratorPage() {
     setSelectedIngredient(null);
   };
 
+  const handleModalIngredientSelect = (id) => {
+    setModalSelectedIngredientIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleModalRecommend = async () => {
+    if (modalSelectedIngredientIds.length === 0) {
+      alert('추천받을 재료를 선택하세요.');
+      return;
+    }
+    try {
+      const res = await axios.post('http://localhost:8080/recipes/recommend', {
+        ingredientIds: modalSelectedIngredientIds,
+      });
+      setRecommendedRecipes(res.data);
+      setShowRecommendModal(false);
+    } catch (err) {
+      alert('레시피 추천 실패');
+    }
+  };
+
   const filteredIngredients = ingredients.filter((item) =>
     activeTab === 'expired'
       ? item.expiryDaysLeft !== null && item.expiryDaysLeft < 0
@@ -99,6 +125,7 @@ export default function RefrigeratorPage() {
                 key={item.id}
                 className={`${styles.card} ${item.frozen ? styles.frozenCard : ''}`}
                 onClick={() => setSelectedIngredient(item)}
+                style={{ position: 'relative' }}
               >
                 <button
                   className={styles.top}
@@ -107,7 +134,6 @@ export default function RefrigeratorPage() {
                     handleDelete(item.id);
                   }}
                 >✕</button>
-
                 <div className={styles.cardContent}>
                   <img src={item.imageUrl || '/images/default.jpg'} alt={item.name} className={styles.image} />
                   <div className={styles.textContent}>
@@ -194,7 +220,127 @@ export default function RefrigeratorPage() {
           </div>
         )}
 
-        <button className={styles.recipeRecommendBtn}>✨레시피 추천받기</button>
+        <button
+          className={styles.recipeRecommendBtn}
+          onClick={() => {
+            setShowRecommendModal(true);
+            setModalSelectedIngredientIds([]);
+          }}
+        >
+          ✨레시피 추천받기
+        </button>
+        {showRecommendModal && (
+          <div style={{
+            position: 'fixed', left: 0, top: 0, width: '100vw', height: '100vh',
+            background: 'rgba(0,0,0,0.3)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center'
+          }}>
+            <div style={{
+              background: '#fff',
+              borderRadius: 24,
+              padding: '2rem 1.5rem 1.5rem 1.5rem',
+              minWidth: 320,
+              maxWidth: 380,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              position: 'relative',
+            }}>
+              <h2 style={{ marginBottom: 20, fontWeight: 700, fontSize: 22, color: '#ff6600' }}>재료 선택</h2>
+              <div style={{ maxHeight: 320, overflowY: 'auto', marginBottom: 24, width: '100%' }}>
+                {ingredients.map((item) => (
+                  <label key={item.id} style={{
+                    display: 'flex', alignItems: 'center',
+                    marginBottom: 14, fontSize: 17, fontWeight: 500, cursor: 'pointer',
+                    padding: '0.5rem 0.5rem 0.5rem 0', borderRadius: 8,
+                    transition: 'background 0.2s',
+                    background: modalSelectedIngredientIds.includes(item.id) ? '#fff6ee' : 'transparent',
+                  }}>
+                    <span style={{
+                      display: 'inline-block',
+                      width: 24, height: 24,
+                      border: '2px solid #ff6600',
+                      borderRadius: '50%',
+                      marginRight: 14,
+                      background: modalSelectedIngredientIds.includes(item.id) ? '#ff6600' : '#fff',
+                      position: 'relative',
+                      transition: 'background 0.2s',
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={modalSelectedIngredientIds.includes(item.id)}
+                        onChange={() => handleModalIngredientSelect(item.id)}
+                        style={{
+                          opacity: 0,
+                          width: 24,
+                          height: 24,
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          margin: 0,
+                          cursor: 'pointer',
+                        }}
+                      />
+                      {modalSelectedIngredientIds.includes(item.id) && (
+                        <svg width="16" height="16" viewBox="0 0 16 16" style={{ position: 'absolute', left: 4, top: 4 }}>
+                          <polyline points="2,9 7,13 14,4" style={{ fill: 'none', stroke: '#fff', strokeWidth: 2 }} />
+                        </svg>
+                      )}
+                    </span>
+                    <span>{item.name}</span>
+                  </label>
+                ))}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, width: '100%' }}>
+                <button onClick={() => setShowRecommendModal(false)} style={{
+                  padding: '0.6rem 1.2rem',
+                  background: '#fff',
+                  color: '#ff6600',
+                  border: '1.5px solid #ff6600',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: 16,
+                  cursor: 'pointer',
+                  transition: 'background 0.2s, color 0.2s',
+                }}>닫기</button>
+                <button onClick={handleModalRecommend} style={{
+                  padding: '0.6rem 1.2rem',
+                  background: '#ff6600',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: 16,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(255,102,0,0.08)',
+                  transition: 'background 0.2s',
+                }}>추천받기</button>
+              </div>
+            </div>
+          </div>
+        )}
+        {recommendedRecipes.length > 0 && (
+          <div style={{ marginTop: '2rem' }}>
+            <h2>🍳 추천 레시피</h2>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {recommendedRecipes.map((recipe) => (
+                <li
+                  key={recipe.id}
+                  style={{
+                    border: '1px solid #ffa500',
+                    borderRadius: '4px',
+                    padding: '1rem',
+                    marginBottom: '1rem',
+                    background: '#fff8f0',
+                  }}
+                >
+                  <strong>{recipe.name}</strong>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <button className={styles.addButton}>＋</button>
       </div>
       <BottomNavigation />

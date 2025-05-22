@@ -115,29 +115,31 @@ export default function MyIngredientsPage() {
     <main style={{ padding: '2rem' }}>
       <h1>냉장고 재고</h1>
 
-      {/* 보유 재료 리스트 */}
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {ingredients.map((item) => (
-          <li
-            key={item.id}
-            style={{
-              border: '1px solid #ddd',
-              padding: '0.5rem',
-              marginBottom: '0.5rem',
-              borderRadius: '4px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <span>
-              <strong>{item.name}</strong>
-              {item.frozen && <span> ❄️ (냉동)</span>}
-            </span>
-            <button onClick={() => handleDelete(item.id)}>🗑</button>
-          </li>
-        ))}
-      </ul>
+      {/* 보유 재료 리스트 (카드형) */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {ingredients.map((item) => (
+            <li
+              key={item.id}
+              style={{
+                border: '1px solid #ddd',
+                padding: '0.5rem',
+                marginBottom: '0.5rem',
+                borderRadius: '4px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <span>
+                <strong>{item.name}</strong>
+                {item.frozen && <span> ❄️ (냉동)</span>}
+              </span>
+              <button onClick={() => handleDelete(item.id)}>🗑</button>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <hr style={{ margin: '2rem 0' }} />
 
