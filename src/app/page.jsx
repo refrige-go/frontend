@@ -24,70 +24,70 @@ export default function Home() {
       .then(data => setBookmarkedIds(data.map(r => r.recipeId ?? r.rcpSeq)));
   }, []);
 
-  // 2. 카메라 모달이 열릴 때 카메라 시작
-  useEffect(() => {
-    if (showCamera) {
-      startCamera();
-    }
-  }, [showCamera]);
+  // // 2. 카메라 모달이 열릴 때 카메라 시작
+  // useEffect(() => {
+  //   if (showCamera) {
+  //     startCamera();
+  //   }
+  // }, [showCamera]);
 
-  // 카메라 시작
-  const startCamera = async () => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (error) {
-        console.error('카메라 접근 오류:', error);
-        alert('카메라 접근에 실패했습니다.');
-      }
-    }
-  };
+  // // 카메라 시작
+  // const startCamera = async () => {
+  //   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  //     try {
+  //       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  //       if (videoRef.current) {
+  //         videoRef.current.srcObject = stream;
+  //       }
+  //     } catch (error) {
+  //       console.error('카메라 접근 오류:', error);
+  //       alert('카메라 접근에 실패했습니다.');
+  //     }
+  //   }
+  // };
 
-  // 사진 촬영
-  const capturePhoto = async () => {
-    if (!videoRef.current) return;
-    const video = videoRef.current;
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  // // 사진 촬영
+  // const capturePhoto = async () => {
+  //   if (!videoRef.current) return;
+  //   const video = videoRef.current;
+  //   const canvas = document.createElement('canvas');
+  //   canvas.width = video.videoWidth;
+  //   canvas.height = video.videoHeight;
+  //   const ctx = canvas.getContext('2d');
+  //   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // 이미지를 Blob으로 변환
-    canvas.toBlob(async (blob) => {
-      const formData = new FormData();
-      formData.append('file', blob, 'capture.jpg');
+  //   // 이미지를 Blob으로 변환
+  //   canvas.toBlob(async (blob) => {
+  //     const formData = new FormData();
+  //     formData.append('file', blob, 'capture.jpg');
 
-      try {
-        // 파이썬 서버로 이미지 전송
-        const response = await fetch('http://localhost:5000/ocr', {
-          method: 'POST',
-          body: formData,
-        });
+  //     try {
+  //       // 파이썬 서버로 이미지 전송
+  //       const response = await fetch('http://localhost:8012/ocr', {
+  //         method: 'POST',
+  //         body: formData,
+  //       });
 
-        if (response.ok) {
-          const result = await response.json();
-          console.log('OCR 결과:', result); // 디버깅용
+  //       if (response.ok) {
+  //         const result = await response.json();
+  //         console.log('OCR 결과:', result); // 디버깅용
 
-          // OCR 결과를 쿼리스트링으로 다음 페이지에 전달
-          router.push({
-            pathname: '/ocr/result',
-            query: { 
-              data: JSON.stringify(result.ingredients)
-            }
-          });
-        } else {
-          alert('OCR 서버 오류가 발생했습니다.');
-        }
-      } catch (error) {
-        console.error('OCR 처리 중 오류:', error);
-        alert('OCR 처리 중 오류가 발생했습니다.');
-      }
-    }, 'image/jpg');
-  };
+  //         // OCR 결과를 쿼리스트링으로 다음 페이지에 전달
+  //         router.push({
+  //           pathname: '/ocr/result',
+  //           query: { 
+  //             data: JSON.stringify(result.ingredients)
+  //           }
+  //         });
+  //       } else {
+  //         alert('OCR 서버 오류가 발생했습니다.');
+  //       }
+  //     } catch (error) {
+  //       console.error('OCR 처리 중 오류:', error);
+  //       alert('OCR 처리 중 오류가 발생했습니다.');
+  //     }
+  //   }, 'image/jpg');
+  // };
 
   // 찜 추가
   const handleBookmark = (id) => {

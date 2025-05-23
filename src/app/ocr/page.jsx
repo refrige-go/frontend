@@ -1,32 +1,45 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const router = useRouter();
 
-  // 버튼 클릭 시 goodbill.jpg로 OCR 요청
+    // 버튼 클릭 시 goodbill.jpg로 OCR 요청
   const goToResultWithGoodBill = async () => {
     try {
-      const response = await fetch('http://localhost:5000/ocr', {
+      const response = await fetch('http://localhost:8012/ocr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: 'goodbill.jpg' })
+        body: JSON.stringify({ filename: 'billbill.jpg' })
       });
 
       if (response.ok) {
-        const result = await response.json();
-        sessionStorage.setItem('ocr_ingredients', JSON.stringify(result.ingredients));
-        router.push('/ocr/result');
-      } else {
-        alert('OCR 서버 오류가 발생했습니다.');
+      let result;
+      try {
+        result = await response.json();
+      } catch (e) {
+        alert('서버에서 올바른 JSON이 오지 않았습니다.');
+        return;
       }
-    } catch (error) {
-      alert('OCR 처리 중 오류가 발생했습니다.');
-      console.error(error);
+      sessionStorage.setItem('ocr_ingredients', JSON.stringify(result.ingredients));
+      router.push('/ocr/result');
+    } else {
+      // 서버가 JSON이 아닌 에러 페이지(HTML)를 반환할 때 대비
+      let errorMsg = 'OCR 서버 오류가 발생했습니다.';
+      try {
+        const errorResult = await response.json();
+        if (errorResult.error) errorMsg = errorResult.error;
+      } catch (e) {}
+      alert(errorMsg);
     }
-  };
+  } catch (error) {
+    alert('OCR 처리 중 오류가 발생했습니다.');
+    console.error(error);
+  }
+};
+
 
   return (
     <div className="container">
@@ -188,8 +201,14 @@ export default function Home() {
             {/* 상단 헤더 */}
       <div className="header-wrap">
         <div className="header">
-          <div className="header-title" style={{textAlign:'center'}}>재료 사진 인식</div>
-          <div className="header-desc" style={{textAlign:'center'}}>AI가 재료를 자동으로 찾아드려요!<br/>영수증이나 재료 사진을 찍어보세요</div>
+          <div className="header-row">
+            <span className="header-title">재료 사진 인식</span>
+            <span className="header-info">i</span>
+          </div>
+          <div className="header-desc">
+            AI가 재료를 자동으로 찾아드려요!<br />
+            영수증이나 재료 사진을 찍어보세요
+          </div>
         </div>
       </div>
 
@@ -211,9 +230,41 @@ export default function Home() {
         </ul>
       </div>
 
-      {/* 하단 버튼 */}
-      <div className="footer">
-        <button className="footer-btn main-btn" onClick={goToResultWithGoodBill}>●</button>
+        {/*하단*/}
+      <div className="footer" style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: '40px auto 0 auto',
+        width: '100%',
+      }}>
+        <button
+          className="footer-btn main-btn"
+          onClick={goToResultWithGoodBill}
+          style={{
+            background: '#fff',
+            color: '#f79726',
+            fontSize: '2.5em',
+            borderRadius: '50%',
+            width: '80px',
+            height: '80px',
+            minWidth: '80px',
+            minHeight: '80px',
+            maxWidth: '80px',
+            maxHeight: '80px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto',
+            boxShadow: '0 2px 8px #0002',
+            border: '4px solid #f79726',
+            padding: 0,
+            flex: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          ●
+        </button>
       </div>
     </div>
   );
