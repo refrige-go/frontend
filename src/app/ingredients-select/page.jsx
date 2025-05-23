@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import BottomNavigation from '../../components/layout/BottomNavigation';
 import styles from '../../styles/pages/ingredientselect.module.css';
+import api from '../../lib/api'; // ✅ axios 인스턴스 불러오기
 
 const iconMap = {
   '전체': '🍔',
@@ -65,13 +66,9 @@ export default function IngredientSelectPage() {
     }
 
     try {
-      const res = await fetch('http://localhost:8080/user-ingredients/batch-add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredientIds: selectedIds })
+      await api.post('/user-ingredients/batch-add', {
+        ingredientIds: selectedIds
       });
-
-      if (!res.ok) throw new Error('등록 실패');
       alert('재료가 냉장고에 추가되었습니다!');
       router.back();
     } catch (err) {
@@ -81,16 +78,14 @@ export default function IngredientSelectPage() {
   };
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/ingredients/categories')
-      .then((res) => res.json())
-      .then((data) => setCategories(['전체', ...data]));
+    api.get('/api/ingredients/categories')
+      .then((res) => setCategories(['전체', ...res.data]));
   }, []);
 
   useEffect(() => {
     const query = selectedCategory === '전체' ? '' : `?category=${selectedCategory}`;
-    fetch(`http://localhost:8080/api/ingredients${query}`)
-      .then((res) => res.json())
-      .then(setIngredients);
+    api.get(`/api/ingredients${query}`)
+      .then((res) => setIngredients(res.data));
   }, [selectedCategory]);
 
   return (
