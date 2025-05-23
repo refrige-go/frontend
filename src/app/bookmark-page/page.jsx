@@ -25,17 +25,39 @@ export default function BookmarksPage() {
 
   // 기존 찜 레시피
   useEffect(() => {
-    if (activeTab === '전체' && userId) {
-      axios.get(`${baseUrl}api/bookmark/${userId}`)
-        .then((res) => setRecipes(res.data))
+    if (activeTab === '전체') {
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      fetch(`${baseUrl}api/bookmark/list`, {
+        method: 'GET',
+        headers: headers,
+        credentials: 'include'
+      })
+        .then((res) => res.json())
+        .then((data) => setRecipes(data))
         .catch((err) => console.error('찜한 레시피 가져오기 실패:', err));
     }
-  }, [activeTab, userId]);
+  }, [activeTab]);
 
   // "지금 가능" 레시피 불러오기
   const fetchIngredientRecipes = async () => {
-    if (!userId) return [];
-    const res = await fetch(`${baseUrl}api/bookmark/ingredient-recommend?userId=${userId}`);
+    const token = localStorage.getItem('token');
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    const res = await fetch(`${baseUrl}api/bookmark/ingredient-recommend`, {
+      method: 'GET',
+      headers: headers,
+      credentials: 'include'
+    });
     if (!res.ok) return [];
     const data = await res.json();
     return data;
@@ -43,10 +65,10 @@ export default function BookmarksPage() {
 
   // "지금 가능" 탭 클릭 시 레시피 불러오기
   useEffect(() => {
-    if (activeTab === '지금 가능' && userId) {
+    if (activeTab === '지금 가능') {
       fetchIngredientRecipes().then(setIngredientRecipes);
     }
-  }, [activeTab, userId]);
+  }, [activeTab]);
 
   return (
     <div className='mainContainer'>
@@ -81,10 +103,6 @@ export default function BookmarksPage() {
                   <BookmarkCard
                     key={recipe.recipeId}
                     recipe={recipe}
-                    onUnbookmark={(id) => {
-                      setRecipes((prev) => prev.filter((r) => (r.recipeId ?? r.rcpSeq) !== id));
-                      setIngredientRecipes((prev) => prev.filter((r) => (r.recipeId ?? r.rcpSeq) !== id));
-                    }}
                   />
                 ))
               }
@@ -97,10 +115,6 @@ export default function BookmarksPage() {
                     <BookmarkCard
                       key={recipe.recipeId ?? recipe.rcpSeq}
                       recipe={{ ...recipe, bookmarked: isBookmarked }}
-                      onUnbookmark={(id) => {
-                        setRecipes((prev) => prev.filter((r) => (r.recipeId ?? r.rcpSeq) !== id));
-                        setIngredientRecipes((prev) => prev.filter((r) => (r.recipeId ?? r.rcpSeq) !== id));
-                      }}
                     />
                   );
                 })

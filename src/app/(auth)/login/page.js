@@ -10,18 +10,18 @@ export default function LoginPage() {
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
- // 로그인 페이지 들어오면 기존 토큰 제거 (만료된 토큰 방지용)
-useEffect(() => {
-  const token = localStorage.getItem('token');
+  // 로그인 페이지 들어오면 기존 토큰 제거 (만료된 토큰 방지용)
+  useEffect(() => {
+    const token = localStorage.getItem('token');
 
-  if (token) {
-    // 로그인된 사용자는 로그인 페이지 접근 못 하게
-    router.replace('/');
-  } else {
-    // 로그인 안 된 사용자라면 혹시 모를 이전 토큰 제거
-    localStorage.removeItem('token');
-  }
-}, []);
+    if (token) {
+      // 로그인된 사용자는 로그인 페이지 접근 못 하게
+      router.replace('/');
+    } else {
+      // 로그인 안 된 사용자라면 혹시 모를 이전 토큰 제거
+      localStorage.removeItem('token');
+    }
+  }, []);
 
 
 
@@ -34,7 +34,7 @@ useEffect(() => {
     e.preventDefault(); // 기본 폼 제출 막기
 
     try {
-      const response = await fetch(`${baseUrl}/login`, {  // 백엔드 로그인 API 주소
+      const response = await fetch(`${baseUrl}login`, {  // 백엔드 로그인 API 주소
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
