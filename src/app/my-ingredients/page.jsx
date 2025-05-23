@@ -3,11 +3,24 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 
+function getUserIdFromToken() {
+  const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.userId || payload.id || payload.sub || null;
+  } catch {
+    return null;
+  }
+}
+
 export default function MyIngredientsPage() {
+  const baseURL = process.env.NEXT_PUBLIC_BASE_API_URL;
+  const userId = getUserIdFromToken();
   const [ingredients, setIngredients] = useState([])           // 보유 재료 목록
   const [ingredientList, setIngredientList] = useState([])     // 기준 재료 목록
   const [form, setForm] = useState({                            // 직접 추가 폼 (customName 사용)
-    userId: '1',
+    userId: userId || '',
     customName: '',
     purchaseDate: '',
     expiryDate: '',
@@ -17,8 +30,12 @@ export default function MyIngredientsPage() {
 
   // 보유 재료 목록 조회
   const fetchIngredients = () => {
+    if (!userId) {
+      window.location.href = '/login';
+      return;
+    }
     axios
-      .get('http://localhost:8080/user-ingredients?userId=1')
+      .get(`${baseURL}/user-ingredients?userId=${userId}`)
       .then((res) => setIngredients(res.data))
       .catch((err) => console.error('재료 불러오기 실패', err))
   }
@@ -26,7 +43,7 @@ export default function MyIngredientsPage() {
   // 기준 재료 목록 조회
   const fetchIngredientList = () => {
     axios
-      .get('http://localhost:8080/ingredients')
+      .get(`${baseURL}/ingredients`)
       .then((res) => setIngredientList(res.data))
       .catch((err) => console.error('기준 재료 불러오기 실패', err))
   }
@@ -52,8 +69,8 @@ export default function MyIngredientsPage() {
       return
     }
     try {
-      await axios.post('http://localhost:8080/user-ingredients', {
-        userId: form.userId,
+      await axios.post(`${baseURL}/user-ingredients`, {
+        userId: userId,
         ingredientId: null,
         customName: form.customName,
         purchaseDate: form.purchaseDate || null,
@@ -62,7 +79,7 @@ export default function MyIngredientsPage() {
       })
       alert('직접 재료 등록 완료')
       setForm({
-        userId: '1',
+        userId: userId,
         customName: '',
         purchaseDate: '',
         expiryDate: '',
@@ -82,8 +99,8 @@ export default function MyIngredientsPage() {
       return
     }
     try {
-      await axios.post('http://localhost:8080/user-ingredients', {
-        userId: '1',
+      await axios.post(`${baseURL}/user-ingredients`, {
+        userId: userId,
         ingredientId: selectedIngredientId,
         purchaseDate: null,
         expiryDate: null,
@@ -102,7 +119,7 @@ export default function MyIngredientsPage() {
   const handleDelete = async (id) => {
     if (!confirm('정말 삭제할까요?')) return
     try {
-      await axios.delete(`http://localhost:8080/user-ingredients/${id}`)
+      await axios.delete(`${baseURL}/user-ingredients/${id}`)
       alert('삭제 완료')
       fetchIngredients()
     } catch (err) {
@@ -115,29 +132,31 @@ export default function MyIngredientsPage() {
     <main style={{ padding: '2rem' }}>
       <h1>냉장고 재고</h1>
 
-      {/* 보유 재료 리스트 */}
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {ingredients.map((item) => (
-          <li
-            key={item.id}
-            style={{
-              border: '1px solid #ddd',
-              padding: '0.5rem',
-              marginBottom: '0.5rem',
-              borderRadius: '4px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <span>
-              <strong>{item.name}</strong>
-              {item.frozen && <span> ❄️ (냉동)</span>}
-            </span>
-            <button onClick={() => handleDelete(item.id)}>🗑</button>
-          </li>
-        ))}
-      </ul>
+      {/* 보유 재료 리스트 (카드형) */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {ingredients.map((item) => (
+            <li
+              key={item.id}
+              style={{
+                border: '1px solid #ddd',
+                padding: '0.5rem',
+                marginBottom: '0.5rem',
+                borderRadius: '4px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <span>
+                <strong>{item.name}</strong>
+                {item.frozen && <span> ❄️ (냉동)</span>}
+              </span>
+              <button onClick={() => handleDelete(item.id)}>🗑</button>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <hr style={{ margin: '2rem 0' }} />
 

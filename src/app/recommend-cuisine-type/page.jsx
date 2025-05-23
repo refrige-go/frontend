@@ -10,9 +10,29 @@ export default function TypeRecommendationsPage({ bookmarkedIds, onBookmark, onU
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef(null);
+  const [error, setError] = useState(null);
 
-  const fetchRecommendations = async () => {
+<<<<<<< HEAD
+=======
+  function getUserIdFromToken() {
+    const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+    if (!token) return null;
     try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.userId || payload.id || payload.sub || null;
+    } catch {
+      return null;
+    }
+  }
+
+  const baseURL = process.env.NEXT_PUBLIC_BASE_API_URL;
+  const userId = getUserIdFromToken();
+
+>>>>>>> a6b72fdfffa8e62e445d8e9e163c9cf13035a414
+  const fetchRecommendations = async () => {
+    setLoading(true);
+    try {
+<<<<<<< HEAD
       setLoading(true);
       const token = localStorage.getItem('token');
       const headers = {
@@ -27,18 +47,35 @@ export default function TypeRecommendationsPage({ bookmarkedIds, onBookmark, onU
         credentials: 'include'
       });
       if (!res.ok) throw new Error('추천 목록을 불러오는 데 실패했습니다.');
+=======
+      const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+      const res = await fetch(`${baseURL}/api/bookmark/bookmark-recommend?userId=${userId}`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || '추천 목록을 불러오는 데 실패했습니다.');
+      }
+>>>>>>> a6b72fdfffa8e62e445d8e9e163c9cf13035a414
       const data = await res.json();
-      setRecipes(data.slice(0, 7)); // 최대 7개만 보여주기
+      setRecipes(data.slice(0, 7));
     } catch (error) {
-      console.error('에러:', error);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!userId) {
+      window.location.href = '/login';
+      return;
+    }
     fetchRecommendations();
-  }, []);
+  }, [userId]);
 
   const handleBookmark = async (recipeId) => {
     await onBookmark(recipeId);

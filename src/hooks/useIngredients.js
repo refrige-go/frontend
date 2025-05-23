@@ -1,15 +1,31 @@
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
 
+function getUserIdFromToken() {
+  const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.userId || payload.id || payload.sub || null;
+  } catch {
+    return null;
+  }
+}
+
 export function useIngredients() {
   const [ingredients, setIngredients] = useState([]);
 
   // 재료 불러오기 함수 밖으로 분리
   async function fetchIngredients() {
+    const userId = getUserIdFromToken();
+    if (!userId) {
+      window.location.href = '/login';
+      return;
+    }
     try {
       const res = await api.get('/user-ingredients', {
         params: {
-          userId: '1',
+          userId: userId,
         },
       });
       setIngredients(res.data);

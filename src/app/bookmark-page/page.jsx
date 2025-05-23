@@ -16,59 +16,86 @@ export default function BookmarksPage() {
   const [activeTab, setActiveTab] = useState('전체');
   const [ingredientRecipes, setIngredientRecipes] = useState([]);
   const [userId, setUserId] = useState(null);
+  const baseURL = process.env.NEXT_PUBLIC_BASE_API_URL;
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setUserId(localStorage.getItem('userId'));
+    const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      setUserId(payload.userId || payload.id || payload.sub || null);
+    } catch {
+      setUserId(null);
     }
   }, []);
 
   // 기존 찜 레시피
   useEffect(() => {
+    if (!userId) return;
     if (activeTab === '전체') {
-      const token = localStorage.getItem('token');
-      const headers = {
-        'Content-Type': 'application/json',
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      fetch(`${baseUrl}api/bookmark/list`, {
-        method: 'GET',
-        headers: headers,
-        credentials: 'include'
+      const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+      axios.get(`${baseURL}/api/bookmark/${userId}`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+          'Content-Type': 'application/json',
+        }
       })
-        .then((res) => res.json())
-        .then((data) => setRecipes(data))
-        .catch((err) => console.error('찜한 레시피 가져오기 실패:', err));
+        .then((res) => {
+          console.log('북마크 데이터:', res.data);
+          setRecipes(res.data);
+        })
+        .catch((err) => {
+          console.error('찜한 레시피 가져오기 실패:', {
+            status: err.response?.status,
+            data: err.response?.data,
+            message: err.message
+          });
+          setRecipes([]);
+        });
     }
-  }, [activeTab]);
+  }, [activeTab, userId, baseURL]);
 
   // "지금 가능" 레시피 불러오기
   const fetchIngredientRecipes = async () => {
-    const token = localStorage.getItem('token');
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+      const response = await fetch(`${baseURL}/api/bookmark/ingredient-recommend?userId=${userId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('지금 가능 레시피 데이터:', data);
+      return data;
+    } catch (error) {
+      console.error('지금 가능 레시피 가져오기 실패:', error);
+      throw error;
     }
-    const res = await fetch(`${baseUrl}api/bookmark/ingredient-recommend`, {
-      method: 'GET',
-      headers: headers,
-      credentials: 'include'
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data;
   };
 
   // "지금 가능" 탭 클릭 시 레시피 불러오기
   useEffect(() => {
+    if (!userId) return;
     if (activeTab === '지금 가능') {
-      fetchIngredientRecipes().then(setIngredientRecipes);
+      fetchIngredientRecipes()
+        .then(setIngredientRecipes)
+        .catch((err) => {
+          console.error('지금 가능 레시피 가져오기 실패:', err);
+          setIngredientRecipes([]);
+        });
     }
-  }, [activeTab]);
+  }, [activeTab, baseURL, userId]);
 
   return (
     <div className='mainContainer'>
@@ -101,7 +128,7 @@ export default function BookmarksPage() {
               {activeTab === '전체' &&
                 recipes.map(recipe => (
                   <BookmarkCard
-                    key={recipe.recipeId}
+                    key={recipe.recipeId ?? recipe.rcpSeq}
                     recipe={recipe}
                   />
                 ))

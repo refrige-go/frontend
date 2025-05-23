@@ -8,13 +8,27 @@ import IngredientRecommendationsSection from './recommend-ingredient/page'
 import SearchWithCategory from '../components/SearchWithCategory'
 import { useState, useEffect } from 'react';
 
+<<<<<<< HEAD
 const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+=======
+function getUserIdFromToken() {
+  const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.userId || payload.id || payload.sub || null;
+  } catch {
+    return null;
+  }
+}
+>>>>>>> a6b72fdfffa8e62e445d8e9e163c9cf13035a414
 
 export default function Home() {
   const [bookmarkedIds, setBookmarkedIds] = useState([]);
   const [search, setSearch] = useState('');
   const [userId, setUserId] = useState(null);
 
+<<<<<<< HEAD
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -68,6 +82,29 @@ export default function Home() {
     };
 
     fetchBookmarks();
+=======
+  const baseURL = process.env.NEXT_PUBLIC_BASE_API_URL;
+  const userId = getUserIdFromToken();
+
+  // 마운트 시 찜한 레시피 목록 불러오기
+  useEffect(() => {
+    if (!userId) {
+      window.location.href = '/login';
+      return;
+    }
+    const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+    fetch(`${baseURL}/api/bookmark/${userId}`, {
+      headers: {
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(res => {
+        if (!res.ok) return [];
+        return res.json();
+      })
+      .then(data => setBookmarkedIds(data.map(r => r.recipeId ?? r.rcpSeq)));
+>>>>>>> a6b72fdfffa8e62e445d8e9e163c9cf13035a414
   }, [userId]);
 
   // 찜 추가

@@ -11,9 +11,29 @@ export default function IngredientRecommendationsSection({ bookmarkedIds, onBook
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef(null);
+  const [error, setError] = useState(null);
 
-  const fetchRecommendations = async () => {
+<<<<<<< HEAD
+=======
+  function getUserIdFromToken() {
+    const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+    if (!token) return null;
     try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.userId || payload.id || payload.sub || null;
+    } catch {
+      return null;
+    }
+  }
+
+  const baseURL = process.env.NEXT_PUBLIC_BASE_API_URL;
+  const userId = getUserIdFromToken();
+
+>>>>>>> a6b72fdfffa8e62e445d8e9e163c9cf13035a414
+  const fetchRecommendations = async () => {
+    setLoading(true);
+    try {
+<<<<<<< HEAD
       setLoading(true);
       const token = localStorage.getItem('token');
       const headers = {
@@ -36,18 +56,38 @@ export default function IngredientRecommendationsSection({ bookmarkedIds, onBook
       const contentType = res.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         throw new Error('서버에서 올바른 JSON 응답을 받지 못했습니다.');
+=======
+      const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+      const res = await fetch(`${baseURL}/api/bookmark/ingredient-recommend?userId=${userId}`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || '추천 목록을 불러오는 데 실패했습니다.');
+>>>>>>> a6b72fdfffa8e62e445d8e9e163c9cf13035a414
       }
       const data = await res.json();
       setRecipes(data.slice(0, 7));
     } catch (error) {
+<<<<<<< HEAD
       console.error('에러:', error);
       setRecipes([]); // 에러 발생 시 빈 배열로 설정
+=======
+      setError(error.message);
+>>>>>>> a6b72fdfffa8e62e445d8e9e163c9cf13035a414
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!userId) {
+      window.location.href = '/login';
+      return;
+    }
     fetchRecommendations();
   }, []);
 
