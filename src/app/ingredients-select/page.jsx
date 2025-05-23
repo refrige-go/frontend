@@ -1,0 +1,156 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import BottomNavigation from '../../components/layout/BottomNavigation';
+import styles from '../../styles/pages/ingredientselect.module.css';
+
+const iconMap = {
+  '전체': '🍔',
+  '곡류/분말': '🌾',
+  '육류': '🥩',
+  '수산물/해산물': '🐟',
+  '채소': '🥬',
+  '과일': '🍎',
+  '버섯': '🍄',
+  '유제품': '🧀',
+  '두류/콩류': '🌰',
+  '조미료/양념': '🧂',
+  '기름/유지': '🛢️',
+  '면/떡': '🍜',
+  '가공식품': '🥫',
+  '장아찌/절임': '🥒',
+  '기타': '📦'
+};
+
+const categoryOrder = [
+  '전체',
+  '곡류/분말',
+  '과일',
+  '채소',
+  '육류',
+  '수산물/해산물',
+  '유제품',
+  '두류/콩류',
+  '면/떡',
+  '기름/유지',
+  '버섯',
+  '가공식품',
+  '조미료/양념',
+  '장아찌/절임',
+  '기타'
+];
+
+function getCategoryIcon(name) {
+  return iconMap[name] || '🍽️';
+}
+
+export default function IngredientSelectPage() {
+  const router = useRouter();
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [ingredients, setIngredients] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
+
+  const toggleSelection = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleComplete = async () => {
+    if (selectedIds.length === 0) {
+      alert('재료를 선택해주세요.');
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:8080/user-ingredients/batch-add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ingredientIds: selectedIds })
+      });
+
+      if (!res.ok) throw new Error('등록 실패');
+      alert('재료가 냉장고에 추가되었습니다!');
+      router.back();
+    } catch (err) {
+      console.error(err);
+      alert('오류가 발생했습니다.');
+    }
+  };
+
+  useEffect(() => {
+    fetch('http://localhost:8080/api/ingredients/categories')
+      .then((res) => res.json())
+      .then((data) => setCategories(['전체', ...data]));
+  }, []);
+
+  useEffect(() => {
+    const query = selectedCategory === '전체' ? '' : `?category=${selectedCategory}`;
+    fetch(`http://localhost:8080/api/ingredients${query}`)
+      .then((res) => res.json())
+      .then(setIngredients);
+  }, [selectedCategory]);
+
+  return (
+    <div className="mainContainer">
+      <div className="appContainer">
+        <div className={styles.headerRow}>
+          <button onClick={() => router.back()} className={styles.backBtn}>←</button>
+          <h2 className={styles.pageTitle}>재료 목록</h2>
+          <button onClick={handleComplete} className={styles.doneBtn}>완료</button>
+        </div>
+
+        <div className={styles.searchWrap}>
+          <input
+            type="text"
+            placeholder="냉장고 속 재료를 찾아보세요!"
+            className={styles.searchInput}
+          />
+          <span className={styles.searchIcon}>🔍</span>
+        </div>
+
+        <div className={styles.categoryGrid}>
+          {categoryOrder
+            .filter((cat) => categories.includes(cat))
+            .map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`${styles.categoryBtn} ${selectedCategory === cat ? styles.active : ''}`}
+              >
+                <span className={styles.categoryIcon}>{getCategoryIcon(cat)}</span>
+                <span className={styles.categoryLabel}>{cat}</span>
+              </button>
+            ))}
+        </div>
+
+        <div className={styles.ingredientScroll}>
+          <ul className={styles.ingredientList}>
+            {ingredients.map((item) => (
+              <li key={item.id} className={styles.ingredientItem}>
+                <div className={styles.ingredientInfo}>
+                  <img
+                    src={item.imageUrl || '/images/default.jpg'}
+                    alt=""
+                    className={styles.ingredientImage}
+                  />
+                  <span className={styles.ingredientName}>{item.name}</span>
+                </div>
+                <input
+                  type="checkbox"
+                  className={styles.addButton}
+                  checked={selectedIds.includes(item.id)}
+                  onChange={() => toggleSelection(item.id)}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <button className={styles.addManualBtn}>+ 직접 추가</button>
+      </div>
+    </div>
+  );
+}
