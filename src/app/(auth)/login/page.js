@@ -1,10 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 import { useRouter } from 'next/navigation'; // Next.js 13 이상에서는 'next/navigation'에서 가져옵니다
 import Link from 'next/link';
 import "../../../styles/pages/login.css"

@@ -3,20 +3,37 @@
 import { useState } from 'react';
 import axios from 'axios';
 
+const baseURL = process.env.NEXT_PUBLIC_BASE_API_URL;
+
+function getUserIdFromToken() {
+  const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.userId || payload.id || payload.sub || null;
+  } catch {
+    return null;
+  }
+}
+
 export default function BookmarkCard({ recipe, userId, onBookmark, onUnbookmark }) {
   const handleToggleBookmark = async () => {
     try {
-      const token = localStorage.getItem('token'); // 로그인 시 저장해둔 토큰
-
-      const response = await axios.post('http://localhost:8080/api/bookmark/toggle', null, {
+      const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+      const userId = getUserIdFromToken();
+      if (!token || !userId) {
+        window.location.href = '/login';
+        return;
+      }
+      const response = await axios.post(`${baseURL}/api/bookmark/toggle`, null, {
         params: {
-          recipeId: recipe.recipeId ?? recipe.rcpSeq
+          recipeId: recipe.recipeId ?? recipe.rcpSeq,
+          userId: userId
         },
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-
       if (response.data.bookmarked) {
         onBookmark && onBookmark(recipe.recipeId ?? recipe.rcpSeq);
       } else {

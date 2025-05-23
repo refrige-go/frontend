@@ -9,35 +9,68 @@ import BottomNavigation from '../../components/layout/BottomNavigation';
 import IngredientRecommendationsSection from '../recommend-ingredient/page';
 import styles from '../../styles/pages/bookmark.module.css';
 
+function getUserIdFromToken() {
+  const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.userId || payload.id || payload.sub || null;
+  } catch {
+    return null;
+  }
+}
+
 export default function BookmarksPage() {
   const [recipes, setRecipes] = useState([]);
   const [activeTab, setActiveTab] = useState('전체');
   const [ingredientRecipes, setIngredientRecipes] = useState([]);
-  const userId = 2;
+  const baseURL = process.env.NEXT_PUBLIC_BASE_API_URL;
+  const userId = getUserIdFromToken();
 
   // 기존 찜 레시피
   useEffect(() => {
+    if (!userId) {
+      window.location.href = '/login';
+      return;
+    }
     if (activeTab === '전체') {
-      axios.get(`http://localhost:8080/api/bookmark/${userId}`)
+      const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+      axios.get(`${baseURL}/api/bookmark/${userId}`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+          'Content-Type': 'application/json',
+        }
+      })
         .then((res) => setRecipes(res.data))
         .catch((err) => console.error('찜한 레시피 가져오기 실패:', err));
     }
-  }, [activeTab, userId]);
+  }, [activeTab, userId, baseURL]);
 
   // "지금 가능" 레시피 불러오기
   const fetchIngredientRecipes = async () => {
-    const res = await fetch(`http://localhost:8080/api/bookmark/ingredient-recommend?userId=${userId}`);
-    if (!res.ok) return [];
-    const data = await res.json();
+    const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+    const response = await fetch(`${baseURL}/api/bookmark/ingredient-recommend?userId=${userId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || `HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
     return data;
   };
 
   // "지금 가능" 탭 클릭 시 레시피 불러오기
   useEffect(() => {
+    if (!userId) return;
     if (activeTab === '지금 가능') {
-      fetchIngredientRecipes().then(setIngredientRecipes);
+      fetchIngredientRecipes().then(setIngredientRecipes).catch((err) => console.error('지금 가능 레시피 가져오기 실패:', err));
     }
-  }, [activeTab]);
+  }, [activeTab, baseURL, userId]);
 
   return (
     <div className='mainContainer'>
@@ -70,7 +103,7 @@ export default function BookmarksPage() {
               {activeTab === '전체' &&
                 recipes.map(recipe => (
                   <BookmarkCard
-                    key={recipe.recipeId}
+                    key={recipe.recipeId ?? recipe.rcpSeq}
                     recipe={recipe}
                     userId={userId}
                     onUnbookmark={(id) => {
