@@ -4,7 +4,7 @@
 import { useEffect, useState, useRef } from 'react';
 import BookmarkCard from '../../components/BookmarkCard';
 
-export default function IngredientRecommendationsSection({ bookmarkedIds, onBookmark, onUnbookmark }) {
+export default function IngredientRecommendationsSection({ userId, bookmarkedIds, onBookmark, onUnbookmark }) {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -12,12 +12,19 @@ export default function IngredientRecommendationsSection({ bookmarkedIds, onBook
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef(null);
 
-  const userId = 1; // 실제 로그인 유저 ID로 바꾸세요
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
+  // 토큰 필요
+  const token = localStorage.getItem('accessToken');
 
   const fetchRecommendations = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:8080/api/bookmark/ingredient-recommend?userId=${userId}`);
+      const res = await fetch(`${baseUrl}api/bookmark/ingredient-recommend`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!res.ok) throw new Error('추천 목록을 불러오는 데 실패했습니다.');
       const data = await res.json();
       setRecipes(data.slice(0, 7));
@@ -27,6 +34,7 @@ export default function IngredientRecommendationsSection({ bookmarkedIds, onBook
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchRecommendations();
@@ -87,6 +95,7 @@ export default function IngredientRecommendationsSection({ bookmarkedIds, onBook
                 bookmarked: bookmarkedIds.includes(recipe.recipeId ?? recipe.rcpSeq)
               }}
               userId={userId}
+              token={token}
               onBookmark={handleBookmark}
               onUnbookmark={handleUnbookmark}
             />
