@@ -35,7 +35,7 @@ export default function LoginPage() {
       }
 
       alert('로그인 성공!');
-      router.push('/main2');
+      router.push('/');
      
     } catch (err) {
       alert('로그인 실패');
