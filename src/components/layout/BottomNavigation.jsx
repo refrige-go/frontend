@@ -1,10 +1,10 @@
-// src/components/layout/BottomNavigation.jsx
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
+// 네비게이션 아이템 배열
 const navItems = [
   {
     key: 'home',
@@ -36,12 +36,37 @@ const navItems = [
   },
 ];
 
+// 로그인 여부 확인 함수 (localStorage에 accessToken 유무로 체크)
+function isLoggedIn() {
+  if (typeof window === "undefined") return false;
+  return !!localStorage.getItem('accessToken');
+}
+
 const BottomNavigation = ({ className = '' }) => {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const [clientReady, setClientReady] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setClientReady(true);
+    setLoggedIn(isLoggedIn());
+  }, []);
 
   const isItemActive = (item) => {
     if (item.href === '/') return pathname === '/';
     return pathname.startsWith(item.href);
+  };
+
+  // 마이페이지 클릭 핸들러
+  const handleMypageClick = (e) => {
+    e.preventDefault();
+    if (loggedIn) {
+      router.push('/mypage');
+    } else {
+      router.push('/login');
+    }
   };
 
   return (
@@ -56,8 +81,8 @@ const BottomNavigation = ({ className = '' }) => {
         borderTop: '2px solid #e5e7eb',
         zIndex: 1000,
         height: 70,
-        maxWidth: '100%', // 추가: 최대 너비 제한
-        margin: '0 auto', // 추가: 중앙 정렬
+        maxWidth: '100%',
+        margin: '0 auto',
       }}
       className={className}
     >
@@ -68,28 +93,138 @@ const BottomNavigation = ({ className = '' }) => {
           alignItems: 'center',
           height: '100%',
           margin: 0,
-          padding: '0 16px', // 추가: 좌우 패딩
+          padding: '0 16px',
           listStyle: 'none',
-          maxWidth: '100%', // 추가: 최대 너비 제한
+          maxWidth: '100%',
         }}
       >
         {navItems.map((item) => {
           const isActive = isItemActive(item);
+
+          // 마이페이지는 SSR hydration mismatch 방지 분기!
+          if (item.key === "mypage") {
+            return (
+              <li
+                key={item.key}
+                style={{
+                  flex: 1,
+                  maxWidth: '25%',
+                  textAlign: 'center',
+                }}
+              >
+                {clientReady ? (
+                  <a
+                    href={loggedIn ? '/mypage' : '/login'}
+                    onClick={handleMypageClick}
+                    style={{
+                      textDecoration: 'none',
+                      display: 'block',
+                      width: '100%',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        color: isActive ? item.activeColor : '#666',
+                        padding: '8px 0',
+                      }}
+                    >
+                      <img
+                        src={item.icon}
+                        alt={item.label}
+                        style={{
+                          width: 24,
+                          height: 24,
+                          marginBottom: 4,
+                          filter: isActive
+                            ? 'invert(67%) sepia(51%) saturate(1022%) hue-rotate(346deg) brightness(101%) contrast(87%)'
+                            : 'grayscale(100%) brightness(0.7)',
+                          transition: 'all 0.2s ease',
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: 12,
+                          fontWeight: isActive ? 'bold' : 'normal',
+                          color: isActive ? item.activeColor : '#666',
+                          marginTop: 2,
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {item.label}
+                      </span>
+                    </div>
+                  </a>
+                ) : (
+                  // SSR 시엔 클릭 막고, href="/login" 고정 (hydration mismatch 방지)
+                  <a
+                    href="/login"
+                    style={{
+                      textDecoration: 'none',
+                      display: 'block',
+                      width: '100%',
+                      pointerEvents: 'none',
+                      opacity: 0.6,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        color: isActive ? item.activeColor : '#666',
+                        padding: '8px 0',
+                      }}
+                    >
+                      <img
+                        src={item.icon}
+                        alt={item.label}
+                        style={{
+                          width: 24,
+                          height: 24,
+                          marginBottom: 4,
+                          filter: isActive
+                            ? 'invert(67%) sepia(51%) saturate(1022%) hue-rotate(346deg) brightness(101%) contrast(87%)'
+                            : 'grayscale(100%) brightness(0.7)',
+                          transition: 'all 0.2s ease',
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: 12,
+                          fontWeight: isActive ? 'bold' : 'normal',
+                          color: isActive ? item.activeColor : '#666',
+                          marginTop: 2,
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {item.label}
+                      </span>
+                    </div>
+                  </a>
+                )}
+              </li>
+            );
+          }
+
+          // 나머지 메뉴는 Link로
           return (
             <li
               key={item.key}
               style={{
-                flex: 1, // 추가: 균등 분배
-                maxWidth: '25%', // 추가: 최대 너비 제한
-                textAlign: 'center', // 추가: 중앙 정렬
+                flex: 1,
+                maxWidth: '25%',
+                textAlign: 'center',
               }}
             >
               <Link
                 href={item.href}
                 style={{
                   textDecoration: 'none',
-                  display: 'block', // 추가: 블록 레벨 요소로
-                  width: '100%', // 추가: 전체 너비 사용
+                  display: 'block',
+                  width: '100%',
                 }}
               >
                 <div
@@ -98,29 +233,29 @@ const BottomNavigation = ({ className = '' }) => {
                     flexDirection: 'column',
                     alignItems: 'center',
                     color: isActive ? item.activeColor : '#666',
-                    padding: '8px 0', // 추가: 클릭 영역 확장
+                    padding: '8px 0',
                   }}
                 >
                   <img
                     src={item.icon}
                     alt={item.label}
                     style={{
-                      width: 24, // 수정: 크기 조정
-                      height: 24, // 수정: 크기 조정
+                      width: 24,
+                      height: 24,
                       marginBottom: 4,
                       filter: isActive
-                        ? 'invert(67%) sepia(51%) saturate(1022%) hue-rotate(346deg) brightness(101%) contrast(87%)' // 주황색 필터
+                        ? 'invert(67%) sepia(51%) saturate(1022%) hue-rotate(346deg) brightness(101%) contrast(87%)'
                         : 'grayscale(100%) brightness(0.7)',
-                      transition: 'all 0.2s ease', // 추가: 부드러운 전환
+                      transition: 'all 0.2s ease',
                     }}
                   />
                   <span
                     style={{
-                      fontSize: 12, // 수정: 폰트 크기 조정
+                      fontSize: 12,
                       fontWeight: isActive ? 'bold' : 'normal',
                       color: isActive ? item.activeColor : '#666',
                       marginTop: 2,
-                      transition: 'all 0.2s ease', // 추가: 부드러운 전환
+                      transition: 'all 0.2s ease',
                     }}
                   >
                     {item.label}

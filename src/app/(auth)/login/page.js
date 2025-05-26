@@ -36,18 +36,19 @@ export default function LoginPage() {
 
       alert('로그인 성공!');
       router.push('/');
-
     } catch (err) {
       alert('로그인 실패');
     }
   };
 
   return (
-    <div className="appContainer login">
+    <div className="mainContainer">
+      <div className="appContainer login">
       <img src="/images/logo.svg" alt="logo" />
       <form onSubmit={handleSubmit}>
         <label htmlFor="username">
           <input
+          placeholder="아이디를 입력하세요."
             id="username"
             type="text"
             value={username}
@@ -67,7 +68,7 @@ export default function LoginPage() {
           />
           <span>비밀번호</span>
         </label>
-        <button type="submit">로그인</button>
+        <button className="loginBtn" type="submit">로그인</button>
       </form>
       <div className="socialBtns">
         <button>카카오로 계속하기</button>
@@ -75,9 +76,11 @@ export default function LoginPage() {
       </div>
       <div className="authActionBox">
         <Link href="/signup"><span>회원가입</span></Link>
-        <Link href="/browse"><span>냉장GO <span>둘러보기</span></span></Link>
+        <Link href="/"><span>둘러보기</span></Link>
       </div>
     </div>
+    </div>
+    
 
   );
 }
