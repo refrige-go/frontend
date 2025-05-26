@@ -41,7 +41,8 @@ export default function SignupPage() {
       // 회원가입 성공 후 로그인 페이지로 이동
       router.push('/login');
     } catch (err) {
-      alert('회원가입 실패');
+       const message = err?.response?.data || '회원가입 실패';
+       alert(message);
     }
   };
 
