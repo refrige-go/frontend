@@ -1,4 +1,3 @@
-// src/app/bookmark-page/page.jsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,38 +5,66 @@ import axios from 'axios';
 import BookmarkCard from '../../components/BookmarkCard';
 import Header from '../../components/layout/Header';
 import BottomNavigation from '../../components/layout/BottomNavigation';
-import IngredientRecommendationsSection from '../recommend-ingredient/page';
 import styles from '../../styles/pages/bookmark.module.css';
 
 export default function BookmarksPage() {
+  const [userId, setUserId] = useState(null);
   const [recipes, setRecipes] = useState([]);
   const [activeTab, setActiveTab] = useState('전체');
   const [ingredientRecipes, setIngredientRecipes] = useState([]);
-  const userId = 2;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
-  // 기존 찜 레시피
+
+  // ✅ 유저 정보 불러오기
+  const fetchUserInfo = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${baseUrl}api/user/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error('유저 정보 가져오기 실패');
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  };
+
   useEffect(() => {
-    if (activeTab === '전체') {
-      axios.get(`http://localhost:8080/api/bookmark/${userId}`)
+    fetchUserInfo().then(user => {
+      if (user) setUserId(user.id);
+    });
+  }, []);
+
+  // ✅ 기존 찜 레시피 불러오기
+  useEffect(() => {
+    if (activeTab === '전체' && userId) {
+      axios.get(`${process.env.NEXT_PUBLIC_BASE_API_URL}api/bookmark/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
         .then((res) => setRecipes(res.data))
         .catch((err) => console.error('찜한 레시피 가져오기 실패:', err));
     }
   }, [activeTab, userId]);
 
-  // "지금 가능" 레시피 불러오기
-  const fetchIngredientRecipes = async () => {
-    const res = await fetch(`http://localhost:8080/api/bookmark/ingredient-recommend?userId=${userId}`);
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data;
-  };
-
-  // "지금 가능" 탭 클릭 시 레시피 불러오기
+  // ✅ "지금 가능" 탭 레시피 불러오기
   useEffect(() => {
-    if (activeTab === '지금 가능') {
-      fetchIngredientRecipes().then(setIngredientRecipes);
+    if (activeTab === '지금 가능' && userId) {
+      fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}api/bookmark/ingredient-recommend?userId=${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+        .then((res) => res.json())
+        .then(setIngredientRecipes)
+        .catch(err => console.error('가능한 레시피 가져오기 실패:', err));
     }
-  }, [activeTab]);
+  }, [activeTab, userId]);
 
   return (
     <div className='mainContainer'>
@@ -49,7 +76,9 @@ export default function BookmarksPage() {
             <div className={styles.titleSection}>
               <h1>내 레시피북</h1>
               <p>즐겨찾는 레시피를 모아보세요!</p>
-              <p className={styles.recipeCount}>총 {recipes.length}개의 레시피가 저장되었어요</p>
+              <p className={styles.recipeCount}>
+                총 {(activeTab === '전체' ? recipes.length : ingredientRecipes.length)}개의 레시피가 저장되었어요
+              </p>
             </div>
 
             {/* 탭 메뉴 */}
@@ -80,6 +109,7 @@ export default function BookmarksPage() {
                   />
                 ))
               }
+
               {activeTab === '지금 가능' &&
                 ingredientRecipes.map(recipe => {
                   const isBookmarked = recipes.some(
@@ -98,7 +128,6 @@ export default function BookmarksPage() {
                   );
                 })
               }
-              {/* "자주 만듦" 등 다른 탭도 필요시 추가 */}
             </div>
           </div>
         </div>
