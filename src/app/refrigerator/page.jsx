@@ -10,6 +10,7 @@ import styles from '../../styles/pages/Refrigerator.module.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
+import { useRouter } from 'next/navigation';
 
 export default function RefrigeratorPage() {
   const { ingredients, deleteIngredient, refetchIngredients } = useIngredients();
@@ -19,6 +20,8 @@ export default function RefrigeratorPage() {
   const [expiryDate, setExpiryDate] = useState(null);
   const [activeTab, setActiveTab] = useState('stock');
   const [showAddOptions, setShowAddOptions] = useState(false);
+  const [showIngredientList, setShowIngredientList] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (selectedIngredient) {
@@ -194,8 +197,19 @@ export default function RefrigeratorPage() {
           </div>
         )}
 
+         {/* 옵션 버튼들 */}
+        {showAddOptions && (
+          <div className={styles.addOptionsFix}>
+         <button className={styles.addOptionBtn} 
+         onClick={() => router.push('/ingredients-select')}> 재료 추가 </button>
+            <button className={styles.addOptionBtn} onClick={() => alert('OCR 자동 인식 클릭됨')}>OCR 자동 인식</button>
+          </div>
+        )}
+
+        {/* 레시피 추천 + +버튼 */}
         <button className={styles.recipeRecommendBtn}>✨레시피 추천받기</button>
-        <button className={styles.addButton}>＋</button>
+        <button className={styles.addButton} onClick={() => setShowAddOptions(!showAddOptions)}>＋</button>
+
       </div>
       <BottomNavigation />
     </div>
