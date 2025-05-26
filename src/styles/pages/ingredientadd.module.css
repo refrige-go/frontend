@@ -1,0 +1,83 @@
+.headerRow {
+  width: 420px;
+  height: 70px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px 0 20px;
+  box-sizing: border-box;
+  border-bottom: none;
+  position: fixed;
+  top: 0;
+  left: 50%;    
+  transform: translateX(-50%);      
+  z-index: 10;
+}
+
+
+.backBtn,
+.doneBtn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  color: #f97316;
+  cursor: pointer;
+}
+
+/* 폼 전체 */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 이미지 업로드 영역 */
+.imageBox label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  max-width: 180px;
+  aspect-ratio: 1/1;
+  background: #f0f0f0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.imagePlaceholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 인풋 그룹 */
+.inputGroup label,
+.dateGroup label,
+.toggleGroup label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.inputGroup input,
+.inputGroup select,
+.dateInput {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+/* 토글 */
+.toggleGroup input[type="checkbox"] {
+  transform: scale(1.4);
+}
