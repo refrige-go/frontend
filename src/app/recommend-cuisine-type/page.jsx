@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import BookmarkCard from '../../components/BookmarkCard';
 
-export default function TypeRecommendationsPage({ bookmarkedIds, onBookmark, onUnbookmark }) {
+export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookmark, onUnbookmark }) {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -11,15 +11,22 @@ export default function TypeRecommendationsPage({ bookmarkedIds, onBookmark, onU
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef(null);
 
-  const userId = 1; // 실제 로그인 유저 ID로 바꾸세요
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
+  // 토큰 필요
+  const token = localStorage.getItem('accessToken');
 
   const fetchRecommendations = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:8080/api/bookmark/bookmark-recommend?userId=${userId}`);
+      const res = await fetch(`${baseUrl}api/bookmark/bookmark-recommend`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!res.ok) throw new Error('추천 목록을 불러오는 데 실패했습니다.');
       const data = await res.json();
-      setRecipes(data.slice(0, 7)); // 최대 7개만 보여주기
+      setRecipes(data.slice(0, 7));
     } catch (error) {
       console.error('에러:', error);
     } finally {
@@ -27,9 +34,10 @@ export default function TypeRecommendationsPage({ bookmarkedIds, onBookmark, onU
     }
   };
 
+
   useEffect(() => {
     fetchRecommendations();
-  }, []);
+  }, [userId]); // userId가 변경되면 다시 불러오기
 
   const handleBookmark = async (recipeId) => {
     await onBookmark(recipeId);
@@ -47,20 +55,15 @@ export default function TypeRecommendationsPage({ bookmarkedIds, onBookmark, onU
     setScrollLeft(scrollContainerRef.current.scrollLeft);
   };
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseLeave = () => setIsDragging(false);
 
   const handleMouseMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // 스크롤 속도 조절
+    const walk = (x - startX) * 2;
     scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleMouseLeave = () => {
-    setIsDragging(false);
   };
 
   if (loading) return <p>불러오는 중입니다...</p>;
@@ -81,12 +84,12 @@ export default function TypeRecommendationsPage({ bookmarkedIds, onBookmark, onU
         {recipes.map((recipe) => (
           <div className="slide-item" key={recipe.rcpSeq}>
             <BookmarkCard
-              key={recipe.recipeId ?? recipe.rcpSeq}
               recipe={{
                 ...recipe,
                 bookmarked: bookmarkedIds.includes(recipe.recipeId ?? recipe.rcpSeq),
               }}
               userId={userId}
+              token={token}
               onUnbookmark={handleUnbookmark}
               onBookmark={handleBookmark}
             />
@@ -102,9 +105,6 @@ export default function TypeRecommendationsPage({ bookmarkedIds, onBookmark, onU
           gap: 16px;
           padding-bottom: 1rem;
           user-select: none;
-          -webkit-user-select: none;
-          -moz-user-select: none;
-          -ms-user-select: none;
         }
 
         .slide-item {
@@ -112,14 +112,13 @@ export default function TypeRecommendationsPage({ bookmarkedIds, onBookmark, onU
           scroll-snap-align: start;
         }
 
-        /* 스크롤바 제거 */
         .no-scrollbar {
-          -ms-overflow-style: none; /* IE, Edge */
-          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
 
         .no-scrollbar::-webkit-scrollbar {
-          display: none; /* Chrome, Safari */
+          display: none;
         }
       `}</style>
     </section>

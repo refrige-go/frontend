@@ -3,13 +3,11 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-export default function RecipeCard({ recipe, userId, onBookmark, onUnbookmark }) {
+export default function RecipeCard({ token, recipe, userId, onBookmark, onUnbookmark }) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
   const handleToggleBookmark = async () => {
     try {
-      const token = localStorage.getItem('token');
-
       const response = await axios.post(`${baseUrl}api/bookmark/toggle`, null, {
         params: {
           recipeId: recipe.recipeId ?? recipe.rcpSeq
@@ -19,9 +17,7 @@ export default function RecipeCard({ recipe, userId, onBookmark, onUnbookmark })
         }
       });
 
-      if (response.data.bookmarked) {
-        onBookmark && onBookmark(recipe.recipeId ?? recipe.rcpSeq);
-      } else {
+      if (!response.data.bookmarked) {
         onUnbookmark && onUnbookmark(recipe.recipeId ?? recipe.rcpSeq);
       }
     } catch (err) {

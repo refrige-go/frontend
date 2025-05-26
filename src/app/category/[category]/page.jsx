@@ -15,6 +15,7 @@ export default function CategoryPage() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const [token, setToken] = useState(null);
   const size = 5;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
@@ -31,6 +32,14 @@ export default function CategoryPage() {
   const isDragging = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
+
+
+  // 토큰 가져오기 useEffect 추가
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    setToken(storedToken);
+  }, []);
+
 
   useEffect(() => {
     setPage(0);
@@ -145,6 +154,7 @@ export default function CategoryPage() {
                       cuisineType: recipe.cuisineType,
                       rcpWay2: recipe.rcpWay2,
                     }}
+                    token={token}
                   />
                 ))}
               </div>

@@ -1,16 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import axios from 'axios';
 
-export default function BookmarkCard({ recipe, userId, onBookmark, onUnbookmark }) {
+export default function BookmarkCard({ recipe, token, onUnbookmark }) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
   const handleToggleBookmark = async () => {
     try {
-      const token = localStorage.getItem('token'); // 로그인 시 저장해둔 토큰
-
-      const response = await axios.post('${baseUrl}api/bookmark/toggle', null, {
+      const response = await axios.post(`${baseUrl}api/bookmark/toggle`, null, {
         params: {
           recipeId: recipe.recipeId ?? recipe.rcpSeq
         },
@@ -19,16 +16,13 @@ export default function BookmarkCard({ recipe, userId, onBookmark, onUnbookmark 
         }
       });
 
-      if (response.data.bookmarked) {
-        onBookmark && onBookmark(recipe.recipeId ?? recipe.rcpSeq);
-      } else {
+      if (!response.data.bookmarked) {
         onUnbookmark && onUnbookmark(recipe.recipeId ?? recipe.rcpSeq);
       }
     } catch (err) {
       console.error('찜 토글 실패:', err);
     }
   };
-
 
   return (
     <div className="card">
