@@ -1,72 +1,51 @@
 'use client';
 
+import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Next.js 13 이상에서는 'next/navigation'에서 가져옵니다
 import Link from 'next/link';
 import "../../../styles/pages/login.css"
 
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
 export default function LoginPage() {
-  const router = useRouter(); // 라우터 초기화
+  console.log("LoginPage rendered!"); // 컴포넌트 렌더링
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-
- // 로그인 페이지 들어오면 기존 토큰 제거 (만료된 토큰 방지용)
-useEffect(() => {
-  const token = localStorage.getItem('token');
-
-  if (token) {
-    // 로그인된 사용자는 로그인 페이지 접근 못 하게
-    router.replace('/');
-  } else {
-    // 로그인 안 된 사용자라면 혹시 모를 이전 토큰 제거
-    localStorage.removeItem('token');
-  }
-}, []);
-
-
-
-  // 입력값 상태 관리
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter();
 
-  // 폼 제출 이벤트
   const handleSubmit = async (e) => {
-    e.preventDefault(); // 기본 폼 제출 막기
+    e.preventDefault();
+    console.log('handleSubmit called!');
 
     try {
-      const response = await fetch(`${baseUrl}/login`, {  // 백엔드 로그인 API 주소
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),  // 백엔드 DTO에 맞춰서 보냄
-      });
+      const res = await axios.post(
+        `${baseUrl}/login`,
+        { username, password },
+        { withCredentials: true }
+      );
 
-      if (!response.ok) {
-        throw new Error('로그인 실패');
+      // authorization 헤더에서 Bearer 떼고 순수 토큰만 추출!
+      const rawAuthorization = res.headers['authorization'];
+      const accessToken = rawAuthorization?.replace('Bearer ', '');
+      if (accessToken) {
+        localStorage.setItem('accessToken', accessToken);
       }
 
-      const data = await response.json(); // 토큰 등 응답 데이터 받기
-      console.log('로그인 성공:', data);
-
-      // 토큰 저장(예: localStorage)
-      localStorage.setItem('token', data.token);
-
-      // 로그인 성공 알림창 띄우기
-      alert('로그인에 성공했습니다!');
-
-      // 로그인 성공 후 루트 페이지로 이동
-      router.push('/');
-
-    } catch (error) {
-      alert(error.message);
+      alert('로그인 성공!');
+      router.push('/main2');
+     
+    } catch (err) {
+      alert('로그인 실패');
     }
   };
 
   return (
     <div className="appContainer login">
       <img src="/images/logo.svg" alt="logo" />
-      <form method="post" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <label htmlFor="username">
           <input
             id="username"
