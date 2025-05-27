@@ -3,7 +3,7 @@
 import React, { useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function Home() {
+export default function OCRPage() {
   const router = useRouter();
 
     // 버튼 클릭 시 goodbill.jpg로 OCR 요청
