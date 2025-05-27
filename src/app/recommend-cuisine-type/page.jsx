@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import BookmarkCard from '../../components/BookmarkCard';
+import axiosInstance from '../../api/axiosInstance';
 
 export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookmark, onUnbookmark }) {
   const [recipes, setRecipes] = useState([]);
@@ -11,22 +12,13 @@ export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookm
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef(null);
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-
-  // 토큰 필요
-  const token = localStorage.getItem('accessToken');
-
   const fetchRecommendations = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${baseUrl}api/bookmark/bookmark-recommend`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) throw new Error('추천 목록을 불러오는 데 실패했습니다.');
-      const data = await res.json();
-      setRecipes(data.slice(0, 7));
+
+      const res = await axiosInstance.get('/api/bookmark/bookmark-recommend');
+
+      setRecipes(res.data.slice(0, 7));
     } catch (error) {
       console.error('에러:', error);
     } finally {
@@ -89,7 +81,6 @@ export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookm
                 bookmarked: bookmarkedIds.includes(recipe.recipeId ?? recipe.rcpSeq),
               }}
               userId={userId}
-              token={token}
               onUnbookmark={handleUnbookmark}
               onBookmark={handleBookmark}
             />

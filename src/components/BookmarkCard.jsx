@@ -1,18 +1,13 @@
 'use client';
 
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 
-export default function BookmarkCard({ recipe, token, onUnbookmark }) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-
+export default function BookmarkCard({ recipe, onUnbookmark }) {
   const handleToggleBookmark = async () => {
     try {
-      const response = await axios.post(`${baseUrl}api/bookmark/toggle`, null, {
+      const response = await axiosInstance.post('/api/bookmark/toggle', null, {
         params: {
           recipeId: recipe.recipeId ?? recipe.rcpSeq
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
         }
       });
 
