@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 import BookmarkCard from '../../components/BookmarkCard';
 import Header from '../../components/layout/Header';
 import BottomNavigation from '../../components/layout/BottomNavigation';
@@ -11,7 +11,6 @@ export default function BookmarksPage() {
   const [recipes, setRecipes] = useState([]);
   const [ingredientRecipes, setIngredientRecipes] = useState([]);
   const [activeTab, setActiveTab] = useState('전체');
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
   const [token, setToken] = useState(null);
 
   useEffect(() => {
@@ -24,7 +23,7 @@ export default function BookmarksPage() {
       if (!token) return;
 
       try {
-        const response = await axios.get(`${baseUrl}api/bookmark/list`, {
+        const response = await axiosInstance.get('/api/bookmark/list', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -46,7 +45,7 @@ export default function BookmarksPage() {
       if (!token) return;
 
       try {
-        const response = await axios.get(`${baseUrl}api/bookmark/ingredient-recommend`, {
+        const response = await axiosInstance.get('/api/bookmark/ingredient-recommend', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -95,7 +94,6 @@ export default function BookmarksPage() {
                   <BookmarkCard
                     key={recipe.recipeId ?? recipe.rcpSeq}
                     recipe={recipe}
-                    token={token}
                     onUnbookmark={(id) => {
                       setRecipes(prev => prev.filter(r => (r.recipeId ?? r.rcpSeq) !== id));
                       setIngredientRecipes(prev => prev.filter(r => (r.recipeId ?? r.rcpSeq) !== id));

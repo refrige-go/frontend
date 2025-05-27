@@ -5,19 +5,20 @@ import { useParams, useRouter } from 'next/navigation';
 import Header from '../../../components/layout/Header';
 import BottomNavigation from '../../../components/layout/BottomNavigation';
 import RecipeCard from '../../../components/RecipeCard';
+import axiosInstance from '../../../api/axiosInstance';
 
 export default function CategoryPage() {
   const router = useRouter();
   const { category: encodedCategory } = useParams();
   const category = encodedCategory ? decodeURIComponent(encodedCategory) : '';
   const [recipes, setRecipes] = useState([]);
+  const [ingredientRecipes, setIngredientRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [token, setToken] = useState(null);
   const size = 5;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
   const categories = [
     '한식', '양식', '중식', '일식', '태국식', '멕시코식',
@@ -33,13 +34,11 @@ export default function CategoryPage() {
   const startX = useRef(0);
   const scrollLeft = useRef(0);
 
-
   // 토큰 가져오기 useEffect 추가
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
     setToken(storedToken);
   }, []);
-
 
   useEffect(() => {
     setPage(0);
@@ -54,21 +53,26 @@ export default function CategoryPage() {
   }, [category]);
 
   useEffect(() => {
+    if (!category) return;
+
     setLoading(true);
-    fetch(`${baseUrl}api/recipe/category/${category}?page=${page}&size=${size}`)
-      .then(res => res.json())
-      .then(data => {
+
+    // axiosInstance를 사용하면 자동으로 Authorization 헤더가 추가됩니다
+    axiosInstance.get(`api/recipe/category/${category}?page=${page}&size=${size}`)
+      .then(response => {
+        const data = response.data;
         setRecipes(data.content);
         setTotalPages(data.totalPages);
         setTotalElements(data.totalElements);
       })
-      .catch(() => {
+      .catch(error => {
+        console.error('레시피 조회 실패:', error);
         setRecipes([]);
         setTotalPages(0);
         setTotalElements(0);
       })
       .finally(() => setLoading(false));
-  }, [category, page]);
+  }, [category, page]); // token 의존성 제거 (axiosInstance가 자동으로 토큰 처리)
 
   const getPageNumbers = () => {
     const maxButtons = 5;
@@ -92,12 +96,16 @@ export default function CategoryPage() {
 
   const onMouseLeave = () => {
     isDragging.current = false;
-    sliderRef.current.style.cursor = 'grab';
+    if (sliderRef.current) {
+      sliderRef.current.style.cursor = 'grab';
+    }
   };
 
   const onMouseUp = () => {
     isDragging.current = false;
-    sliderRef.current.style.cursor = 'grab';
+    if (sliderRef.current) {
+      sliderRef.current.style.cursor = 'grab';
+    }
   };
 
   const onMouseMove = (e) => {
@@ -149,12 +157,15 @@ export default function CategoryPage() {
                     key={recipe.recipeNm}
                     recipe={{
                       rcpNm: recipe.recipeNm,
+                      rcpSeq: recipe.rcpSeq,
                       image: recipe.image,
                       rcpPartsDtls: recipe.rcpPartsDtls,
                       cuisineType: recipe.cuisineType,
                       rcpWay2: recipe.rcpWay2,
+                      bookmarked: recipe.bookmarked,
                     }}
                     token={token}
+
                   />
                 ))}
               </div>
@@ -256,7 +267,7 @@ export default function CategoryPage() {
         }
         .pageButton {
           margin: 0 2px;
-          padding: 8px 9px;
+          padding: 8px 8px;
           background-color: #eee;
           border: none;
           border-radius: 8px;
