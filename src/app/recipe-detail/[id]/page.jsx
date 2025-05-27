@@ -12,7 +12,6 @@ export default function RecipeDetailPage() {
   const id = params?.id;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
   const [recipe, setRecipe] = useState(null);
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -76,12 +75,6 @@ export default function RecipeDetailPage() {
       <div className="appContainer">
         <div className="recipe-header">
           <h1>{recipe.RCP_NM}</h1>
-          <button
-            className={`bookmark-button ${isBookmarked ? 'bookmarked' : ''}`}
-            onClick={handleToggleBookmark}
-          >
-            {isBookmarked ? '🧡' : '🤍'}
-          </button>
         </div>
 
         {recipe.ATT_FILE_NO_MAIN && (
@@ -145,35 +138,38 @@ export default function RecipeDetailPage() {
         </div>
 
         <div className="cook-steps">
-          <h2>조리 순서</h2>
-          {Array.from({ length: 20 }).map((_, i) => {
-            const stepKey = `MANUAL${String(i + 1).padStart(2, '0')}`;
-            const imgKey = `MANUAL_IMG${String(i + 1).padStart(2, '0')}`;
-            const rawStep = recipe[stepKey];
-            const img = recipe[imgKey];
+          <div className="info-card">
 
-            const cleanedStep = rawStep?.replace(/^\d+\.\s*/, "");
+            <h2>조리 순서</h2>
+            {Array.from({ length: 20 }).map((_, i) => {
+              const stepKey = `MANUAL${String(i + 1).padStart(2, '0')}`;
+              const imgKey = `MANUAL_IMG${String(i + 1).padStart(2, '0')}`;
+              const rawStep = recipe[stepKey];
+              const img = recipe[imgKey];
 
-            return rawStep ? (
-              <div key={i} className="step">
-                <div className="step-number">{i + 1}</div>
-                <div className="step-content">
-                  <p>{cleanedStep}</p>
-                  {img && (
-                    <div className="step-image-container">
-                      <Image
-                        src={img}
-                        alt={`Step ${i + 1}`}
-                        width={400}
-                        height={250}
-                        className="step-image"
-                      />
-                    </div>
-                  )}
+              const cleanedStep = rawStep?.replace(/^\d+\.\s*/, "");
+
+              return rawStep ? (
+                <div key={i} className="step">
+                  <div className="step-number">{i + 1}</div>
+                  <div className="step-content">
+                    <p>{cleanedStep}</p>
+                    {img && (
+                      <div className="step-image-container">
+                        <Image
+                          src={img}
+                          alt={`Step ${i + 1}`}
+                          width={400}
+                          height={250}
+                          className="step-image"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ) : null;
-          })}
+              ) : null;
+            })}
+          </div>
         </div>
 
 
@@ -220,8 +216,9 @@ export default function RecipeDetailPage() {
 
         .recipe-header {
           display: flex;
-          justify-content: space-between;
+          justify-content: center;
           align-items: center;
+          margin-top: 10px;
           margin-bottom: 20px;
         }
 
@@ -229,23 +226,6 @@ export default function RecipeDetailPage() {
           font-size: 2rem;
           color: #333;
           margin: 0;
-        }
-
-        .bookmark-button {
-          background: none;
-          border: none;
-          font-size: 1.5rem;
-          cursor: pointer;
-          padding: 10px;
-          transition: transform 0.2s;
-        }
-
-        .bookmark-button:hover {
-          transform: scale(1.1);
-        }
-
-        .bookmark-button.bookmarked {
-          color: #f59e42;
         }
 
         .main-image-container {
@@ -270,7 +250,7 @@ export default function RecipeDetailPage() {
           background: white;
           border-radius: 15px;
           padding: 20px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          border: 2px solid rgba(0, 0, 0, 0.05);
         }
 
         .info-card h2 {

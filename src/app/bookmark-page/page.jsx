@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import axiosInstance from '../../api/axiosInstance';
 import BookmarkCard from '../../components/BookmarkCard';
 import Header from '../../components/layout/Header';
@@ -8,6 +9,7 @@ import BottomNavigation from '../../components/layout/BottomNavigation';
 import styles from '../../styles/pages/bookmark.module.css';
 
 export default function BookmarksPage() {
+  const router = useRouter();
   const [recipes, setRecipes] = useState([]);
   const [ingredientRecipes, setIngredientRecipes] = useState([]);
   const [activeTab, setActiveTab] = useState('전체');
@@ -15,8 +17,21 @@ export default function BookmarksPage() {
 
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
-    setToken(storedToken);
-  }, []);
+    if (storedToken) {
+      setToken(storedToken);
+    }
+    if (!storedToken) {
+      alert("로그인 후 이용 가능합니다.");
+      router.replace("/login");
+      return;
+    }
+    axiosInstance.get("/secure/ping")
+      .catch(() => {
+        alert("세션이 만료되었습니다. 다시 로그인 해주세요.");
+        localStorage.removeItem('accessToken');
+        router.replace("/login");
+      });
+  }, [router]);
 
   useEffect(() => {
     const fetchBookmarkedRecipes = async () => {
