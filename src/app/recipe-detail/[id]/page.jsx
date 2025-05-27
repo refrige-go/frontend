@@ -2,17 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Header from '../../../components/layout/Header';
 import BottomNavigation from '../../../components/layout/BottomNavigation';
-import axios from 'axios';
+import axiosInstance from '../../../api/axiosInstance';
 
 export default function RecipeDetailPage() {
+  const router = useRouter();
+
   const params = useParams();
   const id = params?.id;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
+
 
   useEffect(() => {
     async function fetchRecipe() {
@@ -37,24 +42,23 @@ export default function RecipeDetailPage() {
     if (id) fetchRecipe();
   }, [id]);
 
-  const handleToggleBookmark = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('북마크 기능을 사용하려면 로그인이 필요합니다.');
-        return;
-      }
-
-      const response = await axios.post(`${baseUrl}api/bookmark/toggle`, null, {
-        params: { recipeId: id },
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      setIsBookmarked(response.data.bookmarked);
-    } catch (error) {
-      console.error('북마크 토글 실패:', error);
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    if (storedToken) {
+      setToken(storedToken);
     }
-  };
+    if (!storedToken) {
+      alert("로그인 후 이용 가능합니다.");
+      router.replace("/login");
+      return;
+    }
+    axiosInstance.get("/secure/ping")
+      .catch(() => {
+        alert("세션이 만료되었습니다. 다시 로그인 해주세요.");
+        localStorage.removeItem('accessToken');
+        router.replace("/login");
+      });
+  }, [router]);
 
   if (loading) {
     return (
