@@ -149,14 +149,16 @@ export default function RecipeDetailPage() {
           {Array.from({ length: 20 }).map((_, i) => {
             const stepKey = `MANUAL${String(i + 1).padStart(2, '0')}`;
             const imgKey = `MANUAL_IMG${String(i + 1).padStart(2, '0')}`;
-            const step = recipe[stepKey];
+            const rawStep = recipe[stepKey];
             const img = recipe[imgKey];
 
-            return step ? (
+            const cleanedStep = rawStep?.replace(/^\d+\.\s*/, "");
+
+            return rawStep ? (
               <div key={i} className="step">
                 <div className="step-number">{i + 1}</div>
                 <div className="step-content">
-                  <p>{step}</p>
+                  <p>{cleanedStep}</p>
                   {img && (
                     <div className="step-image-container">
                       <Image
@@ -173,6 +175,7 @@ export default function RecipeDetailPage() {
             ) : null;
           })}
         </div>
+
 
         {recipe.HASH_TAG && (
           <div className="hashtags">
@@ -319,8 +322,7 @@ export default function RecipeDetailPage() {
           margin-bottom: 30px;
           background: white;
           border-radius: 15px;
-          padding: 20px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          padding: 5px;
         }
 
         .step-number {
@@ -334,6 +336,7 @@ export default function RecipeDetailPage() {
           justify-content: center;
           font-weight: bold;
           flex-shrink: 0;
+          margin: auto;
         }
 
         .step-content {

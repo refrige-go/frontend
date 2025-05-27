@@ -39,11 +39,16 @@ export default function RecipeCard({ recipe, onUnbookmark }) {
           />
           <button
             className="heart"
-            onClick={handleToggleBookmark}
+            onClick={(e) => {
+              e.stopPropagation(); // 이벤트 버블링 방지
+              e.preventDefault(); // 링크 이동 방지
+              handleToggleBookmark();
+            }}
             aria-label="찜 버튼"
           >
             {isBookmarked ? '🧡' : '🤍'}
           </button>
+
         </div>
 
         <div className="content">
