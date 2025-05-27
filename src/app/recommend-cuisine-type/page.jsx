@@ -78,7 +78,7 @@ export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookm
             <BookmarkCard
               recipe={{
                 ...recipe,
-                bookmarked: bookmarkedIds.includes(recipe.recipeId ?? recipe.rcpSeq),
+                bookmarked: recipe.bookmarked,
               }}
               userId={userId}
               onUnbookmark={handleUnbookmark}

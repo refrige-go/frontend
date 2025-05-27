@@ -83,7 +83,7 @@ export default function IngredientRecommendationsSection({ userId, bookmarkedIds
             <BookmarkCard
               recipe={{
                 ...recipe,
-                bookmarked: bookmarkedIds.includes(recipe.recipeId ?? recipe.rcpSeq)
+                bookmarked: recipe.bookmarked
               }}
               userId={userId}
               onBookmark={handleBookmark}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
+import Link from 'next/link';
 
 export default function RecipeCard({ recipe, onUnbookmark }) {
   const recipeId = recipe.recipeId ?? recipe.rcpSeq;
@@ -27,32 +28,34 @@ export default function RecipeCard({ recipe, onUnbookmark }) {
   };
 
   return (
-    <div className="card">
-      <div className="image-wrapper">
-        <img
-          src={recipe.image}
-          alt={recipe.rcpNm || '레시피 이미지'}
-          className="recipe-img"
-        />
-        <button
-          className="heart"
-          onClick={handleToggleBookmark}
-          aria-label="찜 버튼"
-        >
-          {isBookmarked ? '🧡' : '🤍'}
-        </button>
-      </div>
+    <Link href={`/recipe-detail/${recipe.recipeId ?? recipe.rcpSeq}`}>
 
-      <div className="content">
-        <div className="title">{recipe.rcpNm}</div>
-        <div className="ingredient" title={recipe.rcpPartsDtls}>
-          {'재료: ' + recipe.rcpPartsDtls || '재료 정보가 없습니다.'}
+      <div className="card">
+        <div className="image-wrapper">
+          <img
+            src={recipe.image}
+            alt={recipe.rcpNm || '레시피 이미지'}
+            className="recipe-img"
+          />
+          <button
+            className="heart"
+            onClick={handleToggleBookmark}
+            aria-label="찜 버튼"
+          >
+            {isBookmarked ? '🧡' : '🤍'}
+          </button>
         </div>
-        <div className="type">{'요리 타입: ' + recipe.cuisineType || '요리 타입 정보가 없습니다.'}</div>
-        <div className="way">{'조리 방법 : ' + recipe.rcpWay2 || '조리 방법 정보가 없습니다.'}</div>
-      </div>
 
-      <style jsx>{`
+        <div className="content">
+          <div className="title">{recipe.rcpNm}</div>
+          <div className="ingredient" title={recipe.rcpPartsDtls}>
+            {'재료: ' + recipe.rcpPartsDtls || '재료 정보가 없습니다.'}
+          </div>
+          <div className="type">{'요리 타입: ' + recipe.cuisineType || '요리 타입 정보가 없습니다.'}</div>
+          <div className="way">{'조리 방법 : ' + recipe.rcpWay2 || '조리 방법 정보가 없습니다.'}</div>
+        </div>
+
+        <style jsx>{`
         .card {
           display: flex;
           width: 360px;
@@ -134,6 +137,8 @@ export default function RecipeCard({ recipe, onUnbookmark }) {
           margin-bottom: 4px;
         }
       `}</style>
-    </div>
+      </div>
+    </Link>
+
   );
 }
