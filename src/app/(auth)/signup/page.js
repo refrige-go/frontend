@@ -1,62 +1,77 @@
 
 'use client';
+
+import axios from 'axios';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+
+
 import "../../../styles/pages/signup.css"
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
 export default function SignupPage() {
-  const router = useRouter(); // 라우터 훅
-   const [form, setForm] = useState({
+  const [form, setForm] = useState({
     username: '',
-    password: ''
+    password: '',
+    // JoinDTO에 맞는 필드 추가 (예: email 등)
+    // email: '',
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+  const router = useRouter();
 
   const handleChange = (e) => {
-    const { id, value } = e.target;
-    setForm((prev) => ({ ...prev, [id]: value }));
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const { username, password } = form;
-
     try {
-      const res = await fetch(`${baseUrl}/join`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username,
-          password
-        }),
-      });
+      // /join 엔드포인트로 POST 요청 (JSON body)
+      const res = await axios.post(
+        `${baseUrl}/join`,
+        form,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      alert(res.data); // "회원가입이 완료되었습니다." 메시지
 
-      const result = await res.text();
-      alert(result);
-
+      // 회원가입 성공 후 로그인 페이지로 이동
       router.push('/login');
-
     } catch (err) {
-      alert('서버 요청 실패 😢');
+       const message = err?.response?.data || '회원가입 실패';
+       alert(message);
     }
   };
+
+
   return (
     <div className="appContainer singup">
-        <div>
-          <h1>회원가입</h1>
-          <form onSubmit={handleSubmit}>
-            <label htmlFor="username"><input id="username" type="text" onChange={handleChange} value={form.username} /><span>아이디</span></label>
-            <label htmlFor="password"><input id="password" type="password" placeholder="비밀번호를 입력하세요." value={form.password} onChange={handleChange} /><span>비밀번호</span></label>
+      <div>
+        <h1>회원가입</h1>
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="username">
+            <input
+              id="username"
+              type="text"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              placeholder="아이디"
+              required /><span>아이디</span></label>
+          <label htmlFor="password">
+            <input
+            id="password"
+            type="password"
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="비밀번호"
+            required /><span>비밀번호</span></label>
           <button type="submit">회원가입 완료</button>
         </form>
-
-
         <Link href="/"> <button className='btn-gray'>이전</button></Link>
       </div>
 

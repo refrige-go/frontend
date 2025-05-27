@@ -10,6 +10,7 @@ import styles from '../../styles/pages/Refrigerator.module.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
+import { useRouter } from 'next/navigation';
 
 export default function RefrigeratorPage() {
   const { ingredients, deleteIngredient, refetchIngredients } = useIngredients();
@@ -19,6 +20,10 @@ export default function RefrigeratorPage() {
   const [expiryDate, setExpiryDate] = useState(null);
   const [activeTab, setActiveTab] = useState('stock');
   const [showAddOptions, setShowAddOptions] = useState(false);
+  const [showIngredientList, setShowIngredientList] = useState(false);
+  const router = useRouter();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
 
   useEffect(() => {
     if (selectedIngredient) {
@@ -47,11 +52,16 @@ export default function RefrigeratorPage() {
     }
   };
 
-  const handleDelete = async (id) => {
-    const confirmed = confirm('정말 삭제하시겠습니까?');
-    if (!confirmed) return;
-    const success = await deleteIngredient(id);
-    if (success && selectedIngredient?.id === id) setSelectedIngredient(null);
+  // const handleDelete = async (id) => {
+  //   const confirmed = confirm('정말 삭제하시겠습니까?');
+  //   if (!confirmed) return;
+  //   const success = await deleteIngredient(id);
+  //   if (success && selectedIngredient?.id === id) setSelectedIngredient(null);
+  // };
+
+  const handleDelete = (id) => {
+    setDeleteTargetId(id);
+    setShowConfirmModal(true);
   };
 
   const handleComplete = async () => {
@@ -194,8 +204,42 @@ export default function RefrigeratorPage() {
           </div>
         )}
 
+         {/* 옵션 버튼들 */}
+        {showAddOptions && (
+          <div className={styles.addOptionsFix}>
+         <button className={styles.addOptionBtn} 
+         onClick={() => router.push('/ingredients-select')}> 재료 추가 </button>
+            <button className={styles.addOptionBtn} onClick={() => alert('OCR 자동 인식 클릭됨')}>OCR 자동 인식</button>
+          </div>
+        )}
+
+        {/* 레시피 추천 + +버튼 */}
         <button className={styles.recipeRecommendBtn}>✨레시피 추천받기</button>
-        <button className={styles.addButton}>＋</button>
+        <button className={styles.addButton} onClick={() => setShowAddOptions(!showAddOptions)}>＋</button>
+
+         {/* ✅ 삭제 확인 모달 */}
+         {showConfirmModal && (
+  <div className={styles.modalOverlay}>
+    <div className={styles.modalBox}>
+      <p className={styles.modalText}>정말 삭제하시겠습니까?</p> {/* ✅ 문구 추가 */}
+      <div className={styles.modalButtons}>
+        <button className={styles.cancelBtn} onClick={() => setShowConfirmModal(false)}>취소</button>
+        <button
+          className={styles.confirmBtn}
+          onClick={async () => {
+            const success = await deleteIngredient(deleteTargetId);
+            if (success && selectedIngredient?.id === deleteTargetId) setSelectedIngredient(null);
+            setShowConfirmModal(false);
+          }}
+        >
+          삭제
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
       </div>
       <BottomNavigation />
     </div>

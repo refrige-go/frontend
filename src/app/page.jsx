@@ -12,15 +12,31 @@ export default function Home() {
   const router = useRouter();
   const [bookmarkedIds, setBookmarkedIds] = useState([]);
   const [search, setSearch] = useState('');
+  const [token, setToken] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-  const userId = 1;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
 
   // 마운트 시 찜한 레시피 목록 불러오기
   useEffect(() => {
-    fetch(`http://localhost:8080/api/bookmark/${userId}`)
+    if (!token || !userId) return;
+
+    fetch(`${baseUrl}api/bookmark/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then(res => res.json())
-      .then(data => setBookmarkedIds(data.map(r => r.recipeId ?? r.rcpSeq)));
-  }, []);
+      .then(data => setBookmarkedIds(data.map(r => r.recipeId ?? r.rcpSeq)))
+      .catch(err => console.error('찜한 레시피 가져오기 실패:', err));
+  }, [token, userId]);
 
 
   // 찜 추가
@@ -43,8 +59,8 @@ export default function Home() {
             onChange={e => setSearch(e.target.value)}
             placeholder="Search"
           />
-          
-           {/* OCR 인식 페이지로 이동하는 버튼만 남김 */}
+
+          {/* OCR 인식 페이지로 이동하는 버튼만 남김 */}
           <button
             onClick={() => router.push('/ocr')}
             style={{
@@ -64,18 +80,20 @@ export default function Home() {
               alignItems: 'center',         // 수직 중앙
               justifyContent: 'center',     // 수평 중앙
               padding: 0
-            
+
             }}
           >
-            <span role="img" aria-label="카메라" style={{transform : 'translate(1px, -4px)'}}>📷</span>
+            <span role="img" aria-label="카메라" style={{ transform: 'translate(1px, -4px)' }}>📷</span>
           </button>
 
           <TypeRecommendationsPageRecommendationsPage
+            userId={userId}
             bookmarkedIds={bookmarkedIds}
             onBookmark={handleBookmark}
             onUnbookmark={handleUnbookmark}
           />
           <IngredientRecommendationsSection
+            userId={userId}
             bookmarkedIds={bookmarkedIds}
             onBookmark={handleBookmark}
             onUnbookmark={handleUnbookmark}
