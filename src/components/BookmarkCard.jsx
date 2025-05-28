@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import axiosInstance from '../api/axiosInstance';
 
-export default function BookmarkCard({ recipe, onUnbookmark }) {
+export default function BookmarkCard({ recipe, onUnbookmark, onBookmark }) {
   const recipeId = recipe.recipeId ?? recipe.rcpSeq;
 
   const handleToggleBookmark = async (e) => {
-    e.stopPropagation();       // 상위 클릭 이벤트 전파 방지
-    e.preventDefault();        // Link 이동 자체도 막음
+    e.stopPropagation();
+    e.preventDefault();
 
     try {
       const response = await axiosInstance.post('/api/bookmark/toggle', null, {
@@ -17,13 +17,19 @@ export default function BookmarkCard({ recipe, onUnbookmark }) {
         },
       });
 
-      if (!response.data.bookmarked) {
-        onUnbookmark && onUnbookmark(recipeId);
+      const { bookmarked } = response.data;
+
+      if (bookmarked) {
+        onBookmark && onBookmark(recipeId);  // 북마크됨
+      } else {
+        onUnbookmark && onUnbookmark(recipeId);  // 언북마크됨
       }
+
     } catch (err) {
       console.error('찜 토글 실패:', err);
     }
   };
+
 
   return (
     <Link href={`/recipe-detail/${recipe.recipeId ?? recipe.rcpSeq}`}>

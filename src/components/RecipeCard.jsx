@@ -144,6 +144,5 @@ export default function RecipeCard({ recipe, onUnbookmark }) {
       `}</style>
       </div>
     </Link>
-
   );
 }

@@ -12,7 +12,6 @@ export default function CategoryPage() {
   const { category: encodedCategory } = useParams();
   const category = encodedCategory ? decodeURIComponent(encodedCategory) : '';
   const [recipes, setRecipes] = useState([]);
-  const [ingredientRecipes, setIngredientRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -34,11 +33,23 @@ export default function CategoryPage() {
   const startX = useRef(0);
   const scrollLeft = useRef(0);
 
-  // 토큰 가져오기 useEffect 추가
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
-    setToken(storedToken);
-  }, []);
+    if (storedToken) {
+      setToken(storedToken);
+    }
+    if (!storedToken) {
+      alert("로그인 후 이용 가능합니다.");
+      router.replace("/login");
+      return;
+    }
+    axiosInstance.get("/secure/ping")
+      .catch(() => {
+        alert("세션이 만료되었습니다. 다시 로그인 해주세요.");
+        localStorage.removeItem('accessToken');
+        router.replace("/login");
+      });
+  }, [router]);
 
   useEffect(() => {
     setPage(0);

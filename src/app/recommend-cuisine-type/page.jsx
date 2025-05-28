@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import BookmarkCard from '../../components/BookmarkCard';
 import axiosInstance from '../../api/axiosInstance';
 
-export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookmark, onUnbookmark }) {
+export default function TypeRecommendationsPage({ userId, onBookmark, onUnbookmark }) {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -33,7 +33,9 @@ export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookm
 
   const handleBookmark = async (recipeId) => {
     await onBookmark(recipeId);
-    fetchRecommendations();
+
+    // recipeId를 가진 레시피를 필터링해서 제거
+    setRecipes((prevRecipes) => prevRecipes.filter((r) => r.rcpSeq !== recipeId));
   };
 
   const handleUnbookmark = async (recipeId) => {

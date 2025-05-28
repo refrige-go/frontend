@@ -2,18 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Header from '../../../components/layout/Header';
 import BottomNavigation from '../../../components/layout/BottomNavigation';
-import axios from 'axios';
+import axiosInstance from '../../../api/axiosInstance';
 
 export default function RecipeDetailPage() {
+  const router = useRouter();
+
   const params = useParams();
   const id = params?.id;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
   const [recipe, setRecipe] = useState(null);
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
+
 
   useEffect(() => {
     async function fetchRecipe() {
@@ -38,24 +42,23 @@ export default function RecipeDetailPage() {
     if (id) fetchRecipe();
   }, [id]);
 
-  const handleToggleBookmark = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('북마크 기능을 사용하려면 로그인이 필요합니다.');
-        return;
-      }
-
-      const response = await axios.post(`${baseUrl}api/bookmark/toggle`, null, {
-        params: { recipeId: id },
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      setIsBookmarked(response.data.bookmarked);
-    } catch (error) {
-      console.error('북마크 토글 실패:', error);
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    if (storedToken) {
+      setToken(storedToken);
     }
-  };
+    if (!storedToken) {
+      alert("로그인 후 이용 가능합니다.");
+      router.replace("/login");
+      return;
+    }
+    axiosInstance.get("/secure/ping")
+      .catch(() => {
+        alert("세션이 만료되었습니다. 다시 로그인 해주세요.");
+        localStorage.removeItem('accessToken');
+        router.replace("/login");
+      });
+  }, [router]);
 
   if (loading) {
     return (
@@ -76,12 +79,6 @@ export default function RecipeDetailPage() {
       <div className="appContainer">
         <div className="recipe-header">
           <h1>{recipe.RCP_NM}</h1>
-          <button
-            className={`bookmark-button ${isBookmarked ? 'bookmarked' : ''}`}
-            onClick={handleToggleBookmark}
-          >
-            {isBookmarked ? '🧡' : '🤍'}
-          </button>
         </div>
 
         {recipe.ATT_FILE_NO_MAIN && (
@@ -145,35 +142,38 @@ export default function RecipeDetailPage() {
         </div>
 
         <div className="cook-steps">
-          <h2>조리 순서</h2>
-          {Array.from({ length: 20 }).map((_, i) => {
-            const stepKey = `MANUAL${String(i + 1).padStart(2, '0')}`;
-            const imgKey = `MANUAL_IMG${String(i + 1).padStart(2, '0')}`;
-            const rawStep = recipe[stepKey];
-            const img = recipe[imgKey];
+          <div className="info-card">
 
-            const cleanedStep = rawStep?.replace(/^\d+\.\s*/, "");
+            <h2>조리 순서</h2>
+            {Array.from({ length: 20 }).map((_, i) => {
+              const stepKey = `MANUAL${String(i + 1).padStart(2, '0')}`;
+              const imgKey = `MANUAL_IMG${String(i + 1).padStart(2, '0')}`;
+              const rawStep = recipe[stepKey];
+              const img = recipe[imgKey];
 
-            return rawStep ? (
-              <div key={i} className="step">
-                <div className="step-number">{i + 1}</div>
-                <div className="step-content">
-                  <p>{cleanedStep}</p>
-                  {img && (
-                    <div className="step-image-container">
-                      <Image
-                        src={img}
-                        alt={`Step ${i + 1}`}
-                        width={400}
-                        height={250}
-                        className="step-image"
-                      />
-                    </div>
-                  )}
+              const cleanedStep = rawStep?.replace(/^\d+\.\s*/, "");
+
+              return rawStep ? (
+                <div key={i} className="step">
+                  <div className="step-number">{i + 1}</div>
+                  <div className="step-content">
+                    <p>{cleanedStep}</p>
+                    {img && (
+                      <div className="step-image-container">
+                        <Image
+                          src={img}
+                          alt={`Step ${i + 1}`}
+                          width={400}
+                          height={250}
+                          className="step-image"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ) : null;
-          })}
+              ) : null;
+            })}
+          </div>
         </div>
 
 
@@ -220,8 +220,9 @@ export default function RecipeDetailPage() {
 
         .recipe-header {
           display: flex;
-          justify-content: space-between;
+          justify-content: center;
           align-items: center;
+          margin-top: 10px;
           margin-bottom: 20px;
         }
 
@@ -229,23 +230,6 @@ export default function RecipeDetailPage() {
           font-size: 2rem;
           color: #333;
           margin: 0;
-        }
-
-        .bookmark-button {
-          background: none;
-          border: none;
-          font-size: 1.5rem;
-          cursor: pointer;
-          padding: 10px;
-          transition: transform 0.2s;
-        }
-
-        .bookmark-button:hover {
-          transform: scale(1.1);
-        }
-
-        .bookmark-button.bookmarked {
-          color: #f59e42;
         }
 
         .main-image-container {
@@ -270,7 +254,7 @@ export default function RecipeDetailPage() {
           background: white;
           border-radius: 15px;
           padding: 20px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          border: 2px solid rgba(0, 0, 0, 0.05);
         }
 
         .info-card h2 {
