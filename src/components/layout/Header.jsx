@@ -20,7 +20,7 @@ const Header = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 28px 0 20px',
+        padding: '0 28px 0 28px',
         boxSizing: 'border-box',
         borderBottom: '2px solid #e5e7eb',
         position: 'fixed',

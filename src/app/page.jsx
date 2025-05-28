@@ -2,11 +2,12 @@
 
 import Header from '../components/layout/Header'
 import BottomNavigation from '../components/layout/BottomNavigation'
-import TypeRecommendationsPageRecommendationsPage from './recommend-cuisine-type/page'
-import IngredientRecommendationsSection from './recommend-ingredient/page'
+import TypeRecommendationsSection from '../components/TypeRecommendationsSection'
+import IngredientRecommendationsSection from '../components/IngredientRecommendationsSection'
 import SearchWithCategory from '../components/SearchWithCategory'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import axiosInstance from '../api/axiosInstance'
 
 export default function Home() {
   const router = useRouter();
@@ -22,7 +23,19 @@ export default function Home() {
     if (storedToken) {
       setToken(storedToken);
     }
-  }, []);
+    if (!storedToken) {
+      alert("로그인 후 이용 가능합니다.");
+      router.replace("/login");
+      return;
+    }
+    axiosInstance.get("/secure/ping")
+      .catch(() => {
+        alert("세션이 만료되었습니다. 다시 로그인 해주세요.");
+        localStorage.removeItem('accessToken');
+        router.replace("/login");
+      });
+  }, [router]);
+
 
   // 마운트 시 찜한 레시피 목록 불러오기
   useEffect(() => {
@@ -86,7 +99,7 @@ export default function Home() {
             <span role="img" aria-label="카메라" style={{ transform: 'translate(1px, -4px)' }}>📷</span>
           </button>
 
-          <TypeRecommendationsPageRecommendationsPage
+          <TypeRecommendationsSection
             userId={userId}
             bookmarkedIds={bookmarkedIds}
             onBookmark={handleBookmark}
