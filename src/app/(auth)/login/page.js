@@ -34,7 +34,6 @@ export default function LoginPage() {
         localStorage.setItem('accessToken', accessToken);
       }
       router.push('/');
-     
     } catch (err) {
       alert('로그인 실패');
     }

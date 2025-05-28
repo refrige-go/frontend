@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import BottomNavigation from '../../components/layout/BottomNavigation';
 import styles from '../../styles/pages/ingredientselect.module.css';
-import api from '../../lib/api'; // ✅ axios 인스턴스 불러오기
+import api from '../../lib/api';
 
 const iconMap = {
   '전체': '🍔',
@@ -25,21 +25,9 @@ const iconMap = {
 };
 
 const categoryOrder = [
-  '전체',
-  '곡류/분말',
-  '과일',
-  '채소',
-  '육류',
-  '수산물/해산물',
-  '유제품',
-  '두류/콩류',
-  '면/떡',
-  '기름/유지',
-  '버섯',
-  '가공식품',
-  '조미료/양념',
-  '장아찌/절임',
-  '기타'
+  '전체', '곡류/분말', '과일', '채소', '육류', '수산물/해산물',
+  '유제품', '두류/콩류', '면/떡', '기름/유지', '버섯',
+  '가공식품', '조미료/양념', '장아찌/절임', '기타'
 ];
 
 function getCategoryIcon(name) {
@@ -65,12 +53,24 @@ export default function IngredientSelectPage() {
       return;
     }
 
+    const today = new Date().toISOString().slice(0, 10);
+    const oneWeekLater = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+
     try {
       await api.post('/user-ingredients/batch-add', {
-        ingredientIds: selectedIds
+        userId: 1, // ⚠️ 임시 userId, 로그인 구현 시 수정 필요
+        ingredients: selectedIds.map((id) => ({
+          ingredientId: id,
+          customName: null,
+          purchaseDate: today,
+          expiryDate: oneWeekLater,
+          isFrozen: false
+        }))
       });
-      alert('재료가 냉장고에 추가되었습니다!');
-      router.back();
+
+      router.back(); // ✅ 바로 이전 페이지로 이동
     } catch (err) {
       console.error(err);
       alert('오류가 발생했습니다.');
@@ -144,7 +144,7 @@ export default function IngredientSelectPage() {
           </ul>
         </div>
 
-        <button className={styles.addManualBtn}>+ 직접 추가</button>
+        <button className={styles.addManualBtn} onClick={() => router.push('/ingredients-add')} > + 직접 추가 </button>
       </div>
     </div>
   );
