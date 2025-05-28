@@ -1,9 +1,9 @@
-// /app/components/IngredientRecommendationsSection.jsx
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import BookmarkCard from '../../components/BookmarkCard';
-import axiosInstance from '../../api/axiosInstance';
+import { Suspense } from 'react';
+import BookmarkCard from '../components/BookmarkCard';
+import axiosInstance from '../api/axiosInstance';
 
 export default function IngredientRecommendationsSection({ userId, bookmarkedIds, onBookmark, onUnbookmark }) {
   const [recipes, setRecipes] = useState([]);
@@ -67,33 +67,34 @@ export default function IngredientRecommendationsSection({ userId, bookmarkedIds
   if (recipes.length === 0) return null;
 
   return (
-    <section style={{ marginTop: '2rem' }}>
-      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>냉장고 재료로 만들 수 있는 저장된 레시피예요!</h2>
-      <div
-        ref={scrollContainerRef}
-        className="scroll-container no-scrollbar"
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-      >
-        {recipes.map((recipe) => (
-          <div className="slide-item" key={recipe.rcpSeq}>
-            <BookmarkCard
-              recipe={{
-                ...recipe,
-                bookmarked: recipe.bookmarked
-              }}
-              userId={userId}
-              onBookmark={handleBookmark}
-              onUnbookmark={handleUnbookmark}
-            />
-          </div>
-        ))}
-      </div>
+    <Suspense fallback={<p>로딩 중...</p>}>
+      <section style={{ marginTop: '2rem' }}>
+        <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>냉장고 재료로 만들 수 있는 저장된 레시피예요!</h2>
+        <div
+          ref={scrollContainerRef}
+          className="scroll-container no-scrollbar"
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        >
+          {recipes.map((recipe) => (
+            <div className="slide-item" key={recipe.rcpSeq}>
+              <BookmarkCard
+                recipe={{
+                  ...recipe,
+                  bookmarked: recipe.bookmarked
+                }}
+                userId={userId}
+                onBookmark={handleBookmark}
+                onUnbookmark={handleUnbookmark}
+              />
+            </div>
+          ))}
+        </div>
 
-      <style jsx>{`
+        <style jsx>{`
         .scroll-container {
           display: flex;
           overflow-x: auto;
@@ -120,6 +121,7 @@ export default function IngredientRecommendationsSection({ userId, bookmarkedIds
           display: none;
         }
       `}</style>
-    </section>
+      </section>
+    </Suspense>
   );
 }
