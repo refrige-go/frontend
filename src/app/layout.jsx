@@ -1,6 +1,7 @@
 import '../styles/globals.css'; // 전역 CSS 가져오기
 
 export default function RootLayout({ children }) {
+  
   return (
     <html lang="en">
       <head>

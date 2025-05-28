@@ -33,8 +33,6 @@ export default function LoginPage() {
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken);
       }
-
-      alert('로그인 성공!');
       router.push('/');
      
     } catch (err) {

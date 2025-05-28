@@ -16,6 +16,7 @@ export default function SignupPage() {
   const [form, setForm] = useState({
     username: '',
     password: '',
+    nickname: '',
     // JoinDTO에 맞는 필드 추가 (예: email 등)
     // email: '',
   });
@@ -41,41 +42,49 @@ export default function SignupPage() {
       // 회원가입 성공 후 로그인 페이지로 이동
       router.push('/login');
     } catch (err) {
-       const message = err?.response?.data || '회원가입 실패';
-       alert(message);
+      const message = err?.response?.data || '회원가입 실패';
+      alert(message);
     }
   };
 
-
   return (
-    <div className="appContainer singup">
-      <div>
-        <h1>회원가입</h1>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="username">
-            <input
-              id="username"
-              type="text"
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              placeholder="아이디"
-              required /><span>아이디</span></label>
-          <label htmlFor="password">
-            <input
-            id="password"
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            placeholder="비밀번호"
-            required /><span>비밀번호</span></label>
-          <button type="submit">회원가입 완료</button>
-        </form>
-        <Link href="/"> <button className='btn-gray'>이전</button></Link>
+    <div className="mainContainer">
+      <div className="appContainer singup">
+        <div>
+          <h1>회원가입</h1>
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="username">
+              <input
+                id="username"
+                type="text"
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                placeholder="아이디"
+                required /><span>아이디</span></label>
+                 <label htmlFor="username">
+              <input
+                id="nickname"
+                type="text"
+                name="nickname"
+                value={form.nickname}
+                onChange={handleChange}
+                placeholder="닉네임"
+                required /><span>닉네임</span></label>
+            <label htmlFor="password">
+              <input
+                id="password"
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="비밀번호"
+                required /><span>비밀번호</span></label>
+            <button className='btn-org' type="submit">회원가입 완료</button>
+          </form>
+          <Link className='btn-gray' href="/"> <button>이전</button></Link>
+        </div>
       </div>
-
     </div>
-
   );
 }

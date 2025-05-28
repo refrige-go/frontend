@@ -12,14 +12,7 @@ export default function Home() {
   const [bookmarkedIds, setBookmarkedIds] = useState([]);
   const [search, setSearch] = useState('');
 
-  const userId = 1;
 
-  // 마운트 시 찜한 레시피 목록 불러오기
-  useEffect(() => {
-    fetch(`http://localhost:8080/api/bookmark/${userId}`)
-      .then(res => res.json())
-      .then(data => setBookmarkedIds(data.map(r => r.recipeId ?? r.rcpSeq)));
-  }, []);
 
   // 찜 추가
   const handleBookmark = (id) => {
