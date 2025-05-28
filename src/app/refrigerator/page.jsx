@@ -20,7 +20,6 @@ export default function RefrigeratorPage() {
   const [expiryDate, setExpiryDate] = useState(null);
   const [activeTab, setActiveTab] = useState('stock');
   const [showAddOptions, setShowAddOptions] = useState(false);
-  const [showIngredientList, setShowIngredientList] = useState(false);
   const router = useRouter();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState(null);
@@ -51,13 +50,6 @@ export default function RefrigeratorPage() {
       alert('날짜 저장 실패!');
     }
   };
-
-  // const handleDelete = async (id) => {
-  //   const confirmed = confirm('정말 삭제하시겠습니까?');
-  //   if (!confirmed) return;
-  //   const success = await deleteIngredient(id);
-  //   if (success && selectedIngredient?.id === id) setSelectedIngredient(null);
-  // };
 
   const handleDelete = (id) => {
     setDeleteTargetId(id);
@@ -107,7 +99,9 @@ export default function RefrigeratorPage() {
             {filteredIngredients.map((item) => (
               <div
                 key={item.id}
-                className={`${styles.card} ${item.frozen ? styles.frozenCard : ''}`}
+                className={`${styles.card} 
+                  ${item.frozen ? styles.frozenCard : ''} 
+                  ${item.expiryDaysLeft !== null && item.expiryDaysLeft <= 3 && !item.frozen ? styles.pinkCard : ''}`}
                 onClick={() => setSelectedIngredient(item)}
               >
                 <button
@@ -123,13 +117,13 @@ export default function RefrigeratorPage() {
                   <div className={styles.textContent}>
                     <div className={styles.category}>
                       {item.category || '분류 없음'}
+                      {!item.frozen && item.expiryDaysLeft !== null && item.expiryDaysLeft >= 0 && item.expiryDaysLeft <= 3 && (
+                        <span className={styles.dDay}>D-{item.expiryDaysLeft}</span>
+                      )}
                       {item.frozen && <span className={styles.frozenIcon}>❄️</span>}
                     </div>
                     <div className={styles.nameDday}>
                       <span className={styles.name}>{item.name}</span>
-                      {item.expiryDaysLeft !== null && item.expiryDaysLeft >= 0 && (
-                        <span className={styles.dDay}>D-{item.expiryDaysLeft}</span>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -207,39 +201,56 @@ export default function RefrigeratorPage() {
          {/* 옵션 버튼들 */}
         {showAddOptions && (
           <div className={styles.addOptionsFix}>
-         <button className={styles.addOptionBtn} 
-         onClick={() => router.push('/ingredients-select')}> 재료 추가 </button>
-            <button className={styles.addOptionBtn} onClick={() => alert('OCR 자동 인식 클릭됨')}>OCR 자동 인식</button>
+            <button
+              className={styles.addOptionBtn}
+              onClick={() => router.push('/ingredients-select')}
+            >
+              재료 추가
+            </button>
+            <button
+              className={styles.addOptionBtn}
+              onClick={() => alert('OCR 자동 인식 클릭됨')}
+            >
+              OCR 자동 인식
+            </button>
           </div>
         )}
 
         {/* 레시피 추천 + +버튼 */}
         <button className={styles.recipeRecommendBtn}>✨레시피 추천받기</button>
-        <button className={styles.addButton} onClick={() => setShowAddOptions(!showAddOptions)}>＋</button>
-
-         {/* ✅ 삭제 확인 모달 */}
-         {showConfirmModal && (
-  <div className={styles.modalOverlay}>
-    <div className={styles.modalBox}>
-      <p className={styles.modalText}>정말 삭제하시겠습니까?</p> {/* ✅ 문구 추가 */}
-      <div className={styles.modalButtons}>
-        <button className={styles.cancelBtn} onClick={() => setShowConfirmModal(false)}>취소</button>
         <button
-          className={styles.confirmBtn}
-          onClick={async () => {
-            const success = await deleteIngredient(deleteTargetId);
-            if (success && selectedIngredient?.id === deleteTargetId) setSelectedIngredient(null);
-            setShowConfirmModal(false);
-          }}
+          className={styles.addButton}
+          onClick={() => setShowAddOptions(!showAddOptions)}
         >
-          삭제
+          ＋
         </button>
-      </div>
-    </div>
-  </div>
-)}
 
-
+         {/* 삭제 확인 모달 */}
+         {showConfirmModal && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalBox}>
+              <p className={styles.modalText}>정말 삭제하시겠습니까?</p>
+              <div className={styles.modalButtons}>
+                <button
+                  className={styles.cancelBtn}
+                  onClick={() => setShowConfirmModal(false)}
+                >
+                  취소
+                </button>
+                <button
+                  className={styles.confirmBtn}
+                  onClick={async () => {
+                    const success = await deleteIngredient(deleteTargetId);
+                    if (success && selectedIngredient?.id === deleteTargetId) setSelectedIngredient(null);
+                    setShowConfirmModal(false);
+                  }}
+                >
+                  삭제
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <BottomNavigation />
     </div>
