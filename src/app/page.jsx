@@ -2,8 +2,8 @@
 
 import Header from '../components/layout/Header'
 import BottomNavigation from '../components/layout/BottomNavigation'
-import TypeRecommendationsPageRecommendationsPage from './recommend-cuisine-type/page'
-import IngredientRecommendationsSection from './recommend-ingredient/page'
+import TypeRecommendationsSection from '../components/TypeRecommendationsSection'
+import IngredientRecommendationsSection from '../components/IngredientRecommendationsSection'
 import SearchWithCategory from '../components/SearchWithCategory'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -99,7 +99,7 @@ export default function Home() {
             <span role="img" aria-label="카메라" style={{ transform: 'translate(1px, -4px)' }}>📷</span>
           </button>
 
-          <TypeRecommendationsPageRecommendationsPage
+          <TypeRecommendationsSection
             userId={userId}
             bookmarkedIds={bookmarkedIds}
             onBookmark={handleBookmark}

@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import BookmarkCard from '../../components/BookmarkCard';
-import axiosInstance from '../../api/axiosInstance';
+import BookmarkCard from '../components/BookmarkCard';
+import axiosInstance from '../api/axiosInstance';
 
-export default function TypeRecommendationsPage({ userId, onBookmark, onUnbookmark }) {
+export default function IngredientRecommendationsSection({ userId, bookmarkedIds, onBookmark, onUnbookmark }) {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -16,7 +16,7 @@ export default function TypeRecommendationsPage({ userId, onBookmark, onUnbookma
     try {
       setLoading(true);
 
-      const res = await axiosInstance.get('/api/bookmark/bookmark-recommend');
+      const res = await axiosInstance.get('/api/bookmark/ingredient-recommend');
 
       setRecipes(res.data.slice(0, 7));
     } catch (error) {
@@ -26,16 +26,13 @@ export default function TypeRecommendationsPage({ userId, onBookmark, onUnbookma
     }
   };
 
-
   useEffect(() => {
     fetchRecommendations();
-  }, [userId]); // userId가 변경되면 다시 불러오기
+  }, [userId]);
 
   const handleBookmark = async (recipeId) => {
     await onBookmark(recipeId);
-
-    // recipeId를 가진 레시피를 필터링해서 제거
-    setRecipes((prevRecipes) => prevRecipes.filter((r) => r.rcpSeq !== recipeId));
+    fetchRecommendations();
   };
 
   const handleUnbookmark = async (recipeId) => {
@@ -49,15 +46,20 @@ export default function TypeRecommendationsPage({ userId, onBookmark, onUnbookma
     setScrollLeft(scrollContainerRef.current.scrollLeft);
   };
 
-  const handleMouseUp = () => setIsDragging(false);
-  const handleMouseLeave = () => setIsDragging(false);
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
   const handleMouseMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
+    const walk = (x - startX) * 2; // 스크롤 속도 조절
     scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
   };
 
   if (loading) return <p>불러오는 중입니다...</p>;
@@ -65,7 +67,7 @@ export default function TypeRecommendationsPage({ userId, onBookmark, onUnbookma
 
   return (
     <section style={{ marginTop: '2rem' }}>
-      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>사용자님의 취향 저격 레시피를 모아봤어요!</h2>
+      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>냉장고 재료로 만들 수 있는 저장된 레시피예요!</h2>
       <div
         ref={scrollContainerRef}
         className="scroll-container no-scrollbar"
@@ -80,11 +82,11 @@ export default function TypeRecommendationsPage({ userId, onBookmark, onUnbookma
             <BookmarkCard
               recipe={{
                 ...recipe,
-                bookmarked: recipe.bookmarked,
+                bookmarked: recipe.bookmarked
               }}
               userId={userId}
-              onUnbookmark={handleUnbookmark}
               onBookmark={handleBookmark}
+              onUnbookmark={handleUnbookmark}
             />
           </div>
         ))}
@@ -94,10 +96,12 @@ export default function TypeRecommendationsPage({ userId, onBookmark, onUnbookma
         .scroll-container {
           display: flex;
           overflow-x: auto;
-          scroll-snap-type: x mandatory;
           gap: 16px;
           padding-bottom: 1rem;
           user-select: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none; 
         }
 
         .slide-item {
