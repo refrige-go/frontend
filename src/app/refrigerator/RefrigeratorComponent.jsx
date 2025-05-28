@@ -11,17 +11,44 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
 
-export default function RefrigeratorComponent({ currentUserId }) {
-  // userId를 useIngredients에 전달해서 동적 로그인 반영
+export default function RefrigeratorComponent() {
+  const router = useRouter();
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [token, setToken] = useState(null);
+
+  // 로그인 토큰 체크 및 유효성 검사
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    if (!storedToken) {
+      alert('로그인 후 이용 가능합니다.');
+      router.replace('/login');
+      return;
+    }
+
+    api.get('/secure/ping', {
+      headers: { Authorization: `Bearer ${storedToken}` },
+    })
+      .then(() => {
+        setToken(storedToken);
+        // userId는 토큰에서 파싱하거나 별도 API에서 받아와야 하지만, 임시로 1로 세팅
+        setCurrentUserId(1);
+      })
+      .catch(() => {
+        alert('세션이 만료되었습니다. 다시 로그인 해주세요.');
+        localStorage.removeItem('accessToken');
+        router.replace('/login');
+      });
+  }, [router]);
+
+  // userId 기반 재료 조회 커스텀 훅 사용
   const { ingredients, deleteIngredient, refetchIngredients } = useIngredients(currentUserId);
-  
+
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [isFrozenToggle, setIsFrozenToggle] = useState(false);
   const [purchaseDate, setPurchaseDate] = useState(null);
   const [expiryDate, setExpiryDate] = useState(null);
   const [activeTab, setActiveTab] = useState('stock');
   const [showAddOptions, setShowAddOptions] = useState(false);
-  const router = useRouter();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState(null);
 
@@ -75,6 +102,9 @@ export default function RefrigeratorComponent({ currentUserId }) {
       ? item.expiryDaysLeft !== null && item.expiryDaysLeft < 0
       : item.expiryDaysLeft === null || item.expiryDaysLeft >= 0
   );
+
+  // 로그인 전까지 렌더링 금지
+  if (!currentUserId) return null;
 
   return (
     <div className="mainContainer">
@@ -230,7 +260,6 @@ export default function RefrigeratorComponent({ currentUserId }) {
           </div>
         )}
 
-        {/* 옵션 버튼들 */}
         {showAddOptions && (
           <div className={styles.addOptionsFix}>
             <button
@@ -248,7 +277,6 @@ export default function RefrigeratorComponent({ currentUserId }) {
           </div>
         )}
 
-        {/* 레시피 추천 + +버튼 */}
         <button
           className={styles.recipeRecommendBtn}
           onClick={() => alert('레시피 추천 클릭됨')}
@@ -262,7 +290,6 @@ export default function RefrigeratorComponent({ currentUserId }) {
           ＋
         </button>
 
-        {/* 삭제 확인 모달 */}
         {showConfirmModal && (
           <div className={styles.modalOverlay}>
             <div className={styles.modalBox}>
