@@ -3,7 +3,7 @@
 import React, { useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function Home() {
+export default function OCRPage() {
   const router = useRouter();
 
     // 버튼 클릭 시 goodbill.jpg로 OCR 요청
@@ -12,7 +12,7 @@ export default function Home() {
       const response = await fetch('http://localhost:8012/ocr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: 'billbill.jpg' })
+        body: JSON.stringify({ filename: 'fruitbill.jpg' }) //인식할 이미지 업로드
       });
 
       if (response.ok) {
@@ -23,7 +23,11 @@ export default function Home() {
         alert('서버에서 올바른 JSON이 오지 않았습니다.');
         return;
       }
-      sessionStorage.setItem('ocr_ingredients', JSON.stringify(result.ingredients));
+      //sessionStorage.setItem('ocr_ingredients', JSON.stringify(result.ingredients));
+      sessionStorage.setItem('ocr_ingredients', JSON.stringify({
+        ingredients: result.ingredients,
+        purchaseDate: result.purchaseDate
+      }));
       router.push('/ocr/result');
     } else {
       // 서버가 JSON이 아닌 에러 페이지(HTML)를 반환할 때 대비
@@ -53,7 +57,7 @@ export default function Home() {
           margin: 0 auto;
         }
         .header {
-          background: #f79726;
+          background: #f97316;
           color: #fff;
           padding: 20px 24px 14px 24px;
           border-radius: 0 0 18px 18px;

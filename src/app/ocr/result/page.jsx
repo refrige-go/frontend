@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 export default function IngredientConfirm() {
   const router = useRouter();
   const categoryList = [
-  "과일", "채소", "육류", "수산물/해산물", "곡류/분말", "조미료/양념", "면/떡", "두류/콩류", "기타"
+    "과일", "채소", "육류", "수산물/해산물", "곡류/분말", "조미료/양념", "면/떡", "두류/콩류", "기타"
   ];
   const [ingredients, setIngredients] = useState([]);
   const [input, setInput] = useState('');
@@ -17,18 +17,23 @@ export default function IngredientConfirm() {
     if (data) {
       try {
         const parsedData = JSON.parse(data);
-        // 신뢰도에 따라 상태 부여
-        const formatted = parsedData.map(item => ({
+        const ingredients = Array.isArray(parsedData) ? parsedData : (parsedData.ingredients || []);    // OCR에서 추출한 재료 배열
+        const purchaseDate = parsedData.purchaseDate || '';
+        const formatted = ingredients.map(item => ({
           ...item,
           status: item.status || (
             item.confidence >= 70 ? 'selected' :
             item.confidence >= 50 ? 'need_check' :
             item.confidence === null ? 'manual' : 'uncertain'
-          )
+          ),
+          isFrozen: false,
+          purchaseDate: purchaseDate || '',
+          expirationDate: ''
         }));
         setIngredients(formatted);
       } catch (e) {
         console.error('데이터 파싱 오류:', e);
+        setIngredients([]);
       }
     }
   }, []);
@@ -44,6 +49,24 @@ export default function IngredientConfirm() {
     );
   };
 
+  // 냉동여부 변경
+  const handleFrozenChange = (idx, value) => {
+    setIngredients(ings =>
+      ings.map((ing, i) =>
+        i === idx ? { ...ing, isFrozen: value } : ing
+      )
+    );
+  };
+
+  // 날짜 변경
+  const handleDateChange = (idx, field, value) => {
+    setIngredients(ings =>
+      ings.map((ing, i) =>
+        i === idx ? { ...ing, [field]: value } : ing
+      )
+    );
+  };
+
   // 직접 추가
   const handleManualAdd = () => {
     if (!input.trim()) return;
@@ -54,28 +77,37 @@ export default function IngredientConfirm() {
         confidence: null,
         status: 'manual',
         text: input,
-        category: '직접입력'
+        category: '직접입력',
+        isFrozen: false,
+        purchaseDate: '',
+        expirationDate: ''
       }
     ]);
     setInput('');
   };
 
   // 선택된 재료만 complete로 (세션스토리지에 저장, 쿼리 없이 이동)
-  const handleAddSelected = () => {
-    const selected = ingredients.filter(ing => ing.status === 'selected' || ing.status === 'manual');
-    if (selected.length === 0) {
-      alert('최소 1개 이상의 재료를 선택해주세요.');
-      return;
-    }
-    sessionStorage.setItem('ocr_selected_ingredients', JSON.stringify(selected));
-    router.push('/ocr/complete');
-  };
+ const handleAddSelected = () => {
+  const selected = ingredients
+    .filter(ing => ing.status === 'selected' || ing.status === 'manual')
+    .map(ing => ({
+      ...ing,
+      // category가 없으면 OCR에서 mainCategory를 넣어주고, 없으면 '미분류'
+      category: ing.category || (typeof ing.name === 'object' && ing.name !== null ? ing.name.mainCategory : '미분류')
+    }));
+  if (selected.length === 0) {
+    alert('최소 1개 이상의 재료를 선택해주세요.');
+    return;
+  }
+  sessionStorage.setItem('ocr_selected_ingredients', JSON.stringify(selected));
+  router.push('/ocr/complete');
+};
 
   // 색상/아이콘/버튼 등 상태별 스타일
   const getCardStyle = status => {
-    if (status === 'selected') return { border: '1px solid #22c55e', background: '#e6fff2' };
-    if (status === 'need_check') return { border: '1px solid #ffd966', background: '#ffffff' };
-    if (status === 'uncertain') return { border: '1px solid #ff7b7b', background: '#ffffff' };
+    if (status === 'selected') return { border: '1px solid #f79726', background: '#e6fff2' };
+    if (status === 'need_check') return { border: '1px solid #f79726', background: '#ffffff' };
+    if (status === 'uncertain') return { border: '1px solid #f79726', background: '#ffffff' };
     if (status === 'manual') return { border: '1px solid #b3c6e0', background: '#f3f6fa' };
     return {};
   };
@@ -85,7 +117,7 @@ export default function IngredientConfirm() {
         className={`btn-${status}`} 
         onClick={() => handleToggle(idx)}
         style={{ 
-          background: status === 'selected' || status === 'manual' ? '#ffd966' : '#e0e0e0',
+          background: status === 'selected' || status === 'manual' ? '#f79726' : '#e0e0e0',
           color: '#000',
           border: 'none',
           borderRadius: '50%',
@@ -118,6 +150,7 @@ export default function IngredientConfirm() {
         .ingredient-name { font-weight: bold; font-size: 1.1em; }
         .ingredient-status { font-size: 0.95em; margin: 2px 0 4px 0; }
         .ingredient-category { font-size: 0.92em; color: #888; }
+        .ingredient-dates { font-size: 0.92em; color: #888; margin-top: 6px; display: flex; gap: 16px; }
         .btn-selected, .btn-add, .btn-uncertain, .btn-manual { 
           border: none; 
           border-radius: 50%; 
@@ -130,39 +163,18 @@ export default function IngredientConfirm() {
           align-items: center;
           justify-content: center;
         }
-        .btn-add { 
-          background: #ffd966; 
-          color: #f79726; 
-        }
-        .btn-uncertain { 
-          background: #ff7b7b; 
-          color: #fff; 
-        }
-        .btn-manual { 
-          background: #ffd966; 
-          color: #f79726; 
-          border: none; 
-          border-radius: 50%; 
-          width: 36px; 
-          height: 36px; 
-          font-size: 1.1em; 
-          font-weight: bold; 
-        }
-        .btn-selected { 
-          background: #ffd966; 
-          color: #f79726; 
-          border-radius: 50%; 
-          width: 36px; 
-          height: 36px; 
-          font-size: 1.1em; 
-          font-weight: bold; 
-          border: none; 
-        }
+        .btn-add { background: #ffd966; color: #f79726; }
+        .btn-uncertain { background: #ff7b7b; color: #fff; }
+        .btn-manual { background: #ffd966; color: #f79726; }
+        .btn-selected { background: #ffd966; color: #f79726; }
         .manual-add-row { display: flex; align-items: center; width: 92vw; max-width: 400px; margin: 0 auto 18px auto; }
         .manual-input { flex: 1; border: 1.5px solid #f79726; border-radius: 8px; padding: 10px; font-size: 1em; margin-right: 8px; }
-        .manual-btn { background: #1976d2; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-weight: bold; font-size: 1em; cursor: pointer; }
+        .manual-btn { background: #f79726; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-weight: bold; font-size: 1em; cursor: pointer; }
         .add-btn-row { width: 92vw; max-width: 400px; margin: 0 auto; }
         .add-btn-main { width: 100%; background: #f79726; color: #fff; border: none; border-radius: 12px; padding: 16px 0; font-size: 1.15em; font-weight: bold; margin-top: 8px; cursor: pointer; }
+        .frozen-radio { margin-left: 12px; }
+        .frozen-radio label { margin-right: 8px; }
+        .ingredient-dates input[type="date"] { margin-left: 4px; }
       `}</style>
 
       <div className="header">인식된 재료 확인</div>
@@ -203,8 +215,39 @@ export default function IngredientConfirm() {
                 ) : (
                   <>카테고리: {typeof ing.name === 'object' && ing.name !== null ? ing.name.mainCategory : '기타'}</>
                 )}
-            </div>
-              
+                <span className="frozen-radio">
+                  냉동여부: 
+                  <label>
+                    <input
+                      type="radio"
+                      name={`isFrozen-${idx}`}
+                      checked={ing.isFrozen === true}
+                      onChange={() => handleFrozenChange(idx, true)}
+                    /> O
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name={`isFrozen-${idx}`}
+                      checked={ing.isFrozen === false}
+                      onChange={() => handleFrozenChange(idx, false)}
+                    /> X
+                  </label>
+                </span>
+              </div>
+              <div className="ingredient-dates">
+                <span>
+                  구매일자: {ing.purchaseDate ? ing.purchaseDate : '인식된 날짜 없음'}
+                </span>
+                <span>
+                  유통기한: 
+                  <input
+                    type="date"
+                    value={ing.expirationDate || ''}
+                    onChange={e => handleDateChange(idx, 'expirationDate', e.target.value)}
+                  />
+                </span>
+              </div>
             </div>
             {getBtn(ing.status, idx)}
           </div>
