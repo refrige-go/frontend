@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { Suspense } from 'react';
 import BookmarkCard from '../components/BookmarkCard';
 import axiosInstance from '../api/axiosInstance';
 
@@ -62,34 +61,33 @@ export default function TypeRecommendationsSection({ userId, onBookmark, onUnboo
   if (recipes.length === 0) return null;
 
   return (
-    <Suspense fallback={<p>로딩 중...</p>}>
-      <section style={{ marginTop: '2rem' }}>
-        <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
-          사용자님의 취향 저격 레시피를 모아봤어요!
-        </h2>
+    <section style={{ marginTop: '2rem' }}>
+      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
+        사용자님의 취향 저격 레시피를 모아봤어요!
+      </h2>
 
-        <div
-          ref={scrollContainerRef}
-          className="scroll-container no-scrollbar"
-          style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-          {...dragHandlers}
-        >
-          {recipes.map((recipe) => (
-            <div className="slide-item" key={recipe.rcpSeq}>
-              <BookmarkCard
-                recipe={{
-                  ...recipe,
-                  bookmarked: recipe.bookmarked
-                }}
-                userId={userId}
-                onUnbookmark={handleUnbookmark}
-                onBookmark={handleBookmark}
-              />
-            </div>
-          ))}
-        </div>
+      <div
+        ref={scrollContainerRef}
+        className="scroll-container no-scrollbar"
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        {...dragHandlers}
+      >
+        {recipes.map((recipe) => (
+          <div className="slide-item" key={recipe.rcpSeq}>
+            <BookmarkCard
+              recipe={{
+                ...recipe,
+                bookmarked: recipe.bookmarked
+              }}
+              userId={userId}
+              onUnbookmark={handleUnbookmark}
+              onBookmark={handleBookmark}
+            />
+          </div>
+        ))}
+      </div>
 
-        <style jsx>{`
+      <style jsx>{`
         .scroll-container {
           display: flex;
           overflow-x: auto;
@@ -113,7 +111,6 @@ export default function TypeRecommendationsSection({ userId, onBookmark, onUnboo
           display: none;
         }
       `}</style>
-      </section>
-    </Suspense>
+    </section>
   );
 }
