@@ -2,18 +2,23 @@
 
 import Header from '../components/layout/Header'
 import BottomNavigation from '../components/layout/BottomNavigation'
-import TypeRecommendationsPageRecommendationsPage from './recommend-cuisine-type/page'
-import IngredientRecommendationsSection from './recommend-ingredient/page'
+import TypeRecommendationsSection from '../components/TypeRecommendationsSection'
+import IngredientRecommendationsSection from '../components/IngredientRecommendationsSection'
 import SearchWithCategory from '../components/SearchWithCategory'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import axiosInstance from '../api/axiosInstance'
 
 export default function Home() {
   const router = useRouter();
   const [bookmarkedIds, setBookmarkedIds] = useState([]);
   const [search, setSearch] = useState('');
 
+
   const userId = 1;
+
+
+
 
   // 마운트 시 찜한 레시피 목록 불러오기
   useEffect(() => {
@@ -69,7 +74,7 @@ export default function Home() {
             <span role="img" aria-label="카메라" style={{ transform: 'translate(1px, -4px)' }}>📷</span>
           </button>
 
-          <TypeRecommendationsPageRecommendationsPage
+          <TypeRecommendationsSection
             userId={userId}
             bookmarkedIds={bookmarkedIds}
             onBookmark={handleBookmark}
