@@ -1,4 +1,4 @@
-import RefrigeratorComponent from './RefrigeratorComponent';
+import RefrigeratorComponent from './RefrigeratorComponent'
 
 export default function Page() {
   return <RefrigeratorComponent />;
