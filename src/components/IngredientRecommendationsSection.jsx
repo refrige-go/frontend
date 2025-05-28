@@ -96,13 +96,12 @@ export default function IngredientRecommendationsSection({ userId, bookmarkedIds
         .scroll-container {
           display: flex;
           overflow-x: auto;
-          scroll-snap-type: x mandatory;
           gap: 16px;
           padding-bottom: 1rem;
           user-select: none;
           -webkit-user-select: none;
           -moz-user-select: none;
-          -ms-user-select: none;
+          -ms-user-select: none; 
         }
 
         .slide-item {

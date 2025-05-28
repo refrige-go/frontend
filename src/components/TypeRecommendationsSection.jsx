@@ -91,7 +91,6 @@ export default function TypeRecommendationsSection({ userId, onBookmark, onUnboo
         .scroll-container {
           display: flex;
           overflow-x: auto;
-          scroll-snap-type: x mandatory;
           gap: 16px;
           padding-bottom: 1rem;
           user-select: none;
