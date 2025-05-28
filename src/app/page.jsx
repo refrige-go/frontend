@@ -4,6 +4,7 @@ import Header from '../components/layout/Header'
 import BottomNavigation from '../components/layout/BottomNavigation'
 import TypeRecommendationsSection from '../components/TypeRecommendationsSection'
 import IngredientRecommendationsSection from '../components/IngredientRecommendationsSection'
+import WeatherRecommend from '../components/WeatherRecommend'
 import SearchWithCategory from '../components/SearchWithCategory'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -111,6 +112,7 @@ export default function Home() {
             onBookmark={handleBookmark}
             onUnbookmark={handleUnbookmark}
           />
+          <WeatherRecommend />
         </main>
       </div>
       <BottomNavigation />
