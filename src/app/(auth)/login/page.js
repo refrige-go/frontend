@@ -22,7 +22,7 @@ export default function LoginPage() {
 
     try {
       const res = await axios.post(
-        `${baseUrl}login`,
+        `${baseUrl}/login`,
         { username, password },
         { withCredentials: true }
       );
@@ -33,8 +33,6 @@ export default function LoginPage() {
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken);
       }
-
-      alert('로그인 성공!');
       router.push('/');
     } catch (err) {
       alert('로그인 실패');
