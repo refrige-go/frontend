@@ -100,9 +100,19 @@
 }
 
 .dDay {
-  font-size: 12px;
-  color: #f97316;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 33px;               /* 원 가로 */
+  height: 22px;              /* 원 세로 */
+  background-color: white;   /* 원 배경색 흰색 */
+  color: #f97316;            /* 글자 주황색 */
+  border: 2px solid #f97316; /* 테두리 주황색 */
+  border-radius: 50%;        /* 동그라미 */
   font-weight: bold;
+  font-size: 12px;
+  margin-left: 5px;          /* 간격 */
+  user-select: none;
 }
 
 .frozenIcon {
@@ -427,4 +437,8 @@
   text-align: center;
   margin-bottom: 20px;
   color: #333;
+}
+
+.pinkCard {
+  background-color: #ffe6e6; 
 }
