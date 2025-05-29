@@ -7,7 +7,7 @@ export default function LocationSender() {
   const [result, setResult] = useState(null);
 
   const sendLocation = (lat, lon) => {
-    axiosInstance.post('/api/recommendations/location', {
+    axiosInstance.post('/api/weather/location', {
       latitude: lat,
       longitude: lon
     }, {
@@ -31,7 +31,7 @@ export default function LocationSender() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        console.log('위치 좌표:', latitude, longitude); // 디버깅용
+        console.log('위치 좌표:', latitude, longitude);
         sendLocation(latitude, longitude);
       },
       () => setStatus('위치 정보를 가져올 수 없습니다.')

@@ -100,6 +100,8 @@ export default function Home() {
             <span role="img" aria-label="카메라" style={{ transform: 'translate(1px, -4px)' }}>📷</span>
           </button>
 
+          <WeatherRecommend />
+
           <TypeRecommendationsSection
             userId={userId}
             bookmarkedIds={bookmarkedIds}
@@ -112,7 +114,6 @@ export default function Home() {
             onBookmark={handleBookmark}
             onUnbookmark={handleUnbookmark}
           />
-          <WeatherRecommend />
         </main>
       </div>
       <BottomNavigation />
