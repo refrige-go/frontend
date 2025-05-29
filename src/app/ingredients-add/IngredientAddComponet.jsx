@@ -141,7 +141,6 @@ export default function IngredientAddComponent() {
           Authorization: `Bearer ${token}`,
         },
       });
-      alert('재료 추가 완료');
       router.push('/refrigerator');
     } catch (err) {
       console.error('추가 실패:', err);
