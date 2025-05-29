@@ -69,10 +69,11 @@ export default function IngredientAddComponent() {
     }
   }, [router]);
 
-  const getUserIdFromToken = (token) => {
+  // JWT에서 username 추출 (userId 대신 username 사용)
+  const getUsernameFromToken = (token) => {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.userId;
+      return payload.username; // username 반환
     } catch (e) {
       console.error('JWT 파싱 실패', e);
       return null;
@@ -114,8 +115,8 @@ export default function IngredientAddComponent() {
       return;
     }
 
-    const userId = getUserIdFromToken(token);
-    if (!userId) {
+    const username = getUsernameFromToken(token);
+    if (!username) {
       alert('유저 정보 확인 실패');
       return;
     }

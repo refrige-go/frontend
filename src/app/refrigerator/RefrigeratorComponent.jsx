@@ -11,7 +11,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
 
-// JWT에서 payload(username) 파싱 함수 추가
+// JWT에서 payload(username) 파싱 함수
 function getPayloadFromToken(token) {
   try {
     const payload = token.split('.')[1];
@@ -117,7 +117,7 @@ export default function RefrigeratorComponent() {
   );
 
   if (!token || !username) return null;
-  
+
   return (
     <div className="mainContainer">
       <Header />
@@ -170,7 +170,9 @@ export default function RefrigeratorComponent() {
                         item.expiryDaysLeft !== null &&
                         item.expiryDaysLeft >= 0 &&
                         item.expiryDaysLeft <= 3 && (
-                          <span className={styles.dDay}>D-{item.expiryDaysLeft}</span>
+                          <span className={`${styles.dDay} ${item.frozen ? styles.hideDDayCircle : ''}`}>
+                            D-{item.expiryDaysLeft}
+                          </span>
                         )}
                       {item.frozen && <span className={styles.frozenIcon}>❄️</span>}
                     </div>
@@ -204,17 +206,14 @@ export default function RefrigeratorComponent() {
                   </div>
                   <div className={styles.name}>{selectedIngredient.name}</div>
                 </div>
-                <div
-                  className={`${styles.dDay} ${styles.detailDday} ${
-                    isFrozenToggle ? styles.frozenText : ''
-                  }`}
-                >
-                  {isFrozenToggle
-                    ? '❄️ 냉동'
-                    : selectedIngredient.expiryDaysLeft !== null
-                    ? `D-${selectedIngredient.expiryDaysLeft}`
-                    : '기한 없음'}
-                </div>
+
+                {/* 상세보기에서 냉동 여부에 따라 동그라미 표시 및 텍스트 분리 */}
+                {!isFrozenToggle && selectedIngredient.expiryDaysLeft !== null && (
+                  <span className={styles.dDay}>D-{selectedIngredient.expiryDaysLeft}</span>
+                )}
+                {isFrozenToggle && (
+                  <span className={styles.frozenText}>❄️ 냉동</span>
+                )}
               </div>
 
               <div className={styles.detailBody}>
