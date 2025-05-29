@@ -5,9 +5,9 @@ import Header from '../../../components/layout/Header'
 import BottomNavigation from '../../../components/layout/BottomNavigation'
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import "../../../styles/pages/mypage.css"
+import "../../../styles/pages/mypageset.css"
 
-export default function MyPage() {
+export default function MyPageSet() {
   const router = useRouter();
 
   useEffect(() => {
@@ -74,33 +74,47 @@ export default function MyPage() {
   return (
     <div className="mainContainer">
       <Header />
-      <div className="appContainer mypage">
+      <div className="appContainer mypageset">
         <div className="profile">
           <div className="img"></div>
           <span>당당한배추겉절이</span>
         </div>
-        <div className="myCook">
-          <h3>나의 요리생활</h3>
-          <div className="mypage-box">
-            <div>
-              <i><img src="../images/bookmarksorg.svg" alt="bookmarksorg" /></i>
-              <span>저장한 레시피</span>
-            </div>
-            <img src="../images/bar.svg" alt="bar" />
-            <div>
-              <i><img src="../images/basket.svg" alt="basket" /></i>
-              <span>내 식재료 목록</span>
-            </div>
-            <img src="../images/bar.svg" alt="bar" />
-            <div>
-              <a href="../mypageset">
-                 <i><img src="../images/setting.svg" alt="setting" /></i>
-              <span>내 정보 설정</span>
-              </a>
-            </div>
-          </div>
+         <div className="edit-box">
+          <h1>회원정보 수정</h1>
+          <form id="editForm" >
+            <label htmlFor="username">
+              <input
+                id="username"
+                type="text"
+                name="username"
+              //  value={form.username}
+             //   onChange={handleChange}
+                placeholder="아이디"
+                required /><span>아이디</span></label>
+                 <label htmlFor="username">
+              <input
+                id="nickname"
+                type="text"
+                name="nickname"
+             //   value={form.nickname}
+             //   onChange={handleChange}
+                placeholder="닉네임"
+                required /><span>닉네임</span></label>
+            <label htmlFor="password">
+              <input
+                id="password"
+                type="password"
+                name="password"
+             //   value={form.password}
+             //   onChange={handleChange}
+                placeholder="비밀번호"
+                required /><span>비밀번호</span></label>  
+          </form>
+              <div className="btns">
+                  <button className='btn-org' type="submit" form="editForm">회원정보 수정</button>
+                  <button className='btn-gray' onClick={() => router.back()}>이전</button>
+              </div>
         </div>
-        <button className="logout-btn" onClick={handleLogout}>로그아웃</button>
       </div>
        <BottomNavigation />
     </div>
