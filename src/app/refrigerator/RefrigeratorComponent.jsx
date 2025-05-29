@@ -122,44 +122,60 @@ export default function RefrigeratorComponent() {
     );
   };
 
-  // 레시피 추천 API 호출
-  const handleModalRecommend = async () => {
+// 레시피 추천 API 호출
+const handleModalRecommend = async () => {
+  try {
+    setIsRecommending(true);
+
+    const selectedIngredientNames = ingredients
+      .filter(ingredient => modalSelectedIngredientIds.includes(ingredient.id))
+      .map(ingredient => ingredient.name);
+    
+    // 요청 데이터 구성
+    const requestData = {
+      userId: username, // null 대신 username 사용
+      selectedIngredients: selectedIngredientNames,
+      limit: 10
+    };
+
+    console.log('추천 요청 데이터:', requestData);
+    console.log('선택된 재료 이름들:', selectedIngredientNames);
+
+    // 최소 2개 재료 검증
+    if (selectedIngredientNames.length < 2) {
+      alert('최소 2개 이상의 재료를 선택해주세요.');
+      return;
+    }
+
+    // API 호출 - axiosInstance 대신 fetch 사용
+    const response = await fetch(`${baseUrl}/api/recommendations/recipes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(requestData)
+    });
+
+    console.log('응답 상태:', response.status);
+    console.log('응답 헤더:', response.headers);
+
+    const responseText = await response.text();
+    console.log('응답 텍스트:', responseText);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}, body: ${responseText}`);
+    }
+
+    let data;
     try {
-      setIsRecommending(true);
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('JSON 파싱 오류:', parseError);
+      throw new Error('서버 응답을 파싱할 수 없습니다.');
+    }
 
-      const selectedIngredientNames = ingredients
-        .filter(ingredient => modalSelectedIngredientIds.includes(ingredient.id))
-        .map(ingredient => ingredient.name);
-      
-      // 요청 데이터 구성
-      const requestData = {
-        userId: null, // 또는 'guest-user'
-        selectedIngredients: selectedIngredientNames,
-        limit: 10
-      };
-
-      console.log('추천 요청 데이터:', requestData);
-
-      // API 호출
-      const response = await fetch(`${baseUrl}/api/recommendations/recipes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      console.log('응답 상태:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('서버 오류:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('추천 결과:', data);
+    console.log('추천 결과:', data);
       
       // 추천 결과 처리
       if (data && data.recommendedRecipes) {
@@ -185,7 +201,7 @@ export default function RefrigeratorComponent() {
       
     } catch (error) {
       console.error('추천 오류:', error);
-      alert('레시피 추천에 실패했습니다. 다시 시도해주세요.');
+      alert(`레시피 추천에 실패했습니다: ${error.message}`);
     } finally {
       setIsRecommending(false);
     }
