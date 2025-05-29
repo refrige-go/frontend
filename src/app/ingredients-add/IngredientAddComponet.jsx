@@ -21,20 +21,37 @@ export default function IngredientAddComponent({ currentUserId }) {
   const [imagePreview, setImagePreview] = useState('/images/default.jpg');
   const [showPurchasePicker, setShowPurchasePicker] = useState(false);
   const [showExpiryPicker, setShowExpiryPicker] = useState(false);
+  const [token, setToken] = useState(null); 
+
+  // 토큰 불러오기
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    if (!storedToken) {
+      alert('로그인 후 이용해주세요.');
+      router.push('/login');
+    } else {
+      setToken(storedToken);
+    }
+  }, [router]);
 
   // 카테고리 목록 불러오기
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await api.get('/api/ingredients/categories');
+        const res = await api.get('/api/ingredients/categories', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setCategories(res.data);
         setCategory(res.data[0] || '');
       } catch (err) {
         console.error('카테고리 불러오기 실패:', err);
       }
     };
-    fetchCategories();
-  }, []);
+
+    if (token) fetchCategories();
+  }, [token]);
 
   // 이미지 변경 처리
   const handleImageChange = (e) => {
@@ -51,7 +68,7 @@ export default function IngredientAddComponent({ currentUserId }) {
 
   // 재료 추가 제출
   const handleSubmit = async () => {
-    if (!currentUserId) {
+    if (!currentUserId || !token) {
       alert('로그인 후 이용해주세요.');
       router.push('/login');
       return;
@@ -67,13 +84,16 @@ export default function IngredientAddComponent({ currentUserId }) {
     formData.append('customCategory', category);
     formData.append('purchaseDate', purchaseDate.toISOString().split('T')[0]);
     formData.append('expiryDate', expiryDate.toISOString().split('T')[0]);
-    formData.append('isFrozen', isFrozen.toString()); // 문자열로 변환
-    formData.append('userId', currentUserId); // userId 동적 반영
+    formData.append('isFrozen', isFrozen.toString());
+    formData.append('userId', currentUserId);
     if (imageFile) formData.append('image', imageFile);
 
     try {
       await api.post('/user-ingredients', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`, 
+        },
       });
       alert('재료 추가 완료');
       router.push('/refrigerator');
@@ -83,7 +103,6 @@ export default function IngredientAddComponent({ currentUserId }) {
     }
   };
 
-  // 클릭 시 토글로 열리고 닫히게
   const togglePurchasePicker = () => setShowPurchasePicker(prev => !prev);
   const toggleExpiryPicker = () => {
     if (!isFrozen) setShowExpiryPicker(prev => !prev);

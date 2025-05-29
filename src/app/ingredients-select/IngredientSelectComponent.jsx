@@ -40,6 +40,38 @@ export default function IngredientSelectComponent({ currentUserId }) {
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [ingredients, setIngredients] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [token, setToken] = useState(null); // 🔥 accessToken 저장용
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    if (!storedToken) {
+      alert('로그인 후 이용해주세요.');
+      router.push('/login');
+    } else {
+      setToken(storedToken);
+    }
+  }, [router]);
+
+  // 카테고리 불러오기
+  useEffect(() => {
+    if (!token) return;
+    api.get('/api/ingredients/categories', {
+      headers: { Authorization: `Bearer ${token}` }, // 🔥 토큰 포함
+    })
+      .then((res) => setCategories(['전체', ...res.data]))
+      .catch((err) => console.error('카테고리 불러오기 실패:', err));
+  }, [token]);
+
+  // 선택된 카테고리에 따라 재료 불러오기
+  useEffect(() => {
+    if (!token) return;
+    const query = selectedCategory === '전체' ? '' : `?category=${selectedCategory}`;
+    api.get(`/api/ingredients${query}`, {
+      headers: { Authorization: `Bearer ${token}` }, // 🔥 토큰 포함
+    })
+      .then((res) => setIngredients(res.data))
+      .catch((err) => console.error('재료 불러오기 실패:', err));
+  }, [selectedCategory, token]);
 
   const toggleSelection = (id) => {
     setSelectedIds((prev) =>
@@ -53,7 +85,7 @@ export default function IngredientSelectComponent({ currentUserId }) {
       return;
     }
 
-    if (!currentUserId) {
+    if (!currentUserId || !token) {
       alert('로그인 후 이용해주세요.');
       router.push('/login');
       return;
@@ -66,7 +98,7 @@ export default function IngredientSelectComponent({ currentUserId }) {
 
     try {
       await api.post('/user-ingredients/batch-add', {
-        userId: currentUserId,  // 동적 userId 반영
+        userId: currentUserId,
         ingredients: selectedIds.map((id) => ({
           ingredientId: id,
           customName: null,
@@ -74,6 +106,8 @@ export default function IngredientSelectComponent({ currentUserId }) {
           expiryDate: oneWeekLater,
           isFrozen: false
         }))
+      }, {
+        headers: { Authorization: `Bearer ${token}` }, // 🔥 토큰 포함
       });
 
       router.back();
@@ -82,17 +116,6 @@ export default function IngredientSelectComponent({ currentUserId }) {
       alert('오류가 발생했습니다.');
     }
   };
-
-  useEffect(() => {
-    api.get('/api/ingredients/categories')
-      .then((res) => setCategories(['전체', ...res.data]));
-  }, []);
-
-  useEffect(() => {
-    const query = selectedCategory === '전체' ? '' : `?category=${selectedCategory}`;
-    api.get(`/api/ingredients${query}`)
-      .then((res) => setIngredients(res.data));
-  }, [selectedCategory]);
 
   return (
     <div className="mainContainer">

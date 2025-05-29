@@ -16,7 +16,6 @@ export default function RefrigeratorComponent() {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [token, setToken] = useState(null);
 
-  // 로그인 토큰 체크 및 유효성 검사
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
     if (!storedToken) {
@@ -30,7 +29,6 @@ export default function RefrigeratorComponent() {
     })
       .then(() => {
         setToken(storedToken);
-        // userId는 토큰에서 파싱하거나 별도 API에서 받아와야 하지만, 임시로 1로 세팅
         setCurrentUserId(1);
       })
       .catch(() => {
@@ -40,8 +38,7 @@ export default function RefrigeratorComponent() {
       });
   }, [router]);
 
-  // userId 기반 재료 조회 커스텀 훅 사용
-  const { ingredients, deleteIngredient, refetchIngredients } = useIngredients(currentUserId);
+  const { ingredients, deleteIngredient, refetchIngredients } = useIngredients(currentUserId, token);
 
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [isFrozenToggle, setIsFrozenToggle] = useState(false);
@@ -62,7 +59,9 @@ export default function RefrigeratorComponent() {
 
   const updateFrozenStatus = async (id, isFrozen) => {
     try {
-      await api.patch(`/user-ingredients/${id}/frozen`, { frozen: isFrozen });
+      await api.patch(`/user-ingredients/${id}/frozen`, { frozen: isFrozen }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
     } catch {
       alert('냉동 보관 상태 저장 실패!');
     }
@@ -73,6 +72,8 @@ export default function RefrigeratorComponent() {
       await api.patch(`/user-ingredients/${id}/dates`, {
         purchaseDate: purchaseDate?.toISOString().split('T')[0],
         expiryDate: expiryDate?.toISOString().split('T')[0],
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
     } catch {
       alert('날짜 저장 실패!');
@@ -103,9 +104,7 @@ export default function RefrigeratorComponent() {
       : item.expiryDaysLeft === null || item.expiryDaysLeft >= 0
   );
 
-  // 로그인 전까지 렌더링 금지
   if (!currentUserId) return null;
-
   return (
     <div className="mainContainer">
       <Header />
