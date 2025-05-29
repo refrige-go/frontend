@@ -25,7 +25,7 @@ export default function RecipeDetailPage() {
         const token = localStorage.getItem('token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-        const res = await fetch(`${baseUrl}api/recipe/${id}`, {
+        const res = await fetch(`${baseUrl}/api/recipe/${id}`, {
           headers
         });
 
