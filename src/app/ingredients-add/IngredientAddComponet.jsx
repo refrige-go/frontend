@@ -9,7 +9,42 @@ import { ko } from 'date-fns/locale';
 import api from '../../lib/api';
 import { format } from 'date-fns';
 
-export default function IngredientAddComponent({ currentUserId }) {
+// 영어 enum → 한글 매핑
+const categoryMap = {
+  GRAIN_POWDER: '곡류/분말',
+  MEAT: '육류',
+  SEAFOOD: '수산물/해산물',
+  VEGETABLE: '채소',
+  FRUIT: '과일',
+  MUSHROOM: '버섯',
+  DAIRY: '유제품',
+  BEAN: '두류/콩류',
+  SEASONING: '조미료/양념',
+  OIL: '기름/유지',
+  NOODLE_RICE_CAKE: '면/떡',
+  PROCESSED_FOOD: '가공식품',
+  PICKLE: '장아찌/절임',
+  ETC: '기타',
+};
+
+const categoryOrder = [
+  'GRAIN_POWDER',
+  'MEAT',
+  'SEAFOOD',
+  'VEGETABLE',
+  'FRUIT',
+  'MUSHROOM',
+  'DAIRY',
+  'BEAN',
+  'SEASONING',
+  'OIL',
+  'NOODLE_RICE_CAKE',
+  'PROCESSED_FOOD',
+  'PICKLE',
+  'ETC',
+];
+
+export default function IngredientAddComponent() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
@@ -21,9 +56,9 @@ export default function IngredientAddComponent({ currentUserId }) {
   const [imagePreview, setImagePreview] = useState('/images/default.jpg');
   const [showPurchasePicker, setShowPurchasePicker] = useState(false);
   const [showExpiryPicker, setShowExpiryPicker] = useState(false);
-  const [token, setToken] = useState(null); 
+  const [token, setToken] = useState(null);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
-  // 토큰 불러오기
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
     if (!storedToken) {
@@ -34,26 +69,32 @@ export default function IngredientAddComponent({ currentUserId }) {
     }
   }, [router]);
 
-  // 카테고리 목록 불러오기
+  const getUserIdFromToken = (token) => {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.userId;
+    } catch (e) {
+      console.error('JWT 파싱 실패', e);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await api.get('/api/ingredients/categories', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-        setCategories(res.data);
-        setCategory(res.data[0] || '');
+        const sorted = categoryOrder.filter((key) => res.data.includes(key));
+        setCategories(sorted);
+        setCategory(sorted[0] || '');
       } catch (err) {
         console.error('카테고리 불러오기 실패:', err);
       }
     };
-
     if (token) fetchCategories();
   }, [token]);
 
-  // 이미지 변경 처리
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImageFile(file);
@@ -66,11 +107,16 @@ export default function IngredientAddComponent({ currentUserId }) {
     }
   };
 
-  // 재료 추가 제출
   const handleSubmit = async () => {
-    if (!currentUserId || !token) {
+    if (!token) {
       alert('로그인 후 이용해주세요.');
       router.push('/login');
+      return;
+    }
+
+    const userId = getUserIdFromToken(token);
+    if (!userId) {
+      alert('유저 정보 확인 실패');
       return;
     }
 
@@ -85,14 +131,13 @@ export default function IngredientAddComponent({ currentUserId }) {
     formData.append('purchaseDate', purchaseDate.toISOString().split('T')[0]);
     formData.append('expiryDate', expiryDate.toISOString().split('T')[0]);
     formData.append('isFrozen', isFrozen.toString());
-    formData.append('userId', currentUserId);
     if (imageFile) formData.append('image', imageFile);
 
     try {
-      await api.post('/user-ingredients', formData, {
+      await api.post(`${baseUrl}/user-ingredients`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
       });
       alert('재료 추가 완료');
@@ -103,9 +148,9 @@ export default function IngredientAddComponent({ currentUserId }) {
     }
   };
 
-  const togglePurchasePicker = () => setShowPurchasePicker(prev => !prev);
+  const togglePurchasePicker = () => setShowPurchasePicker((prev) => !prev);
   const toggleExpiryPicker = () => {
-    if (!isFrozen) setShowExpiryPicker(prev => !prev);
+    if (!isFrozen) setShowExpiryPicker((prev) => !prev);
   };
 
   return (
@@ -118,7 +163,6 @@ export default function IngredientAddComponent({ currentUserId }) {
         </div>
 
         <div className={styles.form}>
-          {/* 이미지 업로드 */}
           <div className={styles.imageBox}>
             <label>재료 사진</label>
             <div className={styles.imagePlaceholder}>
@@ -131,7 +175,6 @@ export default function IngredientAddComponent({ currentUserId }) {
             </div>
           </div>
 
-          {/* 재료명 */}
           <div className={styles.inputGroup}>
             <label>재료명</label>
             <input
@@ -143,17 +186,17 @@ export default function IngredientAddComponent({ currentUserId }) {
             />
           </div>
 
-          {/* 카테고리 */}
           <div className={styles.inputGroup}>
             <label>카테고리</label>
             <select value={category} onChange={(e) => setCategory(e.target.value)}>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>
+                  {categoryMap[cat] || cat}
+                </option>
               ))}
             </select>
           </div>
 
-          {/* 구매일자 */}
           <div className={styles.row}>
             <span className={styles.label}>구매일자</span>
             <span onClick={togglePurchasePicker} className={styles.value}>
@@ -174,7 +217,6 @@ export default function IngredientAddComponent({ currentUserId }) {
             </div>
           )}
 
-          {/* 소비기한 */}
           <div className={styles.row}>
             <span className={styles.label}>소비기한</span>
             <span
@@ -203,7 +245,6 @@ export default function IngredientAddComponent({ currentUserId }) {
             </div>
           )}
 
-          {/* 냉동 보관 */}
           <div className={styles.toggleGroup}>
             <label>냉동실 보관</label>
             <label className={styles.toggleSwitch}>

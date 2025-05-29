@@ -6,6 +6,7 @@ import BottomNavigation from '../../components/layout/BottomNavigation';
 import styles from '../../styles/pages/ingredientselect.module.css';
 import api from '../../lib/api';
 
+// 카테고리 아이콘 매핑
 const iconMap = {
   '전체': '🍔',
   '곡류/분말': '🌾',
@@ -24,6 +25,23 @@ const iconMap = {
   '기타': '📦'
 };
 
+const categoryMap = {
+  GRAIN_POWDER: '곡류/분말',
+  FRUIT: '과일',
+  VEGETABLE: '채소',
+  MEAT: '육류',
+  SEAFOOD: '수산물/해산물',
+  DAIRY: '유제품',
+  BEAN: '두류/콩류',
+  NOODLE_RICE_CAKE: '면/떡',
+  OIL: '기름/유지',
+  MUSHROOM: '버섯',
+  PROCESSED_FOOD: '가공식품',
+  SEASONING: '조미료/양념',
+  PICKLE: '장아찌/절임',
+  ETC: '기타'
+};
+
 const categoryOrder = [
   '전체', '곡류/분말', '과일', '채소', '육류', '수산물/해산물',
   '유제품', '두류/콩류', '면/떡', '기름/유지', '버섯',
@@ -34,14 +52,16 @@ function getCategoryIcon(name) {
   return iconMap[name] || '🍽️';
 }
 
-export default function IngredientSelectComponent({ currentUserId }) {
+export default function IngredientSelectComponent() {
   const router = useRouter();
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [ingredients, setIngredients] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [token, setToken] = useState(null); // 🔥 accessToken 저장용
+  const [token, setToken] = useState(null);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
+  // 로그인 여부 확인
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
     if (!storedToken) {
@@ -56,9 +76,12 @@ export default function IngredientSelectComponent({ currentUserId }) {
   useEffect(() => {
     if (!token) return;
     api.get('/api/ingredients/categories', {
-      headers: { Authorization: `Bearer ${token}` }, // 🔥 토큰 포함
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => setCategories(['전체', ...res.data]))
+      .then((res) => {
+        const converted = res.data.map((en) => categoryMap[en] || en);
+        setCategories(['전체', ...converted]);
+      })
       .catch((err) => console.error('카테고리 불러오기 실패:', err));
   }, [token]);
 
@@ -67,7 +90,7 @@ export default function IngredientSelectComponent({ currentUserId }) {
     if (!token) return;
     const query = selectedCategory === '전체' ? '' : `?category=${selectedCategory}`;
     api.get(`/api/ingredients${query}`, {
-      headers: { Authorization: `Bearer ${token}` }, // 🔥 토큰 포함
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => setIngredients(res.data))
       .catch((err) => console.error('재료 불러오기 실패:', err));
@@ -85,7 +108,7 @@ export default function IngredientSelectComponent({ currentUserId }) {
       return;
     }
 
-    if (!currentUserId || !token) {
+    if (!token) {
       alert('로그인 후 이용해주세요.');
       router.push('/login');
       return;
@@ -97,8 +120,7 @@ export default function IngredientSelectComponent({ currentUserId }) {
       .slice(0, 10);
 
     try {
-      await api.post('/user-ingredients/batch-add', {
-        userId: currentUserId,
+      await api.post(`${baseUrl}/user-ingredients/batch-add`, {
         ingredients: selectedIds.map((id) => ({
           ingredientId: id,
           customName: null,
@@ -107,12 +129,12 @@ export default function IngredientSelectComponent({ currentUserId }) {
           isFrozen: false
         }))
       }, {
-        headers: { Authorization: `Bearer ${token}` }, // 🔥 토큰 포함
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       router.back();
     } catch (err) {
-      console.error(err);
+      console.error('재료 추가 실패:', err);
       alert('오류가 발생했습니다.');
     }
   };
