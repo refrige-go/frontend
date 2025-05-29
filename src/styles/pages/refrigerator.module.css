@@ -187,13 +187,15 @@
 }
 
 .detailDday {
-  font-size: 18px;
+  font-size: 24px;
   font-weight: bold;
   color: #f97316;
 }
 
 .frozenText {
   color: #111;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .detailBody {
@@ -441,4 +443,8 @@
 
 .pinkCard {
   background-color: #ffe6e6; 
+}
+
+.hideDDayCircle {
+  display: none 
 }
