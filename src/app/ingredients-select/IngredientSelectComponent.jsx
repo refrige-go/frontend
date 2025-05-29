@@ -61,7 +61,6 @@ export default function IngredientSelectComponent() {
   const [token, setToken] = useState(null);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
-  // 로그인 여부 확인
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
     if (!storedToken) {
@@ -72,7 +71,6 @@ export default function IngredientSelectComponent() {
     }
   }, [router]);
 
-  // 카테고리 불러오기
   useEffect(() => {
     if (!token) return;
     api.get('/api/ingredients/categories', {
@@ -85,7 +83,6 @@ export default function IngredientSelectComponent() {
       .catch((err) => console.error('카테고리 불러오기 실패:', err));
   }, [token]);
 
-  // 선택된 카테고리에 따라 재료 불러오기
   useEffect(() => {
     if (!token) return;
     const query = selectedCategory === '전체' ? '' : `?category=${selectedCategory}`;
@@ -102,6 +99,7 @@ export default function IngredientSelectComponent() {
     );
   };
 
+  // default_expiry_days 반영하여 소비기한 계산
   const handleComplete = async () => {
     if (selectedIds.length === 0) {
       alert('재료를 선택해주세요.');
@@ -114,20 +112,28 @@ export default function IngredientSelectComponent() {
       return;
     }
 
-    const today = new Date().toISOString().slice(0, 10);
-    const oneWeekLater = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .slice(0, 10);
+    const today = new Date();
+
+    // 선택한 재료 객체들을 찾아서 default_expiry_days 활용
+    const selectedIngredients = ingredients.filter((item) =>
+      selectedIds.includes(item.id)
+    );
+
+    const ingredientsToAdd = selectedIngredients.map((item) => {
+      const expiry = new Date(today);
+      expiry.setDate(expiry.getDate() + (item.defaultExpiryDays || 7)); // fallback: 7일
+      return {
+        ingredientId: item.id,
+        customName: null,
+        purchaseDate: today.toISOString().slice(0, 10),
+        expiryDate: expiry.toISOString().slice(0, 10),
+        isFrozen: false
+      };
+    });
 
     try {
       await api.post(`${baseUrl}/user-ingredients/batch-add`, {
-        ingredients: selectedIds.map((id) => ({
-          ingredientId: id,
-          customName: null,
-          purchaseDate: today,
-          expiryDate: oneWeekLater,
-          isFrozen: false
-        }))
+        ingredients: ingredientsToAdd
       }, {
         headers: { Authorization: `Bearer ${token}` },
       });
