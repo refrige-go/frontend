@@ -11,10 +11,21 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
 
+// JWT에서 payload(username) 파싱 함수 추가
+function getPayloadFromToken(token) {
+  try {
+    const payload = token.split('.')[1];
+    return JSON.parse(atob(payload));
+  } catch {
+    return null;
+  }
+}
+
 export default function RefrigeratorComponent() {
   const router = useRouter();
-  const [currentUserId, setCurrentUserId] = useState(null);
   const [token, setToken] = useState(null);
+  const [username, setUsername] = useState(null);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
@@ -24,21 +35,22 @@ export default function RefrigeratorComponent() {
       return;
     }
 
-    api.get('/secure/ping', {
+    api.get(`${baseUrl}/secure/ping`, {
       headers: { Authorization: `Bearer ${storedToken}` },
     })
       .then(() => {
         setToken(storedToken);
-        setCurrentUserId(1);
+        const payload = getPayloadFromToken(storedToken);
+        setUsername(payload?.username);
       })
       .catch(() => {
         alert('세션이 만료되었습니다. 다시 로그인 해주세요.');
         localStorage.removeItem('accessToken');
         router.replace('/login');
       });
-  }, [router]);
+  }, [router, baseUrl]);
 
-  const { ingredients, deleteIngredient, refetchIngredients } = useIngredients(currentUserId, token);
+  const { ingredients, deleteIngredient, refetchIngredients } = useIngredients(username);
 
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [isFrozenToggle, setIsFrozenToggle] = useState(false);
@@ -59,7 +71,7 @@ export default function RefrigeratorComponent() {
 
   const updateFrozenStatus = async (id, isFrozen) => {
     try {
-      await api.patch(`/user-ingredients/${id}/frozen`, { frozen: isFrozen }, {
+      await api.patch(`${baseUrl}/user-ingredients/${id}/frozen`, { frozen: isFrozen }, {
         headers: { Authorization: `Bearer ${token}` },
       });
     } catch {
@@ -69,7 +81,7 @@ export default function RefrigeratorComponent() {
 
   const updateDates = async (id) => {
     try {
-      await api.patch(`/user-ingredients/${id}/dates`, {
+      await api.patch(`${baseUrl}/user-ingredients/${id}/dates`, {
         purchaseDate: purchaseDate?.toISOString().split('T')[0],
         expiryDate: expiryDate?.toISOString().split('T')[0],
       }, {
@@ -104,7 +116,8 @@ export default function RefrigeratorComponent() {
       : item.expiryDaysLeft === null || item.expiryDaysLeft >= 0
   );
 
-  if (!currentUserId) return null;
+  if (!token || !username) return null;
+  
   return (
     <div className="mainContainer">
       <Header />

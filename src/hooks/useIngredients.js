@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
 
-export function useIngredients(userId) {
+export function useIngredients() {
   const [ingredients, setIngredients] = useState([]);
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
   async function fetchIngredients() {
-    if (!userId) return; // userId 없으면 요청 안 함
+    if (!token) return;
     try {
+      // userId 파라미터 제거하고 헤더에 토큰만 보냄
       const res = await api.get('/user-ingredients', {
-        params: {
-          userId: userId,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setIngredients(res.data);
     } catch (error) {
@@ -19,8 +19,11 @@ export function useIngredients(userId) {
   }
 
   async function deleteIngredient(id) {
+    if (!token) return false;
     try {
-      await api.delete(`/user-ingredients/${id}`);
+      await api.delete(`/user-ingredients/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       await fetchIngredients();
       return true;
     } catch (error) {
@@ -31,7 +34,7 @@ export function useIngredients(userId) {
 
   useEffect(() => {
     fetchIngredients();
-  }, [userId]);
+  }, []);
 
   return {
     ingredients,
