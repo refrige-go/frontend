@@ -28,20 +28,9 @@ const categoryMap = {
 };
 
 const categoryOrder = [
-  'GRAIN_POWDER',
-  'MEAT',
-  'SEAFOOD',
-  'VEGETABLE',
-  'FRUIT',
-  'MUSHROOM',
-  'DAIRY',
-  'BEAN',
-  'SEASONING',
-  'OIL',
-  'NOODLE_RICE_CAKE',
-  'PROCESSED_FOOD',
-  'PICKLE',
-  'ETC',
+  'GRAIN_POWDER', 'MEAT', 'SEAFOOD', 'VEGETABLE', 'FRUIT', 'MUSHROOM',
+  'DAIRY', 'BEAN', 'SEASONING', 'OIL', 'NOODLE_RICE_CAKE', 'PROCESSED_FOOD',
+  'PICKLE', 'ETC',
 ];
 
 export default function IngredientAddComponent() {
@@ -69,11 +58,10 @@ export default function IngredientAddComponent() {
     }
   }, [router]);
 
-  // JWT에서 username 추출 (userId 대신 username 사용)
   const getUsernameFromToken = (token) => {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.username; // username 반환
+      return payload.username;
     } catch (e) {
       console.error('JWT 파싱 실패', e);
       return null;
@@ -128,7 +116,7 @@ export default function IngredientAddComponent() {
 
     const formData = new FormData();
     formData.append('customName', name);
-    formData.append('customCategory', category);
+    formData.append('customCategory', categoryMap[category]); // ✅ 한글로 변환해서 전송
     formData.append('purchaseDate', purchaseDate.toISOString().split('T')[0]);
     formData.append('expiryDate', expiryDate.toISOString().split('T')[0]);
     formData.append('isFrozen', isFrozen.toString());
