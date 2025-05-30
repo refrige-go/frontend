@@ -1,15 +1,30 @@
+
+.appContainer.singup{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+   
+}
+
+.appContainer.singup>div{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 .singup h1{
-    font-size: 20px;
+    font-size: 26px;
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 90px;
     
 }
 
 .singup form{
-    display: flex;
-    gap: 15px;
+   display: flex;
+    gap: 10px;
     flex-direction: column;
-    margin-bottom: 50px;
+    width: 85%;
 }
 
 .singup label{
@@ -19,13 +34,12 @@
     color: #888;
 }
 .singup input{
-    width: 100%;
-    height: 50px;
-    border-radius: 5;
-    border: 2px solid #888;
-    padding-left: 10px;
-    order:1;
-
+ width: 100%;
+height: 50px;
+border-radius: 5px;
+border: 2px solid #888;
+padding-left: 10px;
+ order:1;
 }
 
 .singup input:focus{
@@ -36,19 +50,33 @@
     color: #F79726;
 }
 
-.singup button{
+.singup .btn-org{
     width: 100%;
     height: 55px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10;
-    margin-top: 15px ;
+    border-radius: 10px;
+    margin-top: 50px ;
     border: none;
     color: #fff;
     background-color: #F79726;
 }
 
 .singup .btn-gray{
+    width: 85%;
     background-color: #d9d9d9;
+    margin-top: 20px;
+    text-align: center;
+    height: 55px;
+    border-radius: 10px;
+    margin-top: 15px ;
+    line-height: 55px;
+}
+
+.singup .btn-gray button{
+    border: none;
+    background-color: transparent;
+    color: #fff; 
+    cursor: pointer;  
 }

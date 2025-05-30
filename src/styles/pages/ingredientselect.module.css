@@ -1,0 +1,211 @@
+.headerRow {
+  width: 420px;
+  height: 70px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px 0 20px;
+  box-sizing: border-box;
+  border-bottom: none;
+  position: fixed;
+  top: 0;
+  left: 50%;    
+  transform: translateX(-50%);      
+  z-index: 10;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.doneBtn {
+  background: #f97316;   
+  color: white;              
+  border: none;              
+  font-weight: bold;
+  font-size: 14px;
+  padding: 6px 14px;
+  border-radius: 999px;      
+  cursor: pointer;
+}
+
+.pageTitle {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 14px 12px;  
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  margin: 14px 0;    
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); 
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.categoryBtn {
+  background: white;
+  color: #f97316;
+  border: 1px solid white;
+  padding: 6px;
+  font-size: 13px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  gap: 5px;
+  width: 72px;
+  height: 72px;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+/* 아이콘 스타일 */
+.categoryIcon {
+  font-size: 30px;
+  margin-bottom: 4px;
+}
+
+/* 라벨 스타일 */
+.categoryLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #222;
+}
+
+.active {
+  background: #f97316;
+  color: white;
+  border: none;
+}
+
+.ingredientList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 60px;
+  padding: 0;         
+  margin: 0;
+}
+
+.ingredientItem {
+  width: 100%;
+  display: flex;
+  box-sizing: border-box;  
+  justify-content: flex-start; 
+  gap: 10px;  
+  margin: 0;      
+  align-items: center;
+  padding: 10px 0px; /* 좌우 여백 조정 */
+  background: none;
+  border-radius: 0;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 15px;       /* 필요시 살짝 키움 */
+  letter-spacing: -0.2px; /* 글자간격 살짝 줄임 */
+}
+
+.ingredientInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.addManualBtn {
+  position: fixed;
+  bottom: 100px;
+  right: 50%;
+  transform: translateX(180px);
+  background: #000;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;  
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.categoryBtn.active {
+  background: #f97316;
+  color: white;
+  font-weight: bold;
+}
+
+.ingredientScroll {
+  overflow-y: auto;
+  max-height: calc(200vh - 200px);
+  padding-bottom: 20px;
+
+  /* 스크롤바 숨기기 */
+  scrollbar-width: none;          
+  -ms-overflow-style: none;       
+}
+
+.ingredientScroll::-webkit-scrollbar {
+  display: none;                  
+}
+
+.addButton {
+  width: 18px;
+  height: 18px;
+  accent-color: black; 
+  background: #fff;
+  font-weight: bold;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: -4px;
+  margin-left: auto;      /* ← 이미지+이름 다음 공간 확보 */
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.searchWrap {
+  position: relative;
+  width: 100%;
+  margin: 16px 0;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 16px 40px 16px 12px;  /* 오른쪽 여백 확보 */
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #999;
+}
+
+.ingredientImage {
+  width: 40px;   
+  height: 40px;  
+  object-fit: cover;  
+  border-radius: 8px; 
+  margin-left: 8px; 
+}
+
+.ingredientName {
+  font-size: 16px;
+  color: #333;
+}

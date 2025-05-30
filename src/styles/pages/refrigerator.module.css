@@ -1,0 +1,450 @@
+/* 전체 wrapper */
+.container {
+  width: 100%;
+  max-width: 420px;      /* globals.css의 mainContainer와 일치 */
+  margin: 0 auto;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+/* 내부 content */
+.content {
+  padding: 0 15px;
+  padding-top: 60px;     /* Header 높이 */
+  padding-bottom: 70px;  /* BottomNavigation 높이 */
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* 탭 버튼 */
+.tabWrap {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.tabActive {
+  flex: 1;
+  background: #f97316;
+  color: white;
+  font-weight: bold;
+  padding: 15px;
+  border-radius: 999px;
+  border: none;
+}
+
+.tabInactive {
+  flex: 1;
+  background: white;
+  color: #f97316;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 999px;
+  border: 1px solid #f97316;
+}
+
+/* 재료 카드 그리드 */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.card {
+  background: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  padding: 17px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.frozenCard {
+  background-color: #f3fbff;
+}
+
+.cardContent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-left: 5px;
+}
+
+.textContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.category {
+  font-size: 12px;
+  color: #999;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.dDay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;               /* 가로 크기 */
+  height: 25px;              /* 세로 크기 */
+  background-color: white;   /* 배경색 흰색 */
+  color: #f97316;            /* 텍스트 색 */
+  border: 2px solid #f97316; /* 테두리 색 */
+  border-radius: 12px;        /* 모서리 둥글게 */
+  font-weight: bold;
+  font-size: 12px;
+  margin-left: 5px;          /* 간격 */
+  user-select: none;
+}
+
+.frozenIcon {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+.top {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #f97316;
+  font-weight: bold;
+  opacity: 0 !important;            /* ← 숨김 상태 강제 적용 */
+  pointer-events: none !important;  /* ← 클릭 막기 */
+  transition: opacity 0.2s ease;
+  z-index: 1;
+}
+
+.card:hover .top {
+  opacity: 1 !important;            /* ← 마우스 올리면 보이게 */
+  pointer-events: auto !important;  /* ← 다시 클릭 가능 */
+}
+
+/* 모달 상세 보기 */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 9999;
+}
+
+.detailContainer {
+  background: #fff;
+  width: 100%;
+  max-width: 420px;        /* ✅ 폭 제한 */
+  margin: 0 auto;          /* ✅ 중앙 정렬 */
+  padding: 24px 20px;
+  border-radius: 24px 24px 0 0;
+  max-height: 60vh;
+  overflow-y: auto;
+  z-index: 10000;          /* 최상단 보장 */
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.detailHeader img {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.detailInfo {
+  flex: 1;
+}
+
+.detailDday {
+  font-size: 24px;
+  font-weight: bold;
+  color: #f97316;
+}
+
+.frozenText {
+  color: #111;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.detailBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.detailBody div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.detailFooter {
+  display: flex;
+  gap: 10px;
+}
+
+.deleteBtn,
+.completeBtn {
+  flex: 1;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+}
+
+.deleteBtn {
+  background: #fff;
+  border: 1px solid #f97316;
+  color: #f97316;
+}
+
+.completeBtn {
+  background: #f97316;
+  color: white;
+}
+
+/* 스위치 */
+.toggleWrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggleSwitch {
+  position: relative;
+  width: 42px;
+  height: 24px;
+}
+
+.toggleSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.slider::before {
+  position: absolute;
+  content: '';
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.toggleSwitch input:checked + .slider {
+  background-color: #f97316;
+}
+
+.toggleSwitch input:checked + .slider::before {
+  transform: translateX(18px);
+}
+
+/* 버튼 */
+.recipeRecommendBtn {
+  position: fixed;
+  bottom: 85px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f97316;
+  color: white;
+  padding: 18px 24px;
+  border-radius: 24px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  z-index: 1000;
+  width: 380px;
+}
+
+.addButton {
+  position: fixed;
+  bottom: 170px;
+  right: 50%;
+  transform: translateX(180px); 
+  background: #f97316;
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  font-size: 28px;
+  font-weight: bold;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 1000;
+}
+
+/* 달력 */
+.dateInput {
+  text-align: right;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #f2f2f2;
+  font-size: 14px;
+  width: 135px;
+}
+
+/* 달력 중앙 정렬 */
+#root-portal .react-datepicker__portal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* + 버튼 위에 뜨는 선택지 버튼 박스 */
+.addOptionsFix {
+  position: fixed;
+  bottom: 230px; /* + 버튼 기준 위로 적당히 띄움 */
+  right: 50%;
+  transform: translateX(180px); /* +버튼 위치에 맞춰 정렬 */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1050;
+  align-items: flex-end;
+}
+
+/* 선택지 버튼 스타일 */
+.addOptionBtn {
+  background-color: #f97316;
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.addOptionBtn:hover {
+  background-color: #fb923c;
+}
+
+/* 모달 배경 어둡게 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  align-items: flex-start;  
+  padding-top: 350px;    
+}
+
+/* 모달 박스 중앙 */
+.modalBox {
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  min-width: 260px;
+}
+
+/* 버튼 묶음 */
+.modalButtons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* 취소 버튼 */
+.cancelBtn {
+  background-color: #fff;
+  color: #f97316;
+  border: 1px solid #f97316;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 삭제 버튼 */
+.confirmBtn {
+  background-color: #f97316;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modalText {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.pinkCard {
+  background-color: #FFE9DD
+}
+
+.hideDDayCircle {
+  display: none 
+}
