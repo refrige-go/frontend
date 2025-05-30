@@ -128,7 +128,7 @@
   bottom: 100px;
   right: 50%;
   transform: translateX(180px);
-  background: #000;
+  background: #f97316;
   color: white;
   padding: 12px 24px;
   border-radius: 12px;  
@@ -169,7 +169,7 @@
   font-size: 14px;
   cursor: pointer;
   margin-left: -4px;
-  margin-left: auto;      /* ← 이미지+이름 다음 공간 확보 */
+  margin-left: auto;      
   margin-right: 10px;
   cursor: pointer;
 }

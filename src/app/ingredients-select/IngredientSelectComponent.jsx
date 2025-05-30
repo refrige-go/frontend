@@ -138,7 +138,7 @@ export default function IngredientSelectComponent() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      router.back();
+      router.push('/refrigerator'); // 완료 후 냉장고 페이지로 이동
     } catch (err) {
       console.error('재료 추가 실패:', err);
       alert('오류가 발생했습니다.');
@@ -151,7 +151,12 @@ export default function IngredientSelectComponent() {
         <div className={styles.headerRow}>
           <button onClick={() => router.back()} className={styles.backBtn}>←</button>
           <h2 className={styles.pageTitle}>재료 목록</h2>
-          <button onClick={handleComplete} className={styles.doneBtn}>완료</button>
+          <button
+            onClick={() => router.push('/ingredients-add')}
+            className={styles.doneBtn}
+          >
+            추가
+          </button>
         </div>
 
         <div className={styles.searchWrap}>
@@ -203,9 +208,9 @@ export default function IngredientSelectComponent() {
 
         <button
           className={styles.addManualBtn}
-          onClick={() => router.push('/ingredients-add')}
+          onClick={handleComplete}
         >
-          + 직접 추가
+          완료
         </button>
       </div>
       <BottomNavigation />
