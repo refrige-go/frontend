@@ -73,24 +73,11 @@
   width: 100%;
 }
 
-.image {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-left: 5px;
-}
-
 .textContent {
   display: flex;
   flex-direction: column;
   gap: 4px;
   flex: 1;
-}
-
-.category {
-  font-size: 12px;
-  color: #999;
 }
 
 .name {
@@ -99,12 +86,19 @@
   color: #333;
 }
 
+.category {
+  font-size: 12px;
+  color: #999;
+  display: flex;             
+  align-items: center;     
+}
+
 .dDay {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 42px;               /* 가로 크기 */
-  height: 25px;              /* 세로 크기 */
+  height: 23px;              /* 세로 크기 */
   background-color: white;   /* 배경색 흰색 */
   color: #f97316;            /* 텍스트 색 */
   border: 2px solid #f97316; /* 테두리 색 */
@@ -447,4 +441,28 @@
 
 .hideDDayCircle {
   display: none 
+}
+
+.emoji {
+  width: 40px;
+  height: 40px;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  margin-left: 5px;
+}
+
+.emojiIcon {
+  width: 40px;
+  height: 40px;
+  font-size: 28px;       
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;       
+  background-color: #f0f0f0;
+  margin-left: 5px;
 }

@@ -21,6 +21,24 @@ function getPayloadFromToken(token) {
   }
 }
 
+// 카테고리별 이모지 매핑
+const categoryEmojiMap = {
+  '곡류/분말': '🌾',
+  '육류': '🥩',
+  '수산물/해산물': '🐟',
+  '채소': '🥬',
+  '과일': '🍎',
+  '버섯': '🍄',
+  '유제품': '🧀',
+  '두류/콩류': '🌰',
+  '조미료/양념': '🧂',
+  '기름/유지': '🛢️',
+  '면/떡': '🍜',
+  '가공식품': '🥫',
+  '장아찌/절임': '🥒',
+  '기타': '📦'
+};
+
 export default function RefrigeratorComponent() {
   const router = useRouter();
   const [token, setToken] = useState(null);
@@ -51,6 +69,13 @@ export default function RefrigeratorComponent() {
   }, [router, baseUrl]);
 
   const { ingredients, deleteIngredient, refetchIngredients } = useIngredients(username);
+
+  // 데이터 확인용 콘솔
+  useEffect(() => {
+    if (ingredients) {
+      console.log('ingredients 데이터:', ingredients);
+    }
+  }, [ingredients]);
 
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [isFrozenToggle, setIsFrozenToggle] = useState(false);
@@ -158,11 +183,17 @@ export default function RefrigeratorComponent() {
                 </button>
 
                 <div className={styles.cardContent}>
-                  <img
-                    src={item.imageUrl || '/images/default.jpg'}
-                    alt={item.name}
-                    className={styles.image}
-                  />
+                  <div className={styles.emoji}>
+                    {item.imageUrl && item.imageUrl !== 'null' ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className={styles.thumbnail}
+                      />
+                    ) : (
+                      categoryEmojiMap[item.category] || '📦'
+                    )}
+                  </div>
                   <div className={styles.textContent}>
                     <div className={styles.category}>
                       {item.category || '분류 없음'}
@@ -196,10 +227,19 @@ export default function RefrigeratorComponent() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className={styles.detailHeader}>
-                <img
-                  src={selectedIngredient.imageUrl || '/images/default.jpg'}
-                  alt={selectedIngredient.name}
-                />
+
+                <div className={selectedIngredient.imageUrl && selectedIngredient.imageUrl !== 'null' ? styles.emoji : styles.emojiIcon}>
+                  {selectedIngredient.imageUrl && selectedIngredient.imageUrl !== 'null' ? (
+                    <img
+                      src={selectedIngredient.imageUrl}
+                      alt={selectedIngredient.name}
+                      className={styles.thumbnail}
+                    />
+                  ) : (
+                    categoryEmojiMap[selectedIngredient.category] || '📦'
+                  )}
+                </div>
+
                 <div className={styles.detailInfo}>
                   <div className={styles.category}>
                     {selectedIngredient.category}
@@ -207,7 +247,6 @@ export default function RefrigeratorComponent() {
                   <div className={styles.name}>{selectedIngredient.name}</div>
                 </div>
 
-                {/* 상세보기에서 냉동 여부에 따라 동그라미 표시 및 텍스트 분리 */}
                 {!isFrozenToggle && selectedIngredient.expiryDaysLeft !== null && (
                   <span className={styles.dDay}>D-{selectedIngredient.expiryDaysLeft}</span>
                 )}
