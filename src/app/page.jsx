@@ -99,7 +99,7 @@ export default function Home() {
             <span role="img" aria-label="카메라" style={{ transform: 'translate(1px, -4px)' }}>📷</span>
           </button>
 
-          <WeatherRecommend />
+          {/* <WeatherRecommend /> */}
 
           <TypeRecommendationsSection
             userId={userId}
