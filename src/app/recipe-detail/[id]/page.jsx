@@ -6,7 +6,6 @@ import Image from 'next/image';
 import BottomNavigation from '../../../components/layout/BottomNavigation';
 import axiosInstance from '../../../api/axiosInstance';
 import RecipeCard from '../../../components/RecipeCard';
-import axios from 'axios';
 
 export default function RecipeDetailPage() {
   const router = useRouter();
@@ -764,11 +763,12 @@ export default function RecipeDetailPage() {
           color: #f59e42;
           margin-bottom: 20px;
           font-size: 1.5rem;
+          text-align: center;
         }
 
         .similar-recipes-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(390px, 1fr));
           gap: 20px;
         }
       `}</style>
