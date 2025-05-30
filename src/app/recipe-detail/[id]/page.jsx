@@ -5,19 +5,24 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import BottomNavigation from '../../../components/layout/BottomNavigation';
 import axiosInstance from '../../../api/axiosInstance';
+import RecipeCard from '../../../components/RecipeCard';
+import axios from 'axios';
 
 export default function RecipeDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-  
+
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
   const [isCookingMode, setIsCookingMode] = useState(false);
   const [userIngredients, setUserIngredients] = useState([]);
   const [ingredientUsage, setIngredientUsage] = useState({});
+  const [similarRecipes, setSimilarRecipes] = useState([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(true);
+  const [displayCount, setDisplayCount] = useState(5);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
@@ -59,7 +64,7 @@ export default function RecipeDetailPage() {
   useEffect(() => {
     async function fetchUserIngredients() {
       if (!token || !recipe) return;
-      
+
       try {
         const response = await axiosInstance.get('/user-ingredients');
         setUserIngredients(response.data);
@@ -69,6 +74,41 @@ export default function RecipeDetailPage() {
     }
     fetchUserIngredients();
   }, [token, recipe]);
+
+  useEffect(() => {
+    async function fetchSimilarRecipes() {
+      try {
+        if (!token) {
+          setLoadingSimilar(false);
+          return;
+        }
+
+        const response = await axiosInstance.get(`/api/recommendations/${id}/similar-ingredients`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setSimilarRecipes(response.data);
+      } catch (error) {
+        console.error('비슷한 레시피 로딩 실패:', error);
+      } finally {
+        setLoadingSimilar(false);
+      }
+    }
+
+    if (id) {
+      fetchSimilarRecipes();
+    }
+  }, [id, token, baseUrl]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100) {
+        setDisplayCount(prev => Math.min(prev + 5, similarRecipes.length));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [similarRecipes.length]);
 
   const handleStartCooking = () => {
     setIsCookingMode(true);
@@ -116,13 +156,20 @@ export default function RecipeDetailPage() {
 
   const getMatchedIngredients = () => {
     if (!recipe || !userIngredients) return [];
-    
+
     // 레시피 재료와 사용자 재료 매칭
     const recipeIngredients = recipe.RCP_PARTS_DTLS?.split(',').map(ing => ing.trim()) || [];
-    return userIngredients.filter(userIng => 
-      recipeIngredients.some(recipeIng => 
+    return userIngredients.filter(userIng =>
+      recipeIngredients.some(recipeIng =>
         recipeIng.includes(userIng.name) || userIng.name.includes(recipeIng)
       )
+    );
+  };
+
+  const handleBookmarkChange = (recipeId) => {
+    // 비슷한 레시피 목록에서 북마크된 레시피 제거
+    setSimilarRecipes(prev =>
+      prev.filter(recipe => recipe.recipeId !== recipeId)
     );
   };
 
@@ -146,7 +193,7 @@ export default function RecipeDetailPage() {
           zIndex: 10,
           borderBottom: '1px solid #e0e0e0'
         }}>
-          <button 
+          <button
             onClick={() => router.back()}
             style={{
               background: 'none',
@@ -198,7 +245,7 @@ export default function RecipeDetailPage() {
           zIndex: 10,
           borderBottom: '1px solid #e0e0e0'
         }}>
-          <button 
+          <button
             onClick={() => router.back()}
             style={{
               background: 'none',
@@ -246,7 +293,7 @@ export default function RecipeDetailPage() {
         zIndex: 10,
         borderBottom: '1px solid #e0e0e0'
       }}>
-        <button 
+        <button
           onClick={() => router.back()}
           style={{
             background: 'none',
@@ -295,10 +342,10 @@ export default function RecipeDetailPage() {
             <p style={{ fontSize: '14px', color: '#666', margin: '0 0 1rem 0' }}>
               사용한 재료를 체크해주세요. 요리 완료 후 냉장고에서 자동으로 차감됩니다.
             </p>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {getMatchedIngredients().map(ingredient => (
-                <div 
+                <div
                   key={ingredient.id}
                   style={{
                     display: 'flex',
@@ -464,18 +511,27 @@ export default function RecipeDetailPage() {
           </div>
         </div>
 
-        {recipe.HASH_TAG && (
-          <div className="hashtags">
-            {recipe.HASH_TAG.split(',').map((tag, index) => (
-              <span key={index} className="hashtag">#{tag.trim()}</span>
-            ))}
-          </div>
-        )}
-
-        {recipe.RCP_NA_TIP && (
-          <div className="tip-box">
-            <h3>요리 TIP</h3>
-            <p>{recipe.RCP_NA_TIP}</p>
+        {/* 비슷한 레시피 섹션 */}
+        {!loadingSimilar && similarRecipes.length > 0 && (
+          <div className="similar-recipes-section">
+            <h2>비슷한 재료를 사용한 레시피</h2>
+            <div className="similar-recipes-grid">
+              {similarRecipes.slice(0, displayCount).map((similarRecipe) => (
+                <RecipeCard
+                  key={similarRecipe.recipeId}
+                  recipe={{
+                    ...similarRecipe,
+                    rcpNm: similarRecipe.recipeNm || similarRecipe.RCP_NM || similarRecipe.rcpNm
+                  }}
+                  onUnbookmark={handleBookmarkChange}
+                />
+              ))}
+            </div>
+            {displayCount < similarRecipes.length && (
+              <div style={{ textAlign: 'center', marginTop: '20px', color: '#666' }}>
+                스크롤을 내려 더 많은 레시피를 확인하세요
+              </div>
+            )}
           </div>
         )}
 
@@ -696,6 +752,24 @@ export default function RecipeDetailPage() {
           color: #dc3545;
           padding: 20px;
           font-size: 1.2rem;
+        }
+
+        .similar-recipes-section {
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #eee;
+        }
+
+        .similar-recipes-section h2 {
+          color: #f59e42;
+          margin-bottom: 20px;
+          font-size: 1.5rem;
+        }
+
+        .similar-recipes-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+          gap: 20px;
         }
       `}</style>
     </div>
