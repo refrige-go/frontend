@@ -89,7 +89,16 @@ export default function IngredientSelectComponent() {
     api.get(`/api/ingredients${query}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => setIngredients(res.data))
+      .then((res) => {
+        const items = res.data;
+        // 전체일 경우에만 재료 순서 섞기
+        if (selectedCategory === '전체') {
+          const shuffled = [...items].sort(() => Math.random() - 0.5);
+          setIngredients(shuffled);
+        } else {
+          setIngredients(items);
+        }
+      })
       .catch((err) => console.error('재료 불러오기 실패:', err));
   }, [selectedCategory, token]);
 
@@ -99,7 +108,6 @@ export default function IngredientSelectComponent() {
     );
   };
 
-  // default_expiry_days 반영하여 소비기한 계산
   const handleComplete = async () => {
     if (selectedIds.length === 0) {
       alert('재료를 선택해주세요.');
@@ -113,15 +121,13 @@ export default function IngredientSelectComponent() {
     }
 
     const today = new Date();
-
-    // 선택한 재료 객체들을 찾아서 default_expiry_days 활용
     const selectedIngredients = ingredients.filter((item) =>
       selectedIds.includes(item.id)
     );
 
     const ingredientsToAdd = selectedIngredients.map((item) => {
       const expiry = new Date(today);
-      expiry.setDate(expiry.getDate() + (item.defaultExpiryDays || 7)); // fallback: 7일
+      expiry.setDate(expiry.getDate() + (item.defaultExpiryDays || 7));
       return {
         ingredientId: item.id,
         customName: null,
@@ -138,7 +144,7 @@ export default function IngredientSelectComponent() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      router.push('/refrigerator'); // 완료 후 냉장고 페이지로 이동
+      router.push('/refrigerator');
     } catch (err) {
       console.error('재료 추가 실패:', err);
       alert('오류가 발생했습니다.');
@@ -188,11 +194,17 @@ export default function IngredientSelectComponent() {
             {ingredients.map((item) => (
               <li key={item.id} className={styles.ingredientItem}>
                 <div className={styles.ingredientInfo}>
-                  <img
-                    src={item.imageUrl || '/images/default.jpg'}
-                    alt=""
-                    className={styles.ingredientImage}
-                  />
+                {item.imageUrl ? (
+  <img
+    src={item.imageUrl}
+    alt=""
+    className={styles.ingredientImage}
+  />
+) : (
+  <span className={styles.ingredientEmoji}>
+    {getCategoryIcon(item.category)}
+  </span>
+)}
                   <span className={styles.ingredientName}>{item.name}</span>
                 </div>
                 <input
