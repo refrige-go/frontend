@@ -263,12 +263,14 @@ const handleModalRecommend = async () => {
           <div className={styles.grid}>
             {filteredIngredients.map((item) => (
               <div
-                key={item.id}
-                className={`${styles.card} 
-                  ${item.frozen ? styles.frozenCard : ''} 
-                  ${item.expiryDaysLeft !== null && item.expiryDaysLeft <= 3 && !item.frozen ? styles.pinkCard : ''}`}
-                onClick={() => setSelectedIngredient(item)}
-              >
+              key={item.id}
+              className={`${styles.card} 
+                ${item.frozen ? styles.frozenCard : ''} 
+                ${item.expiryDaysLeft !== null && item.expiryDaysLeft < 0 ? styles.expiredCard : ''}
+                ${item.expiryDaysLeft !== null && item.expiryDaysLeft <= 3 && item.expiryDaysLeft >= 0 && !item.frozen ? styles.warningCard : ''}
+              `}
+              onClick={() => setSelectedIngredient(item)}
+            >            
                 <button
                   className={styles.top}
                   onClick={(e) => {
@@ -407,22 +409,31 @@ const handleModalRecommend = async () => {
           </div>
         )}
 
-        {showAddOptions && (
-          <div className={styles.addOptionsFix}>
-            <button
-              className={styles.addOptionBtn}
-              onClick={() => router.push('/ingredients-select')}
-            >
-              재료 추가
-            </button>
-            <button
-              className={styles.addOptionBtn}
-              onClick={() => router.push('/ocr')}
-            >
-              OCR 자동 인식
-            </button>
-          </div>
-        )}
+{showAddOptions && (
+  <div
+    className={styles.addOptionsOverlay} // 배경 클릭 영역
+    onClick={() => setShowAddOptions(false)}
+  >
+    <div
+      className={styles.addOptionsFix}
+      onClick={(e) => e.stopPropagation()} // 버튼 클릭 시 오버레이 닫힘 방지
+    >
+      <button
+        className={styles.addOptionBtn}
+        onClick={() => router.push('/ingredients-select')}
+      >
+        재료 추가
+      </button>
+      <button
+        className={styles.addOptionBtn}
+        onClick={() => router.push('/ocr')}
+      >
+        OCR 자동 인식
+      </button>
+    </div>
+  </div>
+)}
+
 
         {/* 레시피 추천 모달 */}
         {showRecommendModal && (
