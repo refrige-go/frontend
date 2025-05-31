@@ -1,14 +1,54 @@
 'use client';
 
 import axiosInstance from "../../../api/axiosInstance";
-import { useEffect } from "react";
+import Header from '../../../components/layout/Header'
+import BottomNavigation from '../../../components/layout/BottomNavigation'
+import { useEffect , useState } from "react";
 import { useRouter } from "next/navigation";
+import "../../../styles/pages/mypage.css"
 
 export default function MyPage() {
   const router = useRouter();
+  const [nickname, setNickname] = useState(""); 
 
+  // nickname 불러오기
   useEffect(() => {
+     axiosInstance.get("/user/mypage")
+      .then(res => {
+        setNickname(res.data.nickname); 
+      })
+      .catch(err => {
+        console.log("유저 정보 요청 실패", err);
+      });
+
+    
+    // 토큰이 정상발급 되고있는지 console에서 확인 
     const accessToken = localStorage.getItem('accessToken');
+
+    if (accessToken) {
+     
+      const payloadBase64 = accessToken.split('.')[1];
+      const payloadJson = atob(payloadBase64);
+      const payload = JSON.parse(payloadJson);
+
+      const exp = payload.exp;
+      const expDate = new Date(exp * 1000);
+
+      console.log('AccessToken:', accessToken);
+      console.log('만료시간(exp):', exp, '->', expDate.toLocaleString());
+      console.log('현재시간:', new Date().toLocaleString());
+
+      if (Date.now() >= exp * 1000) {
+        console.log('만료됨!');
+      } else {
+        console.log('아직 유효함');
+      }
+    } else {
+      console.log('accessToken이 없습니다!');
+    }
+
+
+    // 프론트에서 토큰을 검증하는 코드 (인증이 필요한 모든 페이지에 필수, axios 사용 )
     if (!accessToken) {
       alert("로그인 후 이용 가능합니다.");
       router.replace("/login");
@@ -22,14 +62,11 @@ export default function MyPage() {
       });
   }, [router]);
 
-  // 👉 로그아웃 핸들러 함수
+  // 로그아웃
   const handleLogout = async () => {
     try {
-      // 1. 로그아웃 API 요청 (refresh 토큰은 쿠키로 자동 전송됨)
       await axiosInstance.post("/logout");
-      // 2. 로컬스토리지 access 토큰 삭제
       localStorage.removeItem('accessToken');
-      // 3. 홈으로 이동
       router.replace("/");
     } catch (error) {
       alert("로그아웃에 실패했습니다.");
@@ -37,11 +74,37 @@ export default function MyPage() {
   };
 
   return (
-    <div>
-      <h1>마이페이지</h1>
-      <p>마이페이지입니다!</p>
-      {/* 로그아웃 버튼 추가 */}
-      <button onClick={handleLogout}>로그아웃</button>
+    <div className="mainContainer">
+      <Header />
+      <div className="appContainer mypage">
+        <div className="profile">
+          <div className="img"></div>
+          <span>{nickname || "닉네임을 불러오는 중..."}</span>
+        </div>
+        <div className="myCook">
+          <h3>나의 요리생활</h3>
+          <div className="mypage-box">
+            <div>
+              <i><img src="../images/bookmarksorg.svg" alt="bookmarksorg" /></i>
+              <span>저장한 레시피</span>
+            </div>
+            <img src="../images/bar.svg" alt="bar" />
+            <div>
+              <i><img src="../images/basket.svg" alt="basket" /></i>
+              <span>내 식재료 목록</span>
+            </div>
+            <img src="../images/bar.svg" alt="bar" />
+            <div>
+              <a href="../mypageset">
+                 <i><img src="../images/setting.svg" alt="setting" /></i>
+              <span>내 정보 설정</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <button className="logout-btn" onClick={handleLogout}>로그아웃</button>
+      </div>
+       <BottomNavigation />
     </div>
   );
 }

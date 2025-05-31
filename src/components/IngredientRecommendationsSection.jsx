@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import BookmarkCard from '../../components/BookmarkCard';
+import BookmarkCard from '../components/BookmarkCard';
+import axiosInstance from '../api/axiosInstance';
 
-export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookmark, onUnbookmark }) {
+export default function IngredientRecommendationsSection({ userId, bookmarkedIds, onBookmark, onUnbookmark }) {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -11,22 +12,13 @@ export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookm
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef(null);
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-
-  // 토큰 필요
-  const token = localStorage.getItem('accessToken');
-
   const fetchRecommendations = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${baseUrl}api/bookmark/bookmark-recommend`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) throw new Error('추천 목록을 불러오는 데 실패했습니다.');
-      const data = await res.json();
-      setRecipes(data.slice(0, 7));
+
+      const res = await axiosInstance.get('/api/bookmark/ingredient-recommend');
+
+      setRecipes(res.data.slice(0, 7));
     } catch (error) {
       console.error('에러:', error);
     } finally {
@@ -34,10 +26,9 @@ export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookm
     }
   };
 
-
   useEffect(() => {
     fetchRecommendations();
-  }, [userId]); // userId가 변경되면 다시 불러오기
+  }, [userId]);
 
   const handleBookmark = async (recipeId) => {
     await onBookmark(recipeId);
@@ -55,15 +46,20 @@ export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookm
     setScrollLeft(scrollContainerRef.current.scrollLeft);
   };
 
-  const handleMouseUp = () => setIsDragging(false);
-  const handleMouseLeave = () => setIsDragging(false);
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
   const handleMouseMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
+    const walk = (x - startX) * 2; // 스크롤 속도 조절
     scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
   };
 
   if (loading) return <p>불러오는 중입니다...</p>;
@@ -71,7 +67,7 @@ export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookm
 
   return (
     <section style={{ marginTop: '2rem' }}>
-      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>사용자님의 취향 저격 레시피를 모아봤어요!</h2>
+      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>냉장고 재료로 만들 수 있는 저장된 레시피예요!</h2>
       <div
         ref={scrollContainerRef}
         className="scroll-container no-scrollbar"
@@ -86,12 +82,11 @@ export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookm
             <BookmarkCard
               recipe={{
                 ...recipe,
-                bookmarked: bookmarkedIds.includes(recipe.recipeId ?? recipe.rcpSeq),
+                bookmarked: recipe.bookmarked
               }}
               userId={userId}
-              token={token}
-              onUnbookmark={handleUnbookmark}
               onBookmark={handleBookmark}
+              onUnbookmark={handleUnbookmark}
             />
           </div>
         ))}
@@ -101,10 +96,12 @@ export default function TypeRecommendationsPage({ userId, bookmarkedIds, onBookm
         .scroll-container {
           display: flex;
           overflow-x: auto;
-          scroll-snap-type: x mandatory;
           gap: 16px;
           padding-bottom: 1rem;
           user-select: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none; 
         }
 
         .slide-item {

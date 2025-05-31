@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
 
-export function useIngredients() {
+export function useIngredients(username) {
   const [ingredients, setIngredients] = useState([]);
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
-  // 재료 불러오기 함수 밖으로 분리
   async function fetchIngredients() {
+    if (!token || !username) return;
     try {
-      const res = await api.get('/user-ingredients', {
-        params: {
-          userId: '1',
-        },
+      // username을 쿼리 파라미터로 전달
+      const res = await api.get(`/user-ingredients?username=${username}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       setIngredients(res.data);
     } catch (error) {
@@ -18,11 +18,12 @@ export function useIngredients() {
     }
   }
 
-  // 재료 삭제 함수 추가
   async function deleteIngredient(id) {
+    if (!token) return false;
     try {
-      await api.delete(`/user-ingredients/${id}`);
-      // 삭제 성공하면 재료 다시 불러오기
+      await api.delete(`/user-ingredients/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       await fetchIngredients();
       return true;
     } catch (error) {
@@ -32,8 +33,10 @@ export function useIngredients() {
   }
 
   useEffect(() => {
-    fetchIngredients();
-  }, []);
+    if (username) {
+      fetchIngredients();
+    }
+  }, [username, token]);
 
   return {
     ingredients,
