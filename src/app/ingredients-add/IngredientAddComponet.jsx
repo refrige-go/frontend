@@ -39,7 +39,12 @@ export default function IngredientAddComponent() {
   const [category, setCategory] = useState('');
   const [categories, setCategories] = useState([]);
   const [purchaseDate, setPurchaseDate] = useState(new Date());
-  const [expiryDate, setExpiryDate] = useState(new Date());
+  // 소비기한 기본값을 현재 날짜 + 7일로 설정
+  const [expiryDate, setExpiryDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 7);
+    return date;
+  });
   const [isFrozen, setIsFrozen] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('/images/default.jpg');
