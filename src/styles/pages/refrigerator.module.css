@@ -90,7 +90,8 @@
   font-size: 12px;
   color: #999;
   display: flex;             
-  align-items: center;     
+  align-items: center;    
+  white-space: nowrap; 
 }
 
 .dDay {
@@ -435,10 +436,6 @@
   color: #333;
 }
 
-.pinkCard {
-  background-color: #FFE9DD
-}
-
 .hideDDayCircle {
   display: none 
 }
@@ -465,4 +462,36 @@
   border-radius: 8px;       
   background-color: #f0f0f0;
   margin-left: 5px;
+}
+
+.thumbnail {
+  width: 40px;
+  height: 40px;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  object-fit: cover;
+  background-color: #f0f0f0;
+}
+
+/* D-day 3일 이하 카드 */
+.warningCard {
+  background-color: #FFE9DD;
+}
+
+/* 유통기한 지난 카드 */
+.expiredCard {
+  background-color: 	#D1D5DB;
+}
+
+.addOptionsOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: transparent;
+  z-index: 1000;
 }

@@ -35,6 +35,8 @@ axiosInstance.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
+       console.log('🚩 reissue 요청!', new Date().toISOString());
+
       try {
         // refresh 토큰은 쿠키로 전송됨 (withCredentials: true)
         const reissueRes = await axios.post(
