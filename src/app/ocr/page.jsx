@@ -1,7 +1,5 @@
-'use client';
-
-import OCRPage from '../../components/OCR/OCRPage';
+import OCRPageComponent from './OCRPageComponent';
 
 export default function Page() {
-  return <OCRPage />;
+  return <OCRPageComponent />;
 }

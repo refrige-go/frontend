@@ -1,5 +1,5 @@
-import OCRCompletePage from '../../../components/OCR/OCRCompletePage';
+import OCRCompletePageComponent from './OCRCompletePageComponent';
 
 export default function Page() {
-  return <OCRCompletePage />;
+  return <OCRCompletePageComponent />;
 }

@@ -107,6 +107,7 @@ export default function Home() {
             onBookmark={handleBookmark}
             onUnbookmark={handleUnbookmark}
           />
+          
           <IngredientRecommendationsSection
             userId={userId}
             bookmarkedIds={bookmarkedIds}
