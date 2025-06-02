@@ -13,81 +13,77 @@ export default function BookmarksPage() {
   const [recipes, setRecipes] = useState([]);
   const [ingredientRecipes, setIngredientRecipes] = useState([]);
   const [activeTab, setActiveTab] = useState('전체');
-  const [token, setToken] = useState(null);
+
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('accessToken');
-    if (storedToken) {
-      setToken(storedToken);
-    }
-    if (!storedToken) {
+    if (!token) {
       alert("로그인 후 이용 가능합니다.");
       router.replace("/login");
       return;
     }
-    axiosInstance.get("/secure/ping")
-      .catch(() => {
-        alert("세션이 만료되었습니다. 다시 로그인 해주세요.");
-        localStorage.removeItem('accessToken');
-        router.replace("/login");
-      });
-  }, [router]);
+
+    axiosInstance.get("/secure/ping", {
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {
+      alert("세션이 만료되었습니다. 다시 로그인 해주세요.");
+      localStorage.removeItem('accessToken');
+      router.replace("/login");
+    });
+  }, [router, token]);
 
   useEffect(() => {
+    if (activeTab !== '전체' || !token) return;
+
     const fetchBookmarkedRecipes = async () => {
-      if (!token) return;
-
       try {
-        const response = await axiosInstance.get('/api/bookmark/list', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const res = await axiosInstance.get('/api/bookmark/list', {
+          headers: { Authorization: `Bearer ${token}` },
         });
-
-        setRecipes(response.data);
+        setRecipes(res.data);
       } catch (err) {
         console.error('찜한 레시피 가져오기 실패:', err);
       }
     };
 
-    if (activeTab === '전체' && token) {
-      fetchBookmarkedRecipes();
-    }
+    fetchBookmarkedRecipes();
   }, [activeTab, token]);
 
   useEffect(() => {
+    if (activeTab !== '지금 가능' || !token) return;
+
     const fetchIngredientRecipes = async () => {
-      if (!token) return;
-
       try {
-        const response = await axiosInstance.get('/api/bookmark/ingredient-recommend', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const res = await axiosInstance.get('/api/bookmark/ingredient-recommend', {
+          headers: { Authorization: `Bearer ${token}` },
         });
-
-        setIngredientRecipes(response.data);
+        setIngredientRecipes(res.data);
       } catch (err) {
         console.error('가능한 레시피 가져오기 실패:', err);
       }
     };
 
-    if (activeTab === '지금 가능' && token) {
-      fetchIngredientRecipes();
-    }
+    fetchIngredientRecipes();
   }, [activeTab, token]);
 
+  const handleUnbookmark = (id) => {
+    setRecipes(prev => prev.filter(r => (r.recipeId ?? r.rcpSeq) !== id));
+    setIngredientRecipes(prev => prev.filter(r => (r.recipeId ?? r.rcpSeq) !== id));
+  };
+
+  const recipeList = activeTab === '전체' ? recipes : ingredientRecipes;
+
   return (
-    <div className='mainContainer'>
+    <div className="mainContainer">
       <Header />
-      <div className='appContainer'>
+      <div className="appContainer">
         <div className={styles.pageContainer}>
           <div className={styles.contentWrapper}>
             <div className={styles.titleSection}>
               <h1>내 레시피북</h1>
               <p>즐겨찾는 레시피를 모아보세요!</p>
               <p className={styles.recipeCount}>
-                총 {(activeTab === '전체' ? recipes.length : ingredientRecipes.length)}개의 레시피가 저장되었어요
+                총 {recipeList.length}개의 레시피가 저장되었어요
               </p>
             </div>
 
@@ -104,35 +100,19 @@ export default function BookmarksPage() {
             </div>
 
             <div className={styles.recipeGrid}>
-              {activeTab === '전체' &&
-                recipes.map(recipe => (
-                  <BookmarkCard
-                    key={recipe.recipeId ?? recipe.rcpSeq}
-                    recipe={recipe}
-                    onUnbookmark={(id) => {
-                      setRecipes(prev => prev.filter(r => (r.recipeId ?? r.rcpSeq) !== id));
-                      setIngredientRecipes(prev => prev.filter(r => (r.recipeId ?? r.rcpSeq) !== id));
-                    }}
-                  />
-                ))}
+              {recipeList.map((recipe) => {
+                const id = recipe.recipeId ?? recipe.rcpSeq;
+                const isBookmarked = recipes.some(r => (r.recipeId ?? r.rcpSeq) === id);
 
-              {activeTab === '지금 가능' &&
-                ingredientRecipes.map(recipe => {
-                  const isBookmarked = recipes.some(
-                    r => (r.recipeId ?? r.rcpSeq) === (recipe.recipeId ?? recipe.rcpSeq)
-                  );
-                  return (
-                    <BookmarkCard
-                      key={recipe.recipeId ?? recipe.rcpSeq}
-                      recipe={{ ...recipe, bookmarked: isBookmarked }}
-                      token={token}
-                      onUnbookmark={(id) => {
-                        setRecipes(prev => prev.filter(r => (r.recipeId ?? r.rcpSeq) !== id));
-                        setIngredientRecipes(prev => prev.filter(r => (r.recipeId ?? r.rcpSeq) !== id));
-                      }}
-                    />
-                  );
-                })}
+                return (
+                  <BookmarkCard
+                    key={id}
+                    recipe={{ ...recipe, bookmarked: isBookmarked }}
+                    token={token}
+                    onUnbookmark={handleUnbookmark}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>

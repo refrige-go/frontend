@@ -6,6 +6,7 @@ import Header from '../../../components/layout/Header';
 import BottomNavigation from '../../../components/layout/BottomNavigation';
 import RecipeCard from '../../../components/RecipeCard';
 import axiosInstance from '../../../api/axiosInstance';
+import styles from '../../../styles/pages/CategoryPage.module.css';
 
 export default function CategoryPage() {
   const router = useRouter();
@@ -53,7 +54,6 @@ export default function CategoryPage() {
 
   useEffect(() => {
     setPage(0);
-    // 선택된 카테고리 버튼 스크롤로 보이게 하기
     if (category && categoryRefs.current[category]) {
       categoryRefs.current[category].scrollIntoView({
         behavior: 'smooth',
@@ -68,7 +68,6 @@ export default function CategoryPage() {
 
     setLoading(true);
 
-    // axiosInstance를 사용하면 자동으로 Authorization 헤더가 추가됩니다
     axiosInstance.get(`api/recipe/category/${category}?page=${page}&size=${size}`)
       .then(response => {
         const data = response.data;
@@ -83,7 +82,7 @@ export default function CategoryPage() {
         setTotalElements(0);
       })
       .finally(() => setLoading(false));
-  }, [category, page]); // token 의존성 제거 (axiosInstance가 자동으로 토큰 처리)
+  }, [category, page]);
 
   const getPageNumbers = () => {
     const maxButtons = 5;
@@ -123,7 +122,7 @@ export default function CategoryPage() {
     if (!isDragging.current) return;
     e.preventDefault();
     const x = e.pageX - sliderRef.current.offsetLeft;
-    const walk = (x - startX.current) * 1; // 속도 조절 가능
+    const walk = (x - startX.current) * 1;
     sliderRef.current.scrollLeft = scrollLeft.current - walk;
   };
 
@@ -140,7 +139,7 @@ export default function CategoryPage() {
             <>
               {/* 카테고리 슬라이드 */}
               <div
-                className="categorySlider"
+                className={styles.categorySlider}
                 ref={sliderRef}
                 onMouseDown={onMouseDown}
                 onMouseLeave={onMouseLeave}
@@ -155,14 +154,14 @@ export default function CategoryPage() {
                     onClick={() => {
                       if (cat !== category) router.push(`/category/${encodeURIComponent(cat)}`);
                     }}
-                    className={`categoryButton ${cat === category ? 'selected' : ''}`}
+                    className={`${styles.categoryButton} ${cat === category ? styles.selected : ''}`}
                   >
                     {cat}
                   </button>
                 ))}
               </div>
 
-              <div className="recipesGrid">
+              <div className={styles.recipesGrid}>
                 {recipes.map((recipe) => (
                   <RecipeCard
                     key={recipe.recipeNm}
@@ -176,17 +175,16 @@ export default function CategoryPage() {
                       bookmarked: recipe.bookmarked,
                     }}
                     token={token}
-
                   />
                 ))}
               </div>
 
               {/* 페이지네이션 */}
-              <div className="pagination">
+              <div className={styles.pagination}>
                 <button
                   onClick={() => setPage(0)}
                   disabled={page === 0}
-                  className="pageButton"
+                  className={styles.pageButton}
                   aria-label="처음 페이지"
                 >
                   처음
@@ -195,7 +193,7 @@ export default function CategoryPage() {
                 <button
                   onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                   disabled={page === 0}
-                  className="pageButton"
+                  className={styles.pageButton}
                   aria-label="이전 페이지"
                 >
                   ◀
@@ -205,7 +203,7 @@ export default function CategoryPage() {
                   <button
                     key={num}
                     onClick={() => setPage(num)}
-                    className={`pageButton ${page === num ? 'active' : ''}`}
+                    className={`${styles.pageButton} ${page === num ? styles.active : ''}`}
                     aria-current={page === num ? 'page' : undefined}
                   >
                     {num + 1}
@@ -215,7 +213,7 @@ export default function CategoryPage() {
                 <button
                   onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
                   disabled={page === totalPages - 1}
-                  className="pageButton"
+                  className={styles.pageButton}
                   aria-label="다음 페이지"
                 >
                   ▶
@@ -224,7 +222,7 @@ export default function CategoryPage() {
                 <button
                   onClick={() => setPage(totalPages - 1)}
                   disabled={page === totalPages - 1}
-                  className="pageButton"
+                  className={styles.pageButton}
                   aria-label="마지막 페이지"
                 >
                   끝
@@ -235,66 +233,6 @@ export default function CategoryPage() {
         </main>
       </div>
       <BottomNavigation />
-
-      <style jsx>{`
-        .categorySlider {
-          display: flex;
-          overflow-x: auto;
-          gap: 8px;
-          white-space: nowrap;
-          scrollbar-width: none; /* Firefox */
-          -ms-overflow-style: none; /* IE 10+ */
-          user-select: none; /* 드래그 중 텍스트 선택 방지 */
-        }
-        .categorySlider::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, Opera */
-        }
-        .categoryButton {
-          border: none;
-          background-color: #f0f0f0;
-          padding: 6px 14px;
-          border-radius: 20px;
-          font-size: 0.95rem;
-          cursor: pointer;
-          transition: background-color 0.3s, color 0.3s;
-          white-space: nowrap;
-          user-select: none; /* 버튼 텍스트 선택 방지 */
-        }
-        .categoryButton.selected {
-          background-color: #f59e42;
-          color: white;
-          font-weight: bold;
-        }
-        .recipesGrid {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: flex-start;
-          gap: 20px;
-          margin-top: 24px;
-        }
-        .pagination {
-          margin-top: 2rem;
-          text-align: center;
-        }
-        .pageButton {
-          margin: 0 2px;
-          padding: 8px 8px;
-          background-color: #eee;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: background-color 0.3s, color 0.3s;
-        }
-        .pageButton:disabled {
-          cursor: not-allowed;
-          opacity: 0.5;
-        }
-        .pageButton.active {
-          background-color: #f59e42;
-          color: #fff;
-          font-weight: bold;
-        }
-      `}</style>
     </div>
   );
 }
