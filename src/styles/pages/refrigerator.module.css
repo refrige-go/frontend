@@ -52,18 +52,23 @@
   gap: 12px;
 }
 
+.frozenCard {
+  background-color: #f3fbff;
+}
+
 .card {
   background: #f9fafb;
   border-radius: 12px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  padding: 17px;
+  padding: 12px;
   position: relative;
   display: flex;
+  flex-direction: column; 
+  justify-content: center;
   align-items: center;
-}
-
-.frozenCard {
-  background-color: #f3fbff;
+  width: 100%;                 
+  height: 70px;            
+  box-sizing: border-box;
 }
 
 .cardContent {
@@ -71,6 +76,8 @@
   align-items: center;
   gap: 10px;
   width: 100%;
+  overflow: hidden;  
+  flex-shrink: 0;
 }
 
 .textContent {
