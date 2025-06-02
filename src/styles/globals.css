@@ -56,3 +56,7 @@ input {
   display: flex;
   flex-direction: column;
 }
+
+.react-datepicker__portal {
+  background-color: rgba(0, 0, 0, 0.3); 
+}

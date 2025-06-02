@@ -6,7 +6,7 @@ import Image from 'next/image';
 import BottomNavigation from '../../../components/layout/BottomNavigation';
 import axiosInstance from '../../../api/axiosInstance';
 import RecipeCard from '../../../components/RecipeCard';
-import axios from 'axios';
+import styles from '../../../styles/pages/RecipeDetail.module.css';
 
 export default function RecipeDetailPage() {
   const router = useRouter();
@@ -175,48 +175,18 @@ export default function RecipeDetailPage() {
 
   if (loading) {
     return (
-      <div className="mainContainer">
-        {/* 상단 네비게이션 바 */}
-        <div style={{
-          width: '420px',
-          height: '70px',
-          background: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 20px',
-          boxSizing: 'border-box',
-          position: 'fixed',
-          top: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-          borderBottom: '1px solid #e0e0e0'
-        }}>
-          <button
-            onClick={() => router.back()}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '18px',
-              cursor: 'pointer'
-            }}
-          >
+      <div className={styles.mainContainer}>
+        <div className={styles.navBar}>
+          <button className={styles.backButton} onClick={() => router.back()}>
             ←
           </button>
-          <h2 style={{
-            fontSize: '18px',
-            fontWeight: 'bold',
-            margin: 0
-          }}>
-            레시피 상세
-          </h2>
+          <h2 className={styles.navTitle}>레시피 상세</h2>
           <div style={{ width: '18px' }}></div>
         </div>
 
-        <div className="appContainer" style={{ paddingTop: '70px' }}>
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
+        <div className={styles.appContainer}>
+          <div className={styles.loadingContainer}>
+            <div className={styles.loadingSpinner}></div>
             <p>레시피를 불러오는 중...</p>
           </div>
         </div>
@@ -227,47 +197,17 @@ export default function RecipeDetailPage() {
 
   if (!recipe) {
     return (
-      <div className="mainContainer">
-        {/* 상단 네비게이션 바 */}
-        <div style={{
-          width: '420px',
-          height: '70px',
-          background: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 20px',
-          boxSizing: 'border-box',
-          position: 'fixed',
-          top: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-          borderBottom: '1px solid #e0e0e0'
-        }}>
-          <button
-            onClick={() => router.back()}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '18px',
-              cursor: 'pointer'
-            }}
-          >
+      <div className={styles.mainContainer}>
+        <div className={styles.navBar}>
+          <button className={styles.backButton} onClick={() => router.back()}>
             ←
           </button>
-          <h2 style={{
-            fontSize: '18px',
-            fontWeight: 'bold',
-            margin: 0
-          }}>
-            레시피 상세
-          </h2>
+          <h2 className={styles.navTitle}>레시피 상세</h2>
           <div style={{ width: '18px' }}></div>
         </div>
 
-        <div className="appContainer" style={{ paddingTop: '70px' }}>
-          <div className="error-message">레시피를 찾을 수 없습니다.</div>
+        <div className={styles.appContainer}>
+          <div className={styles.errorMessage}>레시피를 찾을 수 없습니다.</div>
         </div>
         <BottomNavigation />
       </div>
@@ -275,101 +215,34 @@ export default function RecipeDetailPage() {
   }
 
   return (
-    <div className="mainContainer">
-      {/* 상단 네비게이션 바 */}
-      <div style={{
-        width: '420px',
-        height: '70px',
-        background: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 20px',
-        boxSizing: 'border-box',
-        position: 'fixed',
-        top: 0,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 10,
-        borderBottom: '1px solid #e0e0e0'
-      }}>
-        <button
-          onClick={() => router.back()}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '18px',
-            cursor: 'pointer'
-          }}
-        >
+    <div className={styles.mainContainer}>
+      <div className={styles.navBar}>
+        <button className={styles.backButton} onClick={() => router.back()}>
           ←
         </button>
-        <h2 style={{
-          fontSize: '18px',
-          fontWeight: 'bold',
-          margin: 0
-        }}>
-          레시피 상세
-        </h2>
-        <button
-          onClick={handleStartCooking}
-          style={{
-            background: '#f97316',
-            color: 'white',
-            border: 'none',
-            borderRadius: '20px',
-            padding: '8px 16px',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }}
-        >
+        <h2 className={styles.navTitle}>레시피 상세</h2>
+        <button className={styles.startCookingButton} onClick={handleStartCooking}>
           요리 시작
         </button>
       </div>
 
-      <div className="appContainer" style={{ paddingTop: '70px' }}>
+      <div className={styles.appContainer}>
         {/* 요리 모드일 때 재료 사용 체크 */}
         {isCookingMode && (
-          <div style={{
-            background: '#e6fff2',
-            padding: '1rem',
-            borderRadius: '12px',
-            margin: '1rem 0',
-            border: '2px solid #22c55e'
-          }}>
-            <h3 style={{ color: '#22c55e', margin: '0 0 1rem 0' }}>🍳 요리 진행 중</h3>
-            <p style={{ fontSize: '14px', color: '#666', margin: '0 0 1rem 0' }}>
+          <div className={styles.cookingMode}>
+            <h3 className={styles.cookingModeTitle}>🍳 요리 진행 중</h3>
+            <p className={styles.cookingModeDescription}>
               사용한 재료를 체크해주세요. 요리 완료 후 냉장고에서 자동으로 차감됩니다.
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div className={styles.ingredientList}>
               {getMatchedIngredients().map(ingredient => (
-                <div
-                  key={ingredient.id}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '0.5rem',
-                    background: 'white',
-                    borderRadius: '8px',
-                    border: '1px solid #e0e0e0'
-                  }}
-                >
-                  <span style={{ fontSize: '16px' }}>{ingredient.name}</span>
+                <div key={ingredient.id} className={styles.ingredientItem}>
+                  <span className={styles.ingredientName}>{ingredient.name}</span>
                   <button
                     onClick={() => toggleIngredientUsage(ingredient.id)}
-                    style={{
-                      background: ingredientUsage[ingredient.id] === 'used' ? '#f97316' : '#e0e0e0',
-                      color: ingredientUsage[ingredient.id] === 'used' ? 'white' : '#666',
-                      border: 'none',
-                      borderRadius: '20px',
-                      padding: '6px 12px',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
+                    className={`${styles.ingredientButton} ${ingredientUsage[ingredient.id] === 'used' ? styles.used : ''
+                      }`}
                   >
                     {ingredientUsage[ingredient.id] === 'used' ? '다씀' : '남음'}
                   </button>
@@ -377,36 +250,11 @@ export default function RecipeDetailPage() {
               ))}
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-              <button
-                onClick={() => setIsCookingMode(false)}
-                style={{
-                  flex: 1,
-                  background: '#e0e0e0',
-                  color: '#666',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '12px',
-                  fontSize: '16px',
-                  cursor: 'pointer'
-                }}
-              >
+            <div className={styles.buttonGroup}>
+              <button className={styles.cancelButton} onClick={() => setIsCookingMode(false)}>
                 취소
               </button>
-              <button
-                onClick={handleFinishCooking}
-                style={{
-                  flex: 1,
-                  background: '#22c55e',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '12px',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer'
-                }}
-              >
+              <button className={styles.completeButton} onClick={handleFinishCooking}>
                 요리 완료
               </button>
             </div>
@@ -414,73 +262,73 @@ export default function RecipeDetailPage() {
         )}
 
         {/* 기존 레시피 상세 내용 */}
-        <div className="recipe-header">
-          <h1>{recipe.RCP_NM}</h1>
+        <div className={styles.recipeHeader}>
+          <h1 className={styles.recipeTitle}>{recipe.RCP_NM}</h1>
         </div>
 
         {recipe.ATT_FILE_NO_MAIN && (
-          <div className="main-image-container">
+          <div className={styles.mainImageContainer}>
             <Image
               src={recipe.ATT_FILE_NO_MAIN}
               alt={recipe.RCP_NM}
               width={500}
               height={300}
-              className="main-image"
+              className={styles.mainImage}
               priority
             />
           </div>
         )}
 
-        <div className="recipe-info">
-          <div className="info-card">
-            <h2>기본 정보</h2>
-            <div className="info-grid">
-              <div className="info-item">
-                <span className="label">요리 종류</span>
-                <span className="value">{recipe.RCP_PAT2}</span>
+        <div className={styles.recipeInfo}>
+          <div className={styles.infoCard}>
+            <h2 className={styles.infoCardTitle}>기본 정보</h2>
+            <div className={styles.infoGrid}>
+              <div className={styles.infoItem}>
+                <span className={styles.label}>요리 종류</span>
+                <span className={styles.value}>{recipe.RCP_PAT2}</span>
               </div>
-              <div className="info-item">
-                <span className="label">조리 방법</span>
-                <span className="value">{recipe.RCP_WAY2}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="info-card">
-            <h2>영양 정보</h2>
-            <div className="nutrition-grid">
-              <div className="nutrition-item">
-                <span className="label">칼로리</span>
-                <span className="value">{recipe.INFO_ENG} kcal</span>
-              </div>
-              <div className="nutrition-item">
-                <span className="label">탄수화물</span>
-                <span className="value">{recipe.INFO_CAR}g</span>
-              </div>
-              <div className="nutrition-item">
-                <span className="label">단백질</span>
-                <span className="value">{recipe.INFO_PRO}g</span>
-              </div>
-              <div className="nutrition-item">
-                <span className="label">지방</span>
-                <span className="value">{recipe.INFO_FAT}g</span>
-              </div>
-              <div className="nutrition-item">
-                <span className="label">나트륨</span>
-                <span className="value">{recipe.INFO_NA}mg</span>
+              <div className={styles.infoItem}>
+                <span className={styles.label}>조리 방법</span>
+                <span className={styles.value}>{recipe.RCP_WAY2}</span>
               </div>
             </div>
           </div>
 
-          <div className="info-card">
-            <h2>재료</h2>
-            <p className="ingredients">{recipe.RCP_PARTS_DTLS}</p>
+          <div className={styles.infoCard}>
+            <h2 className={styles.infoCardTitle}>영양 정보</h2>
+            <div className={styles.nutritionGrid}>
+              <div className={styles.nutritionItem}>
+                <span className={styles.label}>칼로리</span>
+                <span className={styles.value}>{recipe.INFO_ENG} kcal</span>
+              </div>
+              <div className={styles.nutritionItem}>
+                <span className={styles.label}>탄수화물</span>
+                <span className={styles.value}>{recipe.INFO_CAR}g</span>
+              </div>
+              <div className={styles.nutritionItem}>
+                <span className={styles.label}>단백질</span>
+                <span className={styles.value}>{recipe.INFO_PRO}g</span>
+              </div>
+              <div className={styles.nutritionItem}>
+                <span className={styles.label}>지방</span>
+                <span className={styles.value}>{recipe.INFO_FAT}g</span>
+              </div>
+              <div className={styles.nutritionItem}>
+                <span className={styles.label}>나트륨</span>
+                <span className={styles.value}>{recipe.INFO_NA}mg</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.infoCard}>
+            <h2 className={styles.infoCardTitle}>재료</h2>
+            <p className={styles.ingredients}>{recipe.RCP_PARTS_DTLS}</p>
           </div>
         </div>
 
-        <div className="cook-steps">
-          <div className="info-card">
-            <h2>조리 순서</h2>
+        <div className={styles.cookSteps}>
+          <div className={styles.infoCard}>
+            <h2 className={styles.infoCardTitle}>조리 순서</h2>
             {Array.from({ length: 20 }).map((_, i) => {
               const stepKey = `MANUAL${String(i + 1).padStart(2, '0')}`;
               const imgKey = `MANUAL_IMG${String(i + 1).padStart(2, '0')}`;
@@ -489,18 +337,18 @@ export default function RecipeDetailPage() {
               const cleanedStep = rawStep?.replace(/^\d+\.\s*/, "");
 
               return rawStep ? (
-                <div key={i} className="step">
-                  <div className="step-number">{i + 1}</div>
-                  <div className="step-content">
+                <div key={i} className={styles.step}>
+                  <div className={styles.stepNumber}>{i + 1}</div>
+                  <div className={styles.stepContent}>
                     <p>{cleanedStep}</p>
                     {img && (
-                      <div className="step-image-container">
+                      <div className={styles.stepImageContainer}>
                         <Image
                           src={img}
                           alt={`Step ${i + 1}`}
                           width={400}
                           height={250}
-                          className="step-image"
+                          className={styles.stepImage}
                         />
                       </div>
                     )}
@@ -513,9 +361,9 @@ export default function RecipeDetailPage() {
 
         {/* 비슷한 레시피 섹션 */}
         {!loadingSimilar && similarRecipes.length > 0 && (
-          <div className="similar-recipes-section">
-            <h2>비슷한 재료를 사용한 레시피</h2>
-            <div className="similar-recipes-grid">
+          <div className={styles.similarRecipesSection}>
+            <h2 className={styles.similarRecipesTitle}>비슷한 재료를 사용한 레시피</h2>
+            <div className={styles.similarRecipesGrid}>
               {similarRecipes.slice(0, displayCount).map((similarRecipe) => (
                 <RecipeCard
                   key={similarRecipe.recipeId}
@@ -528,7 +376,7 @@ export default function RecipeDetailPage() {
               ))}
             </div>
             {displayCount < similarRecipes.length && (
-              <div style={{ textAlign: 'center', marginTop: '20px', color: '#666' }}>
+              <div className={styles.scrollMessage}>
                 스크롤을 내려 더 많은 레시피를 확인하세요
               </div>
             )}
@@ -537,241 +385,14 @@ export default function RecipeDetailPage() {
 
         {/* 하단 요리 시작하기 버튼 */}
         {!isCookingMode && (
-          <div style={{
-            position: 'fixed',
-            bottom: '80px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '380px',
-            padding: '0 20px',
-            zIndex: 100
-          }}>
-            <button
-              onClick={handleStartCooking}
-              style={{
-                width: '100%',
-                background: '#22c55e',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '16px',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)'
-              }}
-            >
+          <div className={styles.bottomButton}>
+            <button className={styles.startCookingBottomButton} onClick={handleStartCooking}>
               🍳 요리 시작하기
             </button>
           </div>
         )}
       </div>
       <BottomNavigation />
-
-      {/* 기존 스타일 */}
-      <style jsx>{`
-        .loading-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          height: 50vh;
-        }
-
-        .loading-spinner {
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #f59e42;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          animation: spin 1s linear infinite;
-          margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        .recipe-header {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          margin-top: 10px;
-          margin-bottom: 20px;
-        }
-
-        h1 {
-          font-size: 2rem;
-          color: #333;
-          margin: 0;
-        }
-
-        .main-image-container {
-          margin: 20px 0;
-          border-radius: 15px;
-          overflow: hidden;
-        }
-
-        .main-image {
-          width: 100%;
-          height: auto;
-          object-fit: cover;
-        }
-
-        .recipe-info {
-          display: grid;
-          gap: 20px;
-          margin: 30px 0;
-        }
-
-        .info-card {
-          background: white;
-          border-radius: 15px;
-          padding: 20px;
-          border: 2px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .info-card h2 {
-          color: #f59e42;
-          margin-bottom: 15px;
-          font-size: 1.3rem;
-        }
-
-        .info-grid, .nutrition-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 15px;
-        }
-
-        .info-item, .nutrition-item {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
-
-        .label {
-          color: #666;
-          font-size: 0.9rem;
-        }
-
-        .value {
-          color: #333;
-          font-weight: 500;
-        }
-
-        .ingredients {
-          line-height: 1.6;
-          color: #444;
-        }
-
-        .cook-steps {
-          margin: 40px 0;
-        }
-
-        .cook-steps h2 {
-          color: #f59e42;
-          margin-bottom: 20px;
-          font-size: 1.5rem;
-        }
-
-        .step {
-          display: flex;
-          gap: 20px;
-          margin-bottom: 30px;
-          background: white;
-          border-radius: 15px;
-          padding: 5px;
-        }
-
-        .step-number {
-          background: #f59e42;
-          color: white;
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-          flex-shrink: 0;
-          margin: auto;
-        }
-
-        .step-content {
-          flex: 1;
-        }
-
-        .step-image-container {
-          margin-top: 15px;
-          border-radius: 10px;
-          overflow: hidden;
-        }
-
-        .step-image {
-          width: 100%;
-          height: auto;
-          object-fit: cover;
-        }
-
-        .hashtags {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin: 20px 0;
-        }
-
-        .hashtag {
-          background: #e9ecef;
-          color: #495057;
-          padding: 5px 12px;
-          border-radius: 20px;
-          font-size: 0.9rem;
-        }
-
-        .tip-box {
-          background: #fff3cd;
-          border-left: 4px solid #ffc107;
-          padding: 20px;
-          border-radius: 10px;
-          margin: 20px 0;
-        }
-
-        .tip-box h3 {
-          color: #856404;
-          margin-bottom: 10px;
-        }
-
-        .tip-box p {
-          color: #666;
-          line-height: 1.6;
-        }
-
-        .error-message {
-          text-align: center;
-          color: #dc3545;
-          padding: 20px;
-          font-size: 1.2rem;
-        }
-
-        .similar-recipes-section {
-          margin-top: 40px;
-          padding-top: 20px;
-          border-top: 1px solid #eee;
-        }
-
-        .similar-recipes-section h2 {
-          color: #f59e42;
-          margin-bottom: 20px;
-          font-size: 1.5rem;
-        }
-
-        .similar-recipes-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-          gap: 20px;
-        }
-      `}</style>
     </div>
   );
 }
