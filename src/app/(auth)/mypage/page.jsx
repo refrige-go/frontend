@@ -75,7 +75,7 @@ export default function MyPage() {
 
   //회원탈퇴
   const handleWithdraw = async () => {
-  if (!window.confirm("정말로 회원 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
+  if (!window.confirm("정말로 회원 탈퇴하시겠습니까?")) return;
   try {
     await axiosInstance.delete("/user/withdraw"); // 백엔드에서 deleted: true 처리
     localStorage.removeItem('accessToken'); // 토큰 삭제
