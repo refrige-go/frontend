@@ -1,13 +1,13 @@
 /* 전체 wrapper */
-.container {
+/* .container {
   width: 100%;
-  max-width: 420px;      /* globals.css의 mainContainer와 일치 */
+  max-width: 420px;      /
   margin: 0 auto;
   height: 100vh;
   display: flex;
   flex-direction: column;
   background: #ffffff;
-}
+} */
 
 /* 내부 content */
 .content {
@@ -310,8 +310,8 @@
   position: fixed;
   bottom: 170px;
   right: 50%;
-  transform: translateX(180px); 
-  background: #f97316;
+  transform: translateX(180px);
+  background:#f97316;
   color: white;
   width: 48px;
   height: 48px;
@@ -501,4 +501,11 @@
   height: 100vh;
   background: transparent;
   z-index: 1000;
+}
+
+.pageWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background-color: #fdf1d0;
 }
