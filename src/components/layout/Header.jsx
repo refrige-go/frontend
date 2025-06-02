@@ -23,7 +23,7 @@ const Header = () => {
         boxSizing: 'border-box',
         borderBottom: '2px solid #e5e7eb',
         position: 'fixed',
-        zIndex: 10,
+        zIndex: 1000,
       }}
     >
       {/* 로고 */}
