@@ -66,9 +66,10 @@
     font-weight: bold;
 }
 
-.mypage .logout-btn{
+.mypage .gray-btn{
     height: 40px;
     width: 150px;
     border-radius: 5px;
     border: none;
+    cursor: pointer;
 }
