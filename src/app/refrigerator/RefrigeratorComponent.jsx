@@ -241,6 +241,7 @@ const handleModalRecommend = async () => {
   if (!token || !username) return null;
 
   return (
+    <div className={styles.pageWrapper}>
     <div className="mainContainer">
       <Header />
       <div className="appContainer">
@@ -598,6 +599,7 @@ const handleModalRecommend = async () => {
         )}
       </div>
       <BottomNavigation />
+    </div>
     </div>
   );
 }

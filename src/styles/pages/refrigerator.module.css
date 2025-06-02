@@ -52,23 +52,18 @@
   gap: 12px;
 }
 
-.frozenCard {
-  background-color: #f3fbff;
-}
-
 .card {
   background: #f9fafb;
   border-radius: 12px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  padding: 12px;
+  padding: 17px;
   position: relative;
   display: flex;
-  flex-direction: column; 
-  justify-content: center;
   align-items: center;
-  width: 100%;                 
-  height: 70px;            
-  box-sizing: border-box;
+}
+
+.frozenCard {
+  background-color: #f3fbff;
 }
 
 .cardContent {
@@ -76,8 +71,6 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  overflow: hidden;  
-  flex-shrink: 0;
 }
 
 .textContent {
@@ -310,8 +303,8 @@
   position: fixed;
   bottom: 170px;
   right: 50%;
-  transform: translateX(180px);
-  background: #8aca1c;
+  transform: translateX(180px); 
+  background: #f97316;
   color: white;
   width: 48px;
   height: 48px;
