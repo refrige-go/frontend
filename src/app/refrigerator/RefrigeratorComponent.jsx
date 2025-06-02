@@ -11,12 +11,40 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
 
+// JWT에서 payload(username) 파싱 함수
+function getPayloadFromToken(token) {
+  try {
+    const payload = token.split('.')[1];
+    return JSON.parse(atob(payload));
+  } catch {
+    return null;
+  }
+}
+
+// 카테고리별 이모지 매핑
+const categoryEmojiMap = {
+  '곡류/분말': '🌾',
+  '육류': '🥩',
+  '수산물/해산물': '🐟',
+  '채소': '🥬',
+  '과일': '🍎',
+  '버섯': '🍄',
+  '유제품': '🧀',
+  '두류/콩류': '🌰',
+  '조미료/양념': '🧂',
+  '기름/유지': '🛢️',
+  '면/떡': '🍜',
+  '가공식품': '🥫',
+  '장아찌/절임': '🥒',
+  '기타': '📦'
+};
+
 export default function RefrigeratorComponent() {
   const router = useRouter();
-  const [currentUserId, setCurrentUserId] = useState(null);
   const [token, setToken] = useState(null);
+  const [username, setUsername] = useState(null);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
-  // 로그인 토큰 체크 및 유효성 검사
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
     if (!storedToken) {
@@ -25,23 +53,29 @@ export default function RefrigeratorComponent() {
       return;
     }
 
-    api.get('/secure/ping', {
+    api.get(`${baseUrl}/secure/ping`, {
       headers: { Authorization: `Bearer ${storedToken}` },
     })
       .then(() => {
         setToken(storedToken);
-        // userId는 토큰에서 파싱하거나 별도 API에서 받아와야 하지만, 임시로 1로 세팅
-        setCurrentUserId(1);
+        const payload = getPayloadFromToken(storedToken);
+        setUsername(payload?.username);
       })
       .catch(() => {
         alert('세션이 만료되었습니다. 다시 로그인 해주세요.');
         localStorage.removeItem('accessToken');
         router.replace('/login');
       });
-  }, [router]);
+  }, [router, baseUrl]);
 
-  // userId 기반 재료 조회 커스텀 훅 사용
-  const { ingredients, deleteIngredient, refetchIngredients } = useIngredients(currentUserId);
+  const { ingredients, deleteIngredient, refetchIngredients } = useIngredients(username);
+
+  // 데이터 확인용 콘솔
+  useEffect(() => {
+    if (ingredients) {
+      console.log('ingredients 데이터:', ingredients);
+    }
+  }, [ingredients]);
 
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [isFrozenToggle, setIsFrozenToggle] = useState(false);
@@ -51,6 +85,11 @@ export default function RefrigeratorComponent() {
   const [showAddOptions, setShowAddOptions] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState(null);
+  
+  // 레시피 추천 관련 상태 추가
+  const [showRecommendModal, setShowRecommendModal] = useState(false);
+  const [modalSelectedIngredientIds, setModalSelectedIngredientIds] = useState([]);
+  const [isRecommending, setIsRecommending] = useState(false);
 
   useEffect(() => {
     if (selectedIngredient) {
@@ -62,7 +101,9 @@ export default function RefrigeratorComponent() {
 
   const updateFrozenStatus = async (id, isFrozen) => {
     try {
-      await api.patch(`/user-ingredients/${id}/frozen`, { frozen: isFrozen });
+      await api.patch(`${baseUrl}/user-ingredients/${id}/frozen`, { frozen: isFrozen }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
     } catch {
       alert('냉동 보관 상태 저장 실패!');
     }
@@ -70,9 +111,11 @@ export default function RefrigeratorComponent() {
 
   const updateDates = async (id) => {
     try {
-      await api.patch(`/user-ingredients/${id}/dates`, {
+      await api.patch(`${baseUrl}/user-ingredients/${id}/dates`, {
         purchaseDate: purchaseDate?.toISOString().split('T')[0],
         expiryDate: expiryDate?.toISOString().split('T')[0],
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
     } catch {
       alert('날짜 저장 실패!');
@@ -97,14 +140,105 @@ export default function RefrigeratorComponent() {
     setSelectedIngredient(null);
   };
 
+  // 레시피 추천 모달에서 재료 선택/해제
+  const handleModalIngredientSelect = (id) => {
+    setModalSelectedIngredientIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+// 레시피 추천 API 호출
+const handleModalRecommend = async () => {
+  try {
+    setIsRecommending(true);
+
+    const selectedIngredientNames = ingredients
+      .filter(ingredient => modalSelectedIngredientIds.includes(ingredient.id))
+      .map(ingredient => ingredient.name);
+    
+    // 요청 데이터 구성
+    const requestData = {
+      userId: username, // null 대신 username 사용
+      selectedIngredients: selectedIngredientNames,
+      limit: 10
+    };
+
+    console.log('추천 요청 데이터:', requestData);
+    console.log('선택된 재료 이름들:', selectedIngredientNames);
+
+    // 최소 2개 재료 검증
+    if (selectedIngredientNames.length < 2) {
+      alert('최소 2개 이상의 재료를 선택해주세요.');
+      return;
+    }
+
+    // API 호출 - axiosInstance 대신 fetch 사용
+    const response = await fetch(`${baseUrl}/api/recommendations/recipes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(requestData)
+    });
+
+    console.log('응답 상태:', response.status);
+    console.log('응답 헤더:', response.headers);
+
+    const responseText = await response.text();
+    console.log('응답 텍스트:', responseText);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}, body: ${responseText}`);
+    }
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('JSON 파싱 오류:', parseError);
+      throw new Error('서버 응답을 파싱할 수 없습니다.');
+    }
+
+    console.log('추천 결과:', data);
+      
+      // 추천 결과 처리
+      if (data && data.recommendedRecipes) {
+        const recipes = data.recommendedRecipes.map(r => ({
+          ...r,
+          name: r.recipeName
+        }));
+        
+        // 추천 레시피를 sessionStorage에 저장
+        sessionStorage.setItem('recommendedRecipes', JSON.stringify(data));
+        
+        // 모달 닫기
+        setShowRecommendModal(false);
+        setModalSelectedIngredientIds([]);
+        
+        alert(`${recipes.length}개의 레시피를 추천받았습니다!`);
+        
+        // 레시피 페이지로 이동
+        router.push('/recipes/recommended');
+      } else {
+        alert('추천할 레시피가 없습니다. 다른 재료를 선택해보세요.');
+      }
+      
+    } catch (error) {
+      console.error('추천 오류:', error);
+      alert(`레시피 추천에 실패했습니다: ${error.message}`);
+    } finally {
+      setIsRecommending(false);
+    }
+  };
+
   const filteredIngredients = ingredients.filter((item) =>
     activeTab === 'expired'
       ? item.expiryDaysLeft !== null && item.expiryDaysLeft < 0
       : item.expiryDaysLeft === null || item.expiryDaysLeft >= 0
   );
 
-  // 로그인 전까지 렌더링 금지
-  if (!currentUserId) return null;
+  if (!token || !username) return null;
 
   return (
     <div className="mainContainer">
@@ -129,12 +263,14 @@ export default function RefrigeratorComponent() {
           <div className={styles.grid}>
             {filteredIngredients.map((item) => (
               <div
-                key={item.id}
-                className={`${styles.card} 
-                  ${item.frozen ? styles.frozenCard : ''} 
-                  ${item.expiryDaysLeft !== null && item.expiryDaysLeft <= 3 && !item.frozen ? styles.pinkCard : ''}`}
-                onClick={() => setSelectedIngredient(item)}
-              >
+              key={item.id}
+              className={`${styles.card} 
+                ${item.frozen ? styles.frozenCard : ''} 
+                ${item.expiryDaysLeft !== null && item.expiryDaysLeft < 0 ? styles.expiredCard : ''}
+                ${item.expiryDaysLeft !== null && item.expiryDaysLeft <= 3 && item.expiryDaysLeft >= 0 && !item.frozen ? styles.warningCard : ''}
+              `}
+              onClick={() => setSelectedIngredient(item)}
+            >            
                 <button
                   className={styles.top}
                   onClick={(e) => {
@@ -146,11 +282,17 @@ export default function RefrigeratorComponent() {
                 </button>
 
                 <div className={styles.cardContent}>
-                  <img
-                    src={item.imageUrl || '/images/default.jpg'}
-                    alt={item.name}
-                    className={styles.image}
-                  />
+                  <div className={styles.emoji}>
+                    {item.imageUrl && item.imageUrl !== 'null' ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className={styles.thumbnail}
+                      />
+                    ) : (
+                      categoryEmojiMap[item.category] || '📦'
+                    )}
+                  </div>
                   <div className={styles.textContent}>
                     <div className={styles.category}>
                       {item.category || '분류 없음'}
@@ -158,7 +300,9 @@ export default function RefrigeratorComponent() {
                         item.expiryDaysLeft !== null &&
                         item.expiryDaysLeft >= 0 &&
                         item.expiryDaysLeft <= 3 && (
-                          <span className={styles.dDay}>D-{item.expiryDaysLeft}</span>
+                          <span className={`${styles.dDay} ${item.frozen ? styles.hideDDayCircle : ''}`}>
+                            D-{item.expiryDaysLeft}
+                          </span>
                         )}
                       {item.frozen && <span className={styles.frozenIcon}>❄️</span>}
                     </div>
@@ -182,27 +326,32 @@ export default function RefrigeratorComponent() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className={styles.detailHeader}>
-                <img
-                  src={selectedIngredient.imageUrl || '/images/default.jpg'}
-                  alt={selectedIngredient.name}
-                />
+
+                <div className={selectedIngredient.imageUrl && selectedIngredient.imageUrl !== 'null' ? styles.emoji : styles.emojiIcon}>
+                  {selectedIngredient.imageUrl && selectedIngredient.imageUrl !== 'null' ? (
+                    <img
+                      src={selectedIngredient.imageUrl}
+                      alt={selectedIngredient.name}
+                      className={styles.thumbnail}
+                    />
+                  ) : (
+                    categoryEmojiMap[selectedIngredient.category] || '📦'
+                  )}
+                </div>
+
                 <div className={styles.detailInfo}>
                   <div className={styles.category}>
                     {selectedIngredient.category}
                   </div>
                   <div className={styles.name}>{selectedIngredient.name}</div>
                 </div>
-                <div
-                  className={`${styles.dDay} ${styles.detailDday} ${
-                    isFrozenToggle ? styles.frozenText : ''
-                  }`}
-                >
-                  {isFrozenToggle
-                    ? '❄️ 냉동'
-                    : selectedIngredient.expiryDaysLeft !== null
-                    ? `D-${selectedIngredient.expiryDaysLeft}`
-                    : '기한 없음'}
-                </div>
+
+                {!isFrozenToggle && selectedIngredient.expiryDaysLeft !== null && (
+                  <span className={styles.dDay}>D-{selectedIngredient.expiryDaysLeft}</span>
+                )}
+                {isFrozenToggle && (
+                  <span className={styles.frozenText}>❄️ 냉동</span>
+                )}
               </div>
 
               <div className={styles.detailBody}>
@@ -260,26 +409,157 @@ export default function RefrigeratorComponent() {
           </div>
         )}
 
-        {showAddOptions && (
-          <div className={styles.addOptionsFix}>
-            <button
-              className={styles.addOptionBtn}
-              onClick={() => router.push('/ingredients-select')}
-            >
-              재료 추가
-            </button>
-            <button
-              className={styles.addOptionBtn}
-              onClick={() => alert('OCR 자동 인식 클릭됨')}
-            >
-              OCR 자동 인식
-            </button>
+{showAddOptions && (
+  <div
+    className={styles.addOptionsOverlay} // 배경 클릭 영역
+    onClick={() => setShowAddOptions(false)}
+  >
+    <div
+      className={styles.addOptionsFix}
+      onClick={(e) => e.stopPropagation()} // 버튼 클릭 시 오버레이 닫힘 방지
+    >
+      <button
+        className={styles.addOptionBtn}
+        onClick={() => router.push('/ingredients-select')}
+      >
+        재료 추가
+      </button>
+      <button
+        className={styles.addOptionBtn}
+        onClick={() => router.push('/ocr')}
+      >
+        OCR 자동 인식
+      </button>
+    </div>
+  </div>
+)}
+
+
+        {/* 레시피 추천 모달 */}
+        {showRecommendModal && (
+          <div style={{
+            position: 'fixed', left: 0, top: 0, width: '100vw', height: '100vh',
+            background: 'rgba(0,0,0,0.3)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center'
+          }}>
+            <div style={{
+              background: '#fff',
+              borderRadius: 24,
+              padding: '2rem 1.5rem 1.5rem 1.5rem',
+              minWidth: 320,
+              maxWidth: 380,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              position: 'relative',
+            }}>
+              <h2 style={{ marginBottom: 20, fontWeight: 700, fontSize: 22, color: '#f97316' }}>
+                재료 선택 (최소 2개)
+              </h2>
+              <div style={{ maxHeight: 320, overflowY: 'auto', marginBottom: 24, width: '100%' }}>
+                {ingredients.length > 0 ? (
+                  ingredients.map((item) => (
+                    <label key={item.id} style={{
+                      display: 'flex', alignItems: 'center',
+                      marginBottom: 14, fontSize: 17, fontWeight: 500, cursor: 'pointer',
+                      padding: '0.5rem 0.5rem 0.5rem 0', borderRadius: 8,
+                      transition: 'background 0.2s',
+                      background: modalSelectedIngredientIds.includes(item.id) ? '#fff6ee' : 'transparent',
+                    }}>
+                      <span style={{
+                        display: 'inline-block',
+                        width: 24, height: 24,
+                        border: '2px solid #f97316',
+                        borderRadius: '50%',
+                        marginRight: 14,
+                        background: modalSelectedIngredientIds.includes(item.id) ? '#f97316' : '#fff',
+                        position: 'relative',
+                        transition: 'background 0.2s',
+                      }}>
+                        <input
+                          type="checkbox"
+                          checked={modalSelectedIngredientIds.includes(item.id)}
+                          onChange={() => handleModalIngredientSelect(item.id)}
+                          style={{
+                            opacity: 0,
+                            width: 24,
+                            height: 24,
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            margin: 0,
+                            cursor: 'pointer',
+                          }}
+                        />
+                        {modalSelectedIngredientIds.includes(item.id) && (
+                          <svg width="16" height="16" viewBox="0 0 16 16" style={{ position: 'absolute', left: 4, top: 4 }}>
+                            <polyline points="2,9 7,13 14,4" style={{ fill: 'none', stroke: '#fff', strokeWidth: 2 }} />
+                          </svg>
+                        )}
+                      </span>
+                      <span>{item.name}</span>
+                    </label>
+                  ))
+                ) : (
+                  <p style={{ textAlign: 'center', color: '#666', margin: '2rem 0' }}>
+                    선택할 재료가 없습니다.<br />
+                    먼저 재료를 추가해주세요.
+                  </p>
+                )}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, width: '100%' }}>
+                <button 
+                  onClick={() => setShowRecommendModal(false)} 
+                  disabled={isRecommending}
+                  style={{
+                    padding: '0.6rem 1.2rem',
+                    background: '#fff',
+                    color: '#f97316',
+                    border: '1.5px solid #f97316',
+                    borderRadius: 8,
+                    fontWeight: 600,
+                    fontSize: 16,
+                    cursor: isRecommending ? 'not-allowed' : 'pointer',
+                    transition: 'background 0.2s, color 0.2s',
+                    opacity: isRecommending ? 0.5 : 1,
+                  }}
+                >
+                  닫기
+                </button>
+                <button 
+                  onClick={handleModalRecommend} 
+                  disabled={isRecommending || modalSelectedIngredientIds.length < 2}
+                  style={{
+                    padding: '0.6rem 1.2rem',
+                    background: (isRecommending || modalSelectedIngredientIds.length < 2) ? '#ccc' : '#f97316',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontWeight: 600,
+                    fontSize: 16,
+                    cursor: (isRecommending || modalSelectedIngredientIds.length < 2) ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 2px 8px rgba(247,151,22,0.08)',
+                    transition: 'background 0.2s',
+                  }}
+                >
+                  {isRecommending ? '추천 중...' : `추천받기 (${modalSelectedIngredientIds.length}개 선택)`}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
         <button
           className={styles.recipeRecommendBtn}
-          onClick={() => alert('레시피 추천 클릭됨')}
+          onClick={() => {
+            setShowRecommendModal(true);
+            setModalSelectedIngredientIds([]);
+          }}
+          disabled={ingredients.length === 0}
+          style={{
+            opacity: ingredients.length === 0 ? 0.5 : 1,
+            cursor: ingredients.length === 0 ? 'not-allowed' : 'pointer'
+          }}
         >
           ✨레시피 추천받기
         </button>

@@ -73,24 +73,11 @@
   width: 100%;
 }
 
-.image {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-left: 5px;
-}
-
 .textContent {
   display: flex;
   flex-direction: column;
   gap: 4px;
   flex: 1;
-}
-
-.category {
-  font-size: 12px;
-  color: #999;
 }
 
 .name {
@@ -99,16 +86,23 @@
   color: #333;
 }
 
+.category {
+  font-size: 12px;
+  color: #999;
+  display: flex;             
+  align-items: center;     
+}
+
 .dDay {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 33px;               /* 원 가로 */
-  height: 22px;              /* 원 세로 */
-  background-color: white;   /* 원 배경색 흰색 */
-  color: #f97316;            /* 글자 주황색 */
-  border: 2px solid #f97316; /* 테두리 주황색 */
-  border-radius: 50%;        /* 동그라미 */
+  width: 42px;               /* 가로 크기 */
+  height: 23px;              /* 세로 크기 */
+  background-color: white;   /* 배경색 흰색 */
+  color: #f97316;            /* 텍스트 색 */
+  border: 2px solid #f97316; /* 테두리 색 */
+  border-radius: 12px;        /* 모서리 둥글게 */
   font-weight: bold;
   font-size: 12px;
   margin-left: 5px;          /* 간격 */
@@ -187,13 +181,15 @@
 }
 
 .detailDday {
-  font-size: 18px;
+  font-size: 24px;
   font-weight: bold;
   color: #f97316;
 }
 
 .frozenText {
   color: #111;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .detailBody {
@@ -439,6 +435,62 @@
   color: #333;
 }
 
-.pinkCard {
-  background-color: #ffe6e6; 
+.hideDDayCircle {
+  display: none 
+}
+
+.emoji {
+  width: 40px;
+  height: 40px;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  margin-left: 5px;
+}
+
+.emojiIcon {
+  width: 40px;
+  height: 40px;
+  font-size: 28px;       
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;       
+  background-color: #f0f0f0;
+  margin-left: 5px;
+}
+
+.thumbnail {
+  width: 40px;
+  height: 40px;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  object-fit: cover;
+  background-color: #f0f0f0;
+}
+
+/* D-day 3일 이하 카드 */
+.warningCard {
+  background-color: #FFE9DD;
+}
+
+/* 유통기한 지난 카드 */
+.expiredCard {
+  background-color: 	#D1D5DB;
+}
+
+.addOptionsOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: transparent;
+  z-index: 1000;
 }

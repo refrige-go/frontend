@@ -6,6 +6,7 @@ import BottomNavigation from '../../components/layout/BottomNavigation';
 import styles from '../../styles/pages/ingredientselect.module.css';
 import api from '../../lib/api';
 
+// 카테고리 아이콘 매핑
 const iconMap = {
   '전체': '🍔',
   '곡류/분말': '🌾',
@@ -24,6 +25,23 @@ const iconMap = {
   '기타': '📦'
 };
 
+const categoryMap = {
+  GRAIN_POWDER: '곡류/분말',
+  FRUIT: '과일',
+  VEGETABLE: '채소',
+  MEAT: '육류',
+  SEAFOOD: '수산물/해산물',
+  DAIRY: '유제품',
+  BEAN: '두류/콩류',
+  NOODLE_RICE_CAKE: '면/떡',
+  OIL: '기름/유지',
+  MUSHROOM: '버섯',
+  PROCESSED_FOOD: '가공식품',
+  SEASONING: '조미료/양념',
+  PICKLE: '장아찌/절임',
+  ETC: '기타'
+};
+
 const categoryOrder = [
   '전체', '곡류/분말', '과일', '채소', '육류', '수산물/해산물',
   '유제품', '두류/콩류', '면/떡', '기름/유지', '버섯',
@@ -34,12 +52,55 @@ function getCategoryIcon(name) {
   return iconMap[name] || '🍽️';
 }
 
-export default function IngredientSelectComponent({ currentUserId }) {
+export default function IngredientSelectComponent() {
   const router = useRouter();
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [ingredients, setIngredients] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [token, setToken] = useState(null);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    if (!storedToken) {
+      alert('로그인 후 이용해주세요.');
+      router.push('/login');
+    } else {
+      setToken(storedToken);
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (!token) return;
+    api.get('/api/ingredients/categories', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        const converted = res.data.map((en) => categoryMap[en] || en);
+        setCategories(['전체', ...converted]);
+      })
+      .catch((err) => console.error('카테고리 불러오기 실패:', err));
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
+    const query = selectedCategory === '전체' ? '' : `?category=${selectedCategory}`;
+    api.get(`/api/ingredients${query}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        const items = res.data;
+        // 전체일 경우에만 재료 순서 섞기
+        if (selectedCategory === '전체') {
+          const shuffled = [...items].sort(() => Math.random() - 0.5);
+          setIngredients(shuffled);
+        } else {
+          setIngredients(items);
+        }
+      })
+      .catch((err) => console.error('재료 불러오기 실패:', err));
+  }, [selectedCategory, token]);
 
   const toggleSelection = (id) => {
     setSelectedIds((prev) =>
@@ -53,46 +114,42 @@ export default function IngredientSelectComponent({ currentUserId }) {
       return;
     }
 
-    if (!currentUserId) {
+    if (!token) {
       alert('로그인 후 이용해주세요.');
       router.push('/login');
       return;
     }
 
-    const today = new Date().toISOString().slice(0, 10);
-    const oneWeekLater = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .slice(0, 10);
+    const today = new Date();
+    const selectedIngredients = ingredients.filter((item) =>
+      selectedIds.includes(item.id)
+    );
+
+    const ingredientsToAdd = selectedIngredients.map((item) => {
+      const expiry = new Date(today);
+      expiry.setDate(expiry.getDate() + (item.defaultExpiryDays || 7));
+      return {
+        ingredientId: item.id,
+        customName: null,
+        purchaseDate: today.toISOString().slice(0, 10),
+        expiryDate: expiry.toISOString().slice(0, 10),
+        isFrozen: false
+      };
+    });
 
     try {
-      await api.post('/user-ingredients/batch-add', {
-        userId: currentUserId,  // 동적 userId 반영
-        ingredients: selectedIds.map((id) => ({
-          ingredientId: id,
-          customName: null,
-          purchaseDate: today,
-          expiryDate: oneWeekLater,
-          isFrozen: false
-        }))
+      await api.post(`${baseUrl}/user-ingredients/batch-add`, {
+        ingredients: ingredientsToAdd
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      router.back();
+      router.push('/refrigerator');
     } catch (err) {
-      console.error(err);
+      console.error('재료 추가 실패:', err);
       alert('오류가 발생했습니다.');
     }
   };
-
-  useEffect(() => {
-    api.get('/api/ingredients/categories')
-      .then((res) => setCategories(['전체', ...res.data]));
-  }, []);
-
-  useEffect(() => {
-    const query = selectedCategory === '전체' ? '' : `?category=${selectedCategory}`;
-    api.get(`/api/ingredients${query}`)
-      .then((res) => setIngredients(res.data));
-  }, [selectedCategory]);
 
   return (
     <div className="mainContainer">
@@ -100,7 +157,12 @@ export default function IngredientSelectComponent({ currentUserId }) {
         <div className={styles.headerRow}>
           <button onClick={() => router.back()} className={styles.backBtn}>←</button>
           <h2 className={styles.pageTitle}>재료 목록</h2>
-          <button onClick={handleComplete} className={styles.doneBtn}>완료</button>
+          <button
+            onClick={() => router.push('/ingredients-add')}
+            className={styles.doneBtn}
+          >
+            추가
+          </button>
         </div>
 
         <div className={styles.searchWrap}>
@@ -132,11 +194,17 @@ export default function IngredientSelectComponent({ currentUserId }) {
             {ingredients.map((item) => (
               <li key={item.id} className={styles.ingredientItem}>
                 <div className={styles.ingredientInfo}>
-                  <img
-                    src={item.imageUrl || '/images/default.jpg'}
-                    alt=""
-                    className={styles.ingredientImage}
-                  />
+                {item.imageUrl ? (
+  <img
+    src={item.imageUrl}
+    alt=""
+    className={styles.ingredientImage}
+  />
+) : (
+  <span className={styles.ingredientEmoji}>
+    {getCategoryIcon(item.category)}
+  </span>
+)}
                   <span className={styles.ingredientName}>{item.name}</span>
                 </div>
                 <input
@@ -152,9 +220,9 @@ export default function IngredientSelectComponent({ currentUserId }) {
 
         <button
           className={styles.addManualBtn}
-          onClick={() => router.push('/ingredients-add')}
+          onClick={handleComplete}
         >
-          + 직접 추가
+          완료
         </button>
       </div>
       <BottomNavigation />

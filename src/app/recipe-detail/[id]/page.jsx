@@ -1,46 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Header from '../../../components/layout/Header';
 import BottomNavigation from '../../../components/layout/BottomNavigation';
 import axiosInstance from '../../../api/axiosInstance';
+import RecipeCard from '../../../components/RecipeCard';
 
 export default function RecipeDetailPage() {
   const router = useRouter();
-
   const params = useParams();
   const id = params?.id;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
-
-
-  useEffect(() => {
-    async function fetchRecipe() {
-      try {
-        const token = localStorage.getItem('token');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-        const res = await fetch(`${baseUrl}api/recipe/${id}`, {
-          headers
-        });
-
-        if (!res.ok) throw new Error('레시피 정보를 가져오는 데 실패했습니다.');
-        const data = await res.json();
-        setRecipe(data);
-        setIsBookmarked(data.bookmarked || false);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    if (id) fetchRecipe();
-  }, [id]);
+  const [isCookingMode, setIsCookingMode] = useState(false);
+  const [userIngredients, setUserIngredients] = useState([]);
+  const [ingredientUsage, setIngredientUsage] = useState({});
+  const [similarRecipes, setSimilarRecipes] = useState([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(true);
+  const [displayCount, setDisplayCount] = useState(5);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
@@ -60,23 +41,378 @@ export default function RecipeDetailPage() {
       });
   }, [router]);
 
+  useEffect(() => {
+    async function fetchRecipe() {
+      try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(`${baseUrl}/api/recipe/${id}`, { headers });
+
+        if (!res.ok) throw new Error('레시피 정보를 가져오는 데 실패했습니다.');
+        const data = await res.json();
+        setRecipe(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (id && token) fetchRecipe();
+  }, [id, token, baseUrl]);
+
+  // 사용자 냉장고 재료 조회
+  useEffect(() => {
+    async function fetchUserIngredients() {
+      if (!token || !recipe) return;
+
+      try {
+        const response = await axiosInstance.get('/user-ingredients');
+        setUserIngredients(response.data);
+      } catch (error) {
+        console.error('사용자 재료 조회 실패:', error);
+      }
+    }
+    fetchUserIngredients();
+  }, [token, recipe]);
+
+  useEffect(() => {
+    async function fetchSimilarRecipes() {
+      try {
+        if (!token) {
+          setLoadingSimilar(false);
+          return;
+        }
+
+        const response = await axiosInstance.get(`/api/recommendations/${id}/similar-ingredients`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setSimilarRecipes(response.data);
+      } catch (error) {
+        console.error('비슷한 레시피 로딩 실패:', error);
+      } finally {
+        setLoadingSimilar(false);
+      }
+    }
+
+    if (id) {
+      fetchSimilarRecipes();
+    }
+  }, [id, token, baseUrl]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100) {
+        setDisplayCount(prev => Math.min(prev + 5, similarRecipes.length));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [similarRecipes.length]);
+
+  const handleStartCooking = () => {
+    setIsCookingMode(true);
+    // 초기 상태: 모든 재료를 "남음"으로 설정
+    const initialUsage = {};
+    userIngredients.forEach(ingredient => {
+      initialUsage[ingredient.id] = 'remaining'; // 'remaining' or 'used'
+    });
+    setIngredientUsage(initialUsage);
+  };
+
+  const handleFinishCooking = async () => {
+    try {
+      // 사용된 재료들의 ID 수집
+      const usedIngredientIds = Object.entries(ingredientUsage)
+        .filter(([_, status]) => status === 'used')
+        .map(([id, _]) => parseInt(id));
+
+      if (usedIngredientIds.length === 0) {
+        alert('사용된 재료가 없습니다.');
+        return;
+      }
+
+      // 백엔드에 사용된 재료 업데이트 요청
+      await axiosInstance.post('/user-ingredients/consume', {
+        ingredientIds: usedIngredientIds,
+        recipeId: id
+      });
+
+      alert('요리 완료! 사용된 재료가 냉장고에서 차감되었습니다.');
+      setIsCookingMode(false);
+      router.push('/refrigerator');
+    } catch (error) {
+      console.error('요리 완료 처리 실패:', error);
+      alert('요리 완료 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  const toggleIngredientUsage = (ingredientId) => {
+    setIngredientUsage(prev => ({
+      ...prev,
+      [ingredientId]: prev[ingredientId] === 'remaining' ? 'used' : 'remaining'
+    }));
+  };
+
+  const getMatchedIngredients = () => {
+    if (!recipe || !userIngredients) return [];
+
+    // 레시피 재료와 사용자 재료 매칭
+    const recipeIngredients = recipe.RCP_PARTS_DTLS?.split(',').map(ing => ing.trim()) || [];
+    return userIngredients.filter(userIng =>
+      recipeIngredients.some(recipeIng =>
+        recipeIng.includes(userIng.name) || userIng.name.includes(recipeIng)
+      )
+    );
+  };
+
+  const handleBookmarkChange = (recipeId) => {
+    // 비슷한 레시피 목록에서 북마크된 레시피 제거
+    setSimilarRecipes(prev =>
+      prev.filter(recipe => recipe.recipeId !== recipeId)
+    );
+  };
+
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>레시피를 불러오는 중...</p>
+      <div className="mainContainer">
+        {/* 상단 네비게이션 바 */}
+        <div style={{
+          width: '420px',
+          height: '70px',
+          background: '#fff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 20px',
+          boxSizing: 'border-box',
+          position: 'fixed',
+          top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 10,
+          borderBottom: '1px solid #e0e0e0'
+        }}>
+          <button
+            onClick={() => router.back()}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '18px',
+              cursor: 'pointer'
+            }}
+          >
+            ←
+          </button>
+          <h2 style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            margin: 0
+          }}>
+            레시피 상세
+          </h2>
+          <div style={{ width: '18px' }}></div>
+        </div>
+
+        <div className="appContainer" style={{ paddingTop: '70px' }}>
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>레시피를 불러오는 중...</p>
+          </div>
+        </div>
+        <BottomNavigation />
       </div>
     );
   }
 
   if (!recipe) {
-    return <div className="error-message">레시피를 찾을 수 없습니다.</div>;
+    return (
+      <div className="mainContainer">
+        {/* 상단 네비게이션 바 */}
+        <div style={{
+          width: '420px',
+          height: '70px',
+          background: '#fff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 20px',
+          boxSizing: 'border-box',
+          position: 'fixed',
+          top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 10,
+          borderBottom: '1px solid #e0e0e0'
+        }}>
+          <button
+            onClick={() => router.back()}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '18px',
+              cursor: 'pointer'
+            }}
+          >
+            ←
+          </button>
+          <h2 style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            margin: 0
+          }}>
+            레시피 상세
+          </h2>
+          <div style={{ width: '18px' }}></div>
+        </div>
+
+        <div className="appContainer" style={{ paddingTop: '70px' }}>
+          <div className="error-message">레시피를 찾을 수 없습니다.</div>
+        </div>
+        <BottomNavigation />
+      </div>
+    );
   }
 
   return (
     <div className="mainContainer">
-      <Header />
-      <div className="appContainer">
+      {/* 상단 네비게이션 바 */}
+      <div style={{
+        width: '420px',
+        height: '70px',
+        background: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 20px',
+        boxSizing: 'border-box',
+        position: 'fixed',
+        top: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 10,
+        borderBottom: '1px solid #e0e0e0'
+      }}>
+        <button
+          onClick={() => router.back()}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '18px',
+            cursor: 'pointer'
+          }}
+        >
+          ←
+        </button>
+        <h2 style={{
+          fontSize: '18px',
+          fontWeight: 'bold',
+          margin: 0
+        }}>
+          레시피 상세
+        </h2>
+        <button
+          onClick={handleStartCooking}
+          style={{
+            background: '#f97316',
+            color: 'white',
+            border: 'none',
+            borderRadius: '20px',
+            padding: '8px 16px',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            cursor: 'pointer'
+          }}
+        >
+          요리 시작
+        </button>
+      </div>
+
+      <div className="appContainer" style={{ paddingTop: '70px' }}>
+        {/* 요리 모드일 때 재료 사용 체크 */}
+        {isCookingMode && (
+          <div style={{
+            background: '#e6fff2',
+            padding: '1rem',
+            borderRadius: '12px',
+            margin: '1rem 0',
+            border: '2px solid #22c55e'
+          }}>
+            <h3 style={{ color: '#22c55e', margin: '0 0 1rem 0' }}>🍳 요리 진행 중</h3>
+            <p style={{ fontSize: '14px', color: '#666', margin: '0 0 1rem 0' }}>
+              사용한 재료를 체크해주세요. 요리 완료 후 냉장고에서 자동으로 차감됩니다.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {getMatchedIngredients().map(ingredient => (
+                <div
+                  key={ingredient.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.5rem',
+                    background: 'white',
+                    borderRadius: '8px',
+                    border: '1px solid #e0e0e0'
+                  }}
+                >
+                  <span style={{ fontSize: '16px' }}>{ingredient.name}</span>
+                  <button
+                    onClick={() => toggleIngredientUsage(ingredient.id)}
+                    style={{
+                      background: ingredientUsage[ingredient.id] === 'used' ? '#f97316' : '#e0e0e0',
+                      color: ingredientUsage[ingredient.id] === 'used' ? 'white' : '#666',
+                      border: 'none',
+                      borderRadius: '20px',
+                      padding: '6px 12px',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {ingredientUsage[ingredient.id] === 'used' ? '다씀' : '남음'}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+              <button
+                onClick={() => setIsCookingMode(false)}
+                style={{
+                  flex: 1,
+                  background: '#e0e0e0',
+                  color: '#666',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  fontSize: '16px',
+                  cursor: 'pointer'
+                }}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleFinishCooking}
+                style={{
+                  flex: 1,
+                  background: '#22c55e',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >
+                요리 완료
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 기존 레시피 상세 내용 */}
         <div className="recipe-header">
           <h1>{recipe.RCP_NM}</h1>
         </div>
@@ -143,14 +479,12 @@ export default function RecipeDetailPage() {
 
         <div className="cook-steps">
           <div className="info-card">
-
             <h2>조리 순서</h2>
             {Array.from({ length: 20 }).map((_, i) => {
               const stepKey = `MANUAL${String(i + 1).padStart(2, '0')}`;
               const imgKey = `MANUAL_IMG${String(i + 1).padStart(2, '0')}`;
               const rawStep = recipe[stepKey];
               const img = recipe[imgKey];
-
               const cleanedStep = rawStep?.replace(/^\d+\.\s*/, "");
 
               return rawStep ? (
@@ -176,31 +510,71 @@ export default function RecipeDetailPage() {
           </div>
         </div>
 
-
-        {recipe.HASH_TAG && (
-          <div className="hashtags">
-            {recipe.HASH_TAG.split(',').map((tag, index) => (
-              <span key={index} className="hashtag">#{tag.trim()}</span>
-            ))}
+        {/* 비슷한 레시피 섹션 */}
+        {!loadingSimilar && similarRecipes.length > 0 && (
+          <div className="similar-recipes-section">
+            <h2>비슷한 재료를 사용한 레시피</h2>
+            <div className="similar-recipes-grid">
+              {similarRecipes.slice(0, displayCount).map((similarRecipe) => (
+                <RecipeCard
+                  key={similarRecipe.recipeId}
+                  recipe={{
+                    ...similarRecipe,
+                    rcpNm: similarRecipe.recipeNm || similarRecipe.RCP_NM || similarRecipe.rcpNm
+                  }}
+                  onUnbookmark={handleBookmarkChange}
+                />
+              ))}
+            </div>
+            {displayCount < similarRecipes.length && (
+              <div style={{ textAlign: 'center', marginTop: '20px', color: '#666' }}>
+                스크롤을 내려 더 많은 레시피를 확인하세요
+              </div>
+            )}
           </div>
         )}
 
-        {recipe.RCP_NA_TIP && (
-          <div className="tip-box">
-            <h3>요리 TIP</h3>
-            <p>{recipe.RCP_NA_TIP}</p>
+        {/* 하단 요리 시작하기 버튼 */}
+        {!isCookingMode && (
+          <div style={{
+            position: 'fixed',
+            bottom: '80px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '380px',
+            padding: '0 20px',
+            zIndex: 100
+          }}>
+            <button
+              onClick={handleStartCooking}
+              style={{
+                width: '100%',
+                background: '#22c55e',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '16px',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)'
+              }}
+            >
+              🍳 요리 시작하기
+            </button>
           </div>
         )}
       </div>
       <BottomNavigation />
 
+      {/* 기존 스타일 */}
       <style jsx>{`
         .loading-container {
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          height: 100vh;
+          height: 50vh;
         }
 
         .loading-spinner {
@@ -377,6 +751,25 @@ export default function RecipeDetailPage() {
           color: #dc3545;
           padding: 20px;
           font-size: 1.2rem;
+        }
+
+        .similar-recipes-section {
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #eee;
+        }
+
+        .similar-recipes-section h2 {
+          color: #f59e42;
+          margin-bottom: 20px;
+          font-size: 1.5rem;
+          text-align: center;
+        }
+
+        .similar-recipes-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(390px, 1fr));
+          gap: 20px;
         }
       `}</style>
     </div>
