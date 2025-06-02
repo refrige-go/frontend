@@ -73,6 +73,20 @@ export default function MyPage() {
     }
   };
 
+  //회원탈퇴
+  const handleWithdraw = async () => {
+  if (!window.confirm("정말로 회원 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
+  try {
+    await axiosInstance.delete("/user/withdraw"); // 백엔드에서 deleted: true 처리
+    localStorage.removeItem('accessToken'); // 토큰 삭제
+    alert("회원 탈퇴가 완료되었습니다.");
+    router.replace("/login"); // 로그인 페이지로 이동
+  } catch (error) {
+    alert("회원 탈퇴에 실패했습니다.");
+  }
+};
+
+
   return (
     <div className="mainContainer">
       <Header />
@@ -102,7 +116,8 @@ export default function MyPage() {
             </div>
           </div>
         </div>
-        <button className="logout-btn" onClick={handleLogout}>로그아웃</button>
+        <button className="gray-btn" onClick={handleLogout}>로그아웃</button>
+        <button className="gray-btn" onClick={handleWithdraw}>회원탈퇴</button>
       </div>
        <BottomNavigation />
     </div>
