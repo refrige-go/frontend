@@ -272,15 +272,6 @@ const handleModalRecommend = async () => {
               `}
               onClick={() => setSelectedIngredient(item)}
             >            
-                <button
-                  className={styles.top}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(item.id);
-                  }}
-                >
-                  ✕
-                </button>
 
                 <div className={styles.cardContent}>
                   <div className={styles.emoji}>
@@ -318,14 +309,16 @@ const handleModalRecommend = async () => {
         </div>
 
         {selectedIngredient && (
-          <div
-            className={styles.overlay}
-            onClick={() => setSelectedIngredient(null)}
-          >
-            <div
-              className={styles.detailContainer}
-              onClick={(e) => e.stopPropagation()}
-            >
+    <div
+    className={styles.overlay}
+    onClick={() => {
+      if (!showConfirmModal) setSelectedIngredient(null);  // ❗ 모달 떠있으면 상세 닫힘 막기
+    }}
+  >
+    <div
+      className={styles.detailContainer}
+      onClick={(e) => e.stopPropagation()}
+    >
               <div className={styles.detailHeader}>
 
                 <div className={selectedIngredient.imageUrl && selectedIngredient.imageUrl !== 'null' ? styles.emoji : styles.emojiIcon}>
