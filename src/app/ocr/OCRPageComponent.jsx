@@ -288,7 +288,7 @@ export default function OCRPage() {
           </button>
           {/* 촬영 버튼 */}
           <button className="footer-btn main-btn" onClick={capture}>  
-            <span style={{ fontSize: "0.8em", fontWeight: "bold", lineHeight: 1 }}>촬영</span>
+            <span style={{ fontSize: "1.2em", fontWeight: "bold", lineHeight: 1, transform: "translateY(-5px)" }}>📷</span>
           </button>
           {/* 갤러리 버튼 */}
           <button className="footer-btn" onClick={openGallery}>
