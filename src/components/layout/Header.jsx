@@ -10,6 +10,10 @@ const Header = () => {
     router.push('/');
   };
 
+  const handleNotificationClick = () => {
+    router.push('/notifications');
+  };
+
   return (
     <header
       style={{
@@ -57,6 +61,7 @@ const Header = () => {
         <img
           src="/images/bell.svg"
           alt="알림"
+          onClick={handleNotificationClick}
           style={{
             width: 24,
             height: 24,
