@@ -72,6 +72,8 @@ export default function Home() {
             placeholder="Search"
           />
 
+          <br />
+
           <WeatherRecommend
             userId={userId}
             bookmarkedIds={bookmarkedIds}
@@ -85,7 +87,7 @@ export default function Home() {
             onBookmark={handleBookmark}
             onUnbookmark={handleUnbookmark}
           />
-          
+
           <IngredientRecommendationsSection
             userId={userId}
             bookmarkedIds={bookmarkedIds}
