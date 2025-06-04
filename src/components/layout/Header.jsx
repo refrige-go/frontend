@@ -2,16 +2,13 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const Header = () => {
   const router = useRouter();
 
   const handleLogoClick = () => {
     router.push('/');
-  };
-
-  const handleNotificationClick = () => {
-    router.push('/notifications');
   };
 
   return (
@@ -58,17 +55,18 @@ const Header = () => {
       {/* 우측 아이콘들 */}
       <div style={{ display: 'flex', gap: '16px' }}> {/* 아이콘들을 감싸는 컨테이너 */}
         {/* 알림 아이콘 */}
-        <img
-          src="/images/bell.svg"
-          alt="알림"
-          onClick={handleNotificationClick}
-          style={{
-            width: 24,
-            height: 24,
-            objectFit: 'contain',
-            cursor: 'pointer',
-          }}
-        />
+        <Link href="/notifications" style={{ display: 'flex', alignItems: 'center' }}>
+          <img
+            src="/images/bell.svg"
+            alt="알림"
+            style={{
+              width: 24,
+              height: 24,
+              objectFit: 'contain',
+              cursor: 'pointer',
+            }}
+          />
+        </Link>
       </div>
     </header>
   );
