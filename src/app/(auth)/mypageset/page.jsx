@@ -3,31 +3,31 @@
 import axiosInstance from "../../../api/axiosInstance";
 import Header from '../../../components/layout/Header'
 import BottomNavigation from '../../../components/layout/BottomNavigation'
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "../../../styles/pages/mypageset.css"
 
 export default function MyPageSet() {
   const router = useRouter();
-  const [nickname, setNickname] = useState(""); 
+  const [nickname, setNickname] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleEditSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    // 회원정보 수정
-    await axiosInstance.put("/user/mypage-update", {
-      nickname: nickname,
-      password: password,
-    });
-    alert("회원정보가 수정되었습니다.");
-    router.replace("/mypage");
-  } catch (err) {
-    alert("회원정보 수정에 실패했습니다.");
-  }
-};
+    try {
+      // 회원정보 수정
+      await axiosInstance.put("/user/mypage-update", {
+        nickname: nickname,
+        password: password,
+      });
+      alert("회원정보가 수정되었습니다.");
+      router.replace("/mypage");
+    } catch (err) {
+      alert("회원정보 수정에 실패했습니다.");
+    }
+  };
 
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function MyPageSet() {
     axiosInstance.get("/user/mypage")
       .then(res => {
         setNickname(res.data.nickname);
-        setUsername(res.data.username); 
+        setUsername(res.data.username);
       })
       .catch(err => {
         console.log("유저 정보 요청 실패", err);
@@ -45,7 +45,7 @@ export default function MyPageSet() {
     const accessToken = localStorage.getItem('accessToken');
 
     if (accessToken) {
-    
+
       const payloadBase64 = accessToken.split('.')[1];
       const payloadJson = atob(payloadBase64);
       const payload = JSON.parse(payloadJson);
@@ -81,14 +81,60 @@ export default function MyPageSet() {
       });
   }, [router]);
 
-  
+  const [preview, setPreview] = useState(null);
+  const fileInputRef = useRef();
+
+  // 파일 미리보기
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  // 파일 업로드
+  const handleUpload = async () => {
+    const file = fileInputRef.current.files[0];
+    if (!file) {
+      alert("이미지를 선택하세요.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("profileImage", file);
+
+    try {
+      const res = await axiosInstance.post("/user/profile-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      alert("프로필 사진이 업로드되었습니다!");
+      // res.data.url → 새 프로필 이미지 URL
+    } catch (err) {
+      alert("업로드 실패");
+    }
+  };
+
+
 
   return (
     <div className="mainContainer">
       <Header />
       <div className="appContainer mypageset">
         <div className="profile">
-          <div className="img"></div>
+          <div className="profile-img">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              ref={fileInputRef}
+            />
+            {preview && (
+              <div className="img-preview">
+                <img src={preview} alt="미리보기" width={120} height={120} style={{ borderRadius: "50%" }} />
+              </div>
+            )}
+            <button onClick={handleUpload}>이미지수정</button>
+          </div>
           <span>{nickname || "닉네임을 불러오는 중..."}</span>
         </div>
         <div className="edit-box">

@@ -96,17 +96,15 @@ export default function MyPage() {
           <span>{nickname || "닉네임을 불러오는 중..."}</span>
         </div>
         <div className="myCook">
-          <h3>나의 요리생활</h3>
+          <h3>마이페이지</h3>
           <div className="mypage-box">
-            <div>
-              <i><img src="../images/bookmarksorg.svg" alt="bookmarksorg" /></i>
-              <span>저장한 레시피</span>
-            </div>
+            <button className="gray-btn" onClick={handleLogout}>
+              <i><img src="../images/logout.svg" alt="logout" /></i>
+              <span>로그아웃</span></button>
             <img src="../images/bar.svg" alt="bar" />
-            <div>
-              <i><img src="../images/basket.svg" alt="basket" /></i>
-              <span>내 식재료 목록</span>
-            </div>
+            <button className="gray-btn" onClick={handleWithdraw}>
+               <i><img src="../images/userdelete.svg" alt="userdelete" /></i>
+              <span>회원탈퇴</span></button>
             <img src="../images/bar.svg" alt="bar" />
             <div>
               <a href="../mypageset">
@@ -116,8 +114,7 @@ export default function MyPage() {
             </div>
           </div>
         </div>
-        <button className="gray-btn" onClick={handleLogout}>로그아웃</button>
-        <button className="gray-btn" onClick={handleWithdraw}>회원탈퇴</button>
+       
       </div>
        <BottomNavigation />
     </div>
