@@ -44,6 +44,9 @@ export default function RefrigeratorComponent() {
   const [token, setToken] = useState(null);
   const [username, setUsername] = useState(null);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [sortOption, setSortOption] = useState('createdDesc'); // 기본 등록순(최신순)
+  
 
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
@@ -232,11 +235,37 @@ const handleModalRecommend = async () => {
     }
   };
 
-  const filteredIngredients = ingredients.filter((item) =>
+  const filteredIngredients = ingredients
+  .filter((item) =>
     activeTab === 'expired'
       ? item.expiryDaysLeft !== null && item.expiryDaysLeft < 0
       : item.expiryDaysLeft === null || item.expiryDaysLeft >= 0
-  );
+  )
+  .filter((item) =>
+    item.name.toLowerCase().includes(searchKeyword.toLowerCase())
+  )
+  .sort((a, b) => {
+    if (sortOption === 'createdDesc') {
+      return new Date(b.createdAt) - new Date(a.createdAt); // 등록순(최신순)
+    }
+    if (sortOption === 'expiryAsc') {
+      const aVal = a.expiryDaysLeft === null ? Infinity : a.expiryDaysLeft;
+      const bVal = b.expiryDaysLeft === null ? Infinity : b.expiryDaysLeft;
+      return aVal - bVal;
+    }
+    if (sortOption === 'expiryDesc') {
+      const aVal = a.expiryDaysLeft === null ? Infinity : a.expiryDaysLeft;
+      const bVal = b.expiryDaysLeft === null ? Infinity : b.expiryDaysLeft;
+      return bVal - aVal;
+    }
+    if (sortOption === 'nameAsc') {
+      return a.name.localeCompare(b.name);
+    }
+    if (sortOption === 'nameDesc') {
+      return b.name.localeCompare(a.name);
+    }
+    return 0;
+  });  
 
   if (!token || !username) return null;
 
@@ -259,6 +288,30 @@ const handleModalRecommend = async () => {
             유통기한 초과
           </button>
         </div>
+
+        <div className={styles.filterBar}>
+  <input
+    type="text"
+    placeholder="재료 이름 검색"
+    value={searchKeyword}
+    onChange={(e) => setSearchKeyword(e.target.value)}
+    className={styles.searchInput}
+  />
+<select
+  value={sortOption}
+  onChange={(e) => setSortOption(e.target.value)}
+  className={styles.sortSelect}
+>
+  <option value="createdDesc">등록순</option>
+  <option value="expiryAsc">유통기한 오름차순</option>
+  <option value="expiryDesc">유통기한 내림차순</option>
+  <option value="nameAsc">이름 오름차순</option>
+  <option value="nameDesc">이름 내림차순</option>
+</select>
+
+
+</div>
+
 
         <div className={styles.scrollArea}>
           <div className={styles.grid}>
@@ -289,13 +342,13 @@ const handleModalRecommend = async () => {
                     <div className={styles.category}>
                       {item.category || '분류 없음'}
                       {!item.frozen &&
-                        item.expiryDaysLeft !== null &&
-                        item.expiryDaysLeft >= 0 &&
-                        item.expiryDaysLeft <= 3 && (
-                          <span className={`${styles.dDay} ${item.frozen ? styles.hideDDayCircle : ''}`}>
-                            D-{item.expiryDaysLeft}
-                          </span>
-                        )}
+  item.expiryDaysLeft !== null &&
+  item.expiryDaysLeft >= 0 &&
+  item.expiryDaysLeft <= 3 && (
+    <span className={`${styles.dDay} ${item.frozen ? styles.hideDDayCircle : ''}`}>
+     {`D-${item.expiryDaysLeft}`}
+    </span>
+)}
                       {item.frozen && <span className={styles.frozenIcon}>❄️</span>}
                     </div>
                     <div className={styles.nameDday}>
