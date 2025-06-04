@@ -37,7 +37,12 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
         latitude: lat,
         longitude: lon
       });
-      setRecipes(res.data.recipes);
+
+      const recipesData = res.data.recipes;
+      setRecipes(Array.isArray(recipesData) ? recipesData : []); // 안전하게 설정
+      console.log('서버 응답:', res.data);
+
+
       setWeather(res.data.weather);
       setStatus('추천 완료');
     } catch (error) {
@@ -45,6 +50,7 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
       console.error('날씨 기반 추천 실패:', error);
     }
   };
+
 
   const handleBookmark = async (recipeId) => {
     try {

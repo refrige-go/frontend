@@ -10,12 +10,14 @@ import "../../../styles/pages/mypage.css"
 export default function MyPage() {
   const router = useRouter();
   const [nickname, setNickname] = useState(""); 
+  const [profileImgUrl, setProfileImgUrl] = useState("");
 
   // nickname 불러오기
   useEffect(() => {
      axiosInstance.get("/user/mypage")
       .then(res => {
         setNickname(res.data.nickname); 
+        setProfileImgUrl(res.data.profileImageUrl);
       })
       .catch(err => {
         console.log("유저 정보 요청 실패", err);
@@ -92,21 +94,29 @@ export default function MyPage() {
       <Header />
       <div className="appContainer mypage">
         <div className="profile">
-          <div className="img"></div>
+          <div className="img">
+             {profileImgUrl ? (
+              <img
+                src={profileImgUrl}
+                alt="프로필 이미지"
+                width={120}
+                height={120}
+                style={{ borderRadius: "50%", objectFit: "cover" }}
+              />
+            ) : null }
+          </div>
           <span>{nickname || "닉네임을 불러오는 중..."}</span>
         </div>
         <div className="myCook">
-          <h3>나의 요리생활</h3>
+          <h3>마이페이지</h3>
           <div className="mypage-box">
-            <div>
-              <i><img src="../images/bookmarksorg.svg" alt="bookmarksorg" /></i>
-              <span>저장한 레시피</span>
-            </div>
+            <button className="gray-btn" onClick={handleLogout}>
+              <i><img src="../images/logout.svg" alt="logout" /></i>
+              <span>로그아웃</span></button>
             <img src="../images/bar.svg" alt="bar" />
-            <div>
-              <i><img src="../images/basket.svg" alt="basket" /></i>
-              <span>내 식재료 목록</span>
-            </div>
+            <button className="gray-btn" onClick={handleWithdraw}>
+               <i><img src="../images/userdelete.svg" alt="userdelete" /></i>
+              <span>회원탈퇴</span></button>
             <img src="../images/bar.svg" alt="bar" />
             <div>
               <a href="../mypageset">
@@ -116,8 +126,7 @@ export default function MyPage() {
             </div>
           </div>
         </div>
-        <button className="gray-btn" onClick={handleLogout}>로그아웃</button>
-        <button className="gray-btn" onClick={handleWithdraw}>회원탈퇴</button>
+       
       </div>
        <BottomNavigation />
     </div>

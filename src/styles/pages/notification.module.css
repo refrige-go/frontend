@@ -1,0 +1,90 @@
+.pageContainer {
+    min-height: 100vh;
+  }
+  
+  .contentWrapper {
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-bottom: 80px;
+  }
+
+  .notificationItem {
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.3s ease-in-out;
+    transition: background-color 0.2s ease;
+  }
+  
+  /* 읽지 않은 알림 - 상아색 */
+  .notificationItem.unread {
+    background-color: #FFEFD1; /* 상아색 */
+  }
+  
+  /* 읽은 알림 - 흰색 */
+  .notificationItem.read {
+    background-color: #ffffff; /* 기본 흰색 */
+  }
+  
+  .tabContainer {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding: 10px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .tabContainer::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .tabButton {
+    flex: 1;
+    min-width: 100px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: white;
+    color: #f59e42;
+    border: 1px solid #f59e42;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  
+  .tabButton.active {
+    background-color: #f59e42;
+    color: white;
+    box-shadow: 0 4px 10px rgba(255, 172, 133, 0.3);
+  }
+  
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .contentWrapper {
+      padding: 16px;
+    }
+  
+    .titleSection {
+      padding: 20px;
+      border-radius: 16px;
+    }
+
+  }
