@@ -69,7 +69,7 @@ export default function Home() {
           <SearchWithCategory
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search"
+            placeholder="레시피를 검색해보세요..."
           />
 
           <br />
