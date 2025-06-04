@@ -44,11 +44,11 @@
     height: 115px;
     align-items: center;
     justify-content: center;
-    gap: 25px;
+    gap: 35px;
     border-radius: 10px;
 }
 
-.mypage .myCook .mypage-box div,
+.mypage .myCook .mypage-box button,
 .mypage .myCook .mypage-box a{
     display: flex;
     flex-direction: column;
@@ -56,20 +56,19 @@
     gap: 5px;
 }
 
+.mypage .myCook .mypage-box button{
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
 .mypage .myCook .mypage-box img[alt="bar"]{
     width: 2px;
     height: 15px;
 }
-.mypage .myCook .mypage-box div span{
+.mypage .myCook .mypage-box span{
   color: #333;
     font-size: 12px;
     font-weight: bold;
 }
 
-.mypage .gray-btn{
-    height: 40px;
-    width: 150px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-}

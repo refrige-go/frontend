@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const Header = () => {
   const router = useRouter();
@@ -23,7 +24,7 @@ const Header = () => {
         boxSizing: 'border-box',
         borderBottom: '2px solid #e5e7eb',
         position: 'fixed',
-        zIndex: 10,
+        zIndex: 1000,
       }}
     >
       {/* 로고 */}
@@ -54,16 +55,18 @@ const Header = () => {
       {/* 우측 아이콘들 */}
       <div style={{ display: 'flex', gap: '16px' }}> {/* 아이콘들을 감싸는 컨테이너 */}
         {/* 알림 아이콘 */}
-        <img
-          src="/images/bell.svg"
-          alt="알림"
-          style={{
-            width: 24,
-            height: 24,
-            objectFit: 'contain',
-            cursor: 'pointer',
-          }}
-        />
+        <Link href="/notifications" style={{ display: 'flex', alignItems: 'center' }}>
+          <img
+            src="/images/bell.svg"
+            alt="알림"
+            style={{
+              width: 24,
+              height: 24,
+              objectFit: 'contain',
+              cursor: 'pointer',
+            }}
+          />
+        </Link>
       </div>
     </header>
   );

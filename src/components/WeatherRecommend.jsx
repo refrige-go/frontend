@@ -37,7 +37,12 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
         latitude: lat,
         longitude: lon
       });
-      setRecipes(res.data.recipes);
+
+      const recipesData = res.data.recipes;
+      setRecipes(Array.isArray(recipesData) ? recipesData : []); // 안전하게 설정
+      console.log('서버 응답:', res.data);
+
+
       setWeather(res.data.weather);
       setStatus('추천 완료');
     } catch (error) {
@@ -46,14 +51,17 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
     }
   };
 
+
   const handleBookmark = async (recipeId) => {
     try {
       await onBookmark(recipeId);
-      setRecipes(recipes.map(recipe =>
-        recipe.rcpSeq === recipeId
-          ? { ...recipe, bookmarked: true }
-          : recipe
-      ));
+      setRecipes(prevRecipes =>
+        prevRecipes.map(recipe =>
+          recipe.rcpSeq === recipeId
+            ? { ...recipe, bookmarked: true }
+            : recipe
+        )
+      );
     } catch (error) {
       console.error('북마크 추가 실패:', error);
     }
@@ -62,11 +70,13 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
   const handleUnbookmark = async (recipeId) => {
     try {
       await onUnbookmark(recipeId);
-      setRecipes(recipes.map(recipe =>
-        recipe.rcpSeq === recipeId
-          ? { ...recipe, bookmarked: false }
-          : recipe
-      ));
+      setRecipes(prevRecipes =>
+        prevRecipes.map(recipe =>
+          recipe.rcpSeq === recipeId
+            ? { ...recipe, bookmarked: false }
+            : recipe
+        )
+      );
     } catch (error) {
       console.error('북마크 삭제 실패:', error);
     }
@@ -111,7 +121,7 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
     return <div>{status}</div>;
   }
 
-  if (recipes.length === 0) {
+  if (!recipes || recipes.length === 0) {
     return null;
   }
 
@@ -127,7 +137,7 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         {...dragHandlers}
       >
-        {recipes.map((recipe) => (
+        {recipes && recipes.map((recipe) => (
           <div className="slide-item" key={recipe.rcpSeq}>
             <BookmarkCard
               recipe={{
