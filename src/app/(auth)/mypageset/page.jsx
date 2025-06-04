@@ -12,6 +12,9 @@ export default function MyPageSet() {
   const [nickname, setNickname] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [profileImageUrl, setProfileImageUrl] = useState(""); // 이미지 URL 저장
+  const [preview, setPreview] = useState(null);
+  const fileInputRef = useRef();
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -36,6 +39,7 @@ export default function MyPageSet() {
       .then(res => {
         setNickname(res.data.nickname);
         setUsername(res.data.username);
+        setProfileImageUrl(res.data.profileImageUrl || "");
       })
       .catch(err => {
         console.log("유저 정보 요청 실패", err);
@@ -81,8 +85,7 @@ export default function MyPageSet() {
       });
   }, [router]);
 
-  const [preview, setPreview] = useState(null);
-  const fileInputRef = useRef();
+ 
 
   // 파일 미리보기
   const handleFileChange = (e) => {
@@ -108,7 +111,7 @@ export default function MyPageSet() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("프로필 사진이 업로드되었습니다!");
-      // res.data.url → 새 프로필 이미지 URL
+      window.location.reload();
     } catch (err) {
       alert("업로드 실패");
     }
@@ -128,11 +131,15 @@ export default function MyPageSet() {
               onChange={handleFileChange}
               ref={fileInputRef}
             />
-            {preview && (
+             {preview ? (
               <div className="img-preview">
                 <img src={preview} alt="미리보기" width={120} height={120} style={{ borderRadius: "50%" }} />
               </div>
-            )}
+            ) : profileImageUrl ? (
+              <div className="img-preview">
+                <img src={profileImageUrl} alt="프로필" width={120} height={120} style={{ borderRadius: "50%" }} />
+              </div>
+            ) : null}
             <button onClick={handleUpload}>이미지수정</button>
           </div>
           <span>{nickname || "닉네임을 불러오는 중..."}</span>
