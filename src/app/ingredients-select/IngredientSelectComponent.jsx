@@ -60,6 +60,7 @@ export default function IngredientSelectComponent() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [token, setToken] = useState(null);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
@@ -166,11 +167,14 @@ export default function IngredientSelectComponent() {
         </div>
 
         <div className={styles.searchWrap}>
-          <input
-            type="text"
-            placeholder="냉장고 속 재료를 찾아보세요!"
-            className={styles.searchInput}
-          />
+        <input
+  type="text"
+  placeholder="냉장고 속 재료를 찾아보세요!"
+  className={styles.searchInput}
+  value={searchKeyword}
+  onChange={(e) => setSearchKeyword(e.target.value)}
+/>
+
           <span className={styles.searchIcon}>🔍</span>
         </div>
 
@@ -190,33 +194,39 @@ export default function IngredientSelectComponent() {
         </div>
 
         <div className={styles.ingredientScroll}>
-          <ul className={styles.ingredientList}>
-            {ingredients.map((item) => (
-              <li key={item.id} className={styles.ingredientItem}>
-                <div className={styles.ingredientInfo}>
-                {item.imageUrl ? (
-  <img
-    src={item.imageUrl}
-    alt=""
-    className={styles.ingredientImage}
-  />
-) : (
-  <span className={styles.ingredientEmoji}>
-    {getCategoryIcon(item.category)}
-  </span>
-)}
-                  <span className={styles.ingredientName}>{item.name}</span>
-                </div>
-                <input
-                  type="checkbox"
-                  className={styles.addButton}
-                  checked={selectedIds.includes(item.id)}
-                  onChange={() => toggleSelection(item.id)}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
+  <ul className={styles.ingredientList}>
+    {ingredients
+      .filter((item) =>
+        searchKeyword.trim() === '' ||
+        item.name.toLowerCase().includes(searchKeyword.toLowerCase())
+      )
+      .map((item) => (
+        <li key={item.id} className={styles.ingredientItem}>
+          <div className={styles.ingredientInfo}>
+            {item.imageUrl ? (
+              <img
+                src={item.imageUrl}
+                alt=""
+                className={styles.ingredientImage}
+              />
+            ) : (
+              <span className={styles.ingredientEmoji}>
+                {getCategoryIcon(item.category)}
+              </span>
+            )}
+            <span className={styles.ingredientName}>{item.name}</span>
+          </div>
+          <input
+            type="checkbox"
+            className={styles.addButton}
+            checked={selectedIds.includes(item.id)}
+            onChange={() => toggleSelection(item.id)}
+          />
+        </li>
+      ))}
+  </ul>
+</div>
+
 
         <button
           className={styles.addManualBtn}
