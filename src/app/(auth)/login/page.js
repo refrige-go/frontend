@@ -68,10 +68,6 @@ export default function LoginPage() {
           </label>
           <button className="loginBtn" type="submit">로그인</button>
         </form>
-        <div className="socialBtns">
-          <button>카카오로 계속하기</button>
-          <button>Google로 계속하기</button>
-        </div>
         <div className="authActionBox">
           <Link href="/signup"><span>회원가입</span></Link>
           <Link href="/"><span>둘러보기</span></Link>
