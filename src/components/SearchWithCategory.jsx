@@ -14,7 +14,7 @@ const defaultCategories = [
   { label: '스페인식', icon: '🥘' },
   { label: '다이어트식', icon: '🥗' },
   { label: '영유아식', icon: '🍼' },
-  { label: '더보기', icon: '⋯' },
+  { label: '기타', icon: '⋯' },
 ];
 
 export default function SearchWithCategory({ value, onChange, placeholder = "Search", categories = defaultCategories }) {

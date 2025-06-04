@@ -27,7 +27,7 @@
 
 .tabActive {
   flex: 1;
-  background: #f97316;
+  background: #f59e42;
   color: white;
   font-weight: bold;
   padding: 15px;
@@ -38,11 +38,11 @@
 .tabInactive {
   flex: 1;
   background: white;
-  color: #f97316;
+  color: #f59e42;
   font-weight: bold;
   padding: 10px;
   border-radius: 999px;
-  border: 1px solid #f97316;
+  border: 1px solid #f59e42;
 }
 
 /* 재료 카드 그리드 */
@@ -60,6 +60,9 @@
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;        
+  max-width: 190px;  
+  margin: 0 auto;    
 }
 
 .frozenCard {
@@ -90,18 +93,19 @@
   font-size: 12px;
   color: #999;
   display: flex;             
-  align-items: center;     
+  align-items: center;    
+  white-space: nowrap; 
 }
 
 .dDay {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;               /* 가로 크기 */
+  width: 43px;               /* 가로 크기 */
   height: 23px;              /* 세로 크기 */
   background-color: white;   /* 배경색 흰색 */
-  color: #f97316;            /* 텍스트 색 */
-  border: 2px solid #f97316; /* 테두리 색 */
+  color: #f59e42;          /* 텍스트 색 */
+  border: 2px solid #f59e42;/* 테두리 색 */
   border-radius: 12px;        /* 모서리 둥글게 */
   font-weight: bold;
   font-size: 12px;
@@ -121,7 +125,7 @@
   border: none;
   background: transparent;
   font-size: 14px;
-  color: #f97316;
+  color:#f59e42;
   font-weight: bold;
   opacity: 0 !important;            /* ← 숨김 상태 강제 적용 */
   pointer-events: none !important;  /* ← 클릭 막기 */
@@ -159,6 +163,8 @@
   overflow-y: auto;
   z-index: 10000;          /* 최상단 보장 */
   box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  transform: translateX(-2%);
+
 }
 
 
@@ -183,7 +189,7 @@
 .detailDday {
   font-size: 24px;
   font-weight: bold;
-  color: #f97316;
+  color: #f59e42;
 }
 
 .frozenText {
@@ -221,12 +227,12 @@
 
 .deleteBtn {
   background: #fff;
-  border: 1px solid #f97316;
-  color: #f97316;
+  border: 1px solid #f59e42;
+  color: #f59e42;
 }
 
 .completeBtn {
-  background: #f97316;
+  background: #f59e42;
   color: white;
 }
 
@@ -274,7 +280,7 @@
 }
 
 .toggleSwitch input:checked + .slider {
-  background-color: #f97316;
+  background-color: #f59e42;
 }
 
 .toggleSwitch input:checked + .slider::before {
@@ -287,7 +293,7 @@
   bottom: 85px;
   left: 50%;
   transform: translateX(-50%);
-  background: #f97316;
+  background: #f59e42;
   color: white;
   padding: 18px 24px;
   border-radius: 24px;
@@ -303,7 +309,7 @@
   bottom: 170px;
   right: 50%;
   transform: translateX(180px); 
-  background: #f97316;
+  background: #f59e42;
   color: white;
   width: 48px;
   height: 48px;
@@ -354,7 +360,7 @@
 
 /* 선택지 버튼 스타일 */
 .addOptionBtn {
-  background-color: #f97316;
+  background-color: #f59e42;
   color: #ffffff;
   border: none;
   border-radius: 999px;
@@ -368,7 +374,7 @@
 }
 
 .addOptionBtn:hover {
-  background-color: #fb923c;
+  background-color:#f59e42;
 }
 
 /* 모달 배경 어둡게 */
@@ -385,6 +391,7 @@
   z-index: 2000;
   align-items: flex-start;  
   padding-top: 350px;    
+  z-index: 11000;
 }
 
 /* 모달 박스 중앙 */
@@ -395,6 +402,7 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
   min-width: 260px;
+  z-index: 11001;
 }
 
 /* 버튼 묶음 */
@@ -408,8 +416,8 @@
 /* 취소 버튼 */
 .cancelBtn {
   background-color: #fff;
-  color: #f97316;
-  border: 1px solid #f97316;
+  color: #f59e42;
+  border: 1px solid #f59e42;
   border-radius: 8px;
   padding: 8px 16px;
   font-weight: bold;
@@ -418,7 +426,7 @@
 
 /* 삭제 버튼 */
 .confirmBtn {
-  background-color: #f97316;
+  background-color: #f59e42;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -493,4 +501,60 @@
   height: 100vh;
   background: transparent;
   z-index: 1000;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 80px; 
+    scrollbar-width: none;     
+    -ms-overflow-style: none; 
+}
+
+.scrollArea::-webkit-scrollbar {
+  display: none;              
+}
+
+/* styles/pages/refrigerator.module.css 안에 추가 */
+.filterBar {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background-color: #f9fafb;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #f59e42;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+}
+
+.sortSelect {
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background-color: #f9fafb;
+  font-size: 15px;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.sortSelect:focus {
+  outline: none;
+  border-color: #f59e42;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
 }

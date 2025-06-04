@@ -27,7 +27,7 @@
 }
 
 .doneBtn {
-  background: #f97316;
+  background: #f59e42;   
   color: white;
   border: none;
   font-weight: bold;
@@ -162,7 +162,7 @@
 }
 
 .toggleSwitch input:checked + .slider {
-  background-color: #f97316;
+  background-color: #f59e42;   
 }
 
 .toggleSwitch input:checked + .slider::before {
