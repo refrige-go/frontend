@@ -3,63 +3,90 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-
 export default function Page() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [token, setToken] = useState(null); // 토큰 상태 추가
   const categoryList = [
     "과일", "채소", "육류", "수산물/해산물", "곡류/분말", "조미료/양념", "면/떡", "두류/콩류", "기타"
   ];
   const [ingredients, setIngredients] = useState([]);
   const [input, setInput] = useState('');
 
-    // 프론트 -> 백엔드
-  const saveIngredients = async (ingredients) => {
-  try {
-    const response = await fetch('/api/ocr/confirm', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(ingredients)
-    });
-    
-    if (!response.ok) {
-      throw new Error('저장 실패');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('재료 저장 중 오류:', error);
-    throw error;
-  }
-};
+  // 토큰 로드
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    setToken(storedToken);
+  }, []);
 
-  // OCR 결과 불러오기
+  // 프론트 -> 백엔드
+  const saveIngredients = async (ingredients) => {
+    try {
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch('http://localhost:8080/api/ocr/confirm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(ingredients)
+      });
+      
+      if (!response.ok) {
+        throw new Error('저장 실패');
+      }
+
+      // 204 No Content 처리
+      if (response.status === 204) {
+        return null;
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('재료 저장 중 오류:', error);
+      throw error;
+    }
+  };
+
+  // OCR 데이터 로드
   useEffect(() => {
     const data = sessionStorage.getItem('ocr_ingredients');
     if (data) {
       try {
         const parsedData = JSON.parse(data);
+        const purchaseDate = (!Array.isArray(parsedData) && parsedData.purchaseDate) 
+          ? parsedData.purchaseDate 
+          : '';
         const ocrIngredients = Array.isArray(parsedData)
           ? parsedData
           : (parsedData.ingredients || []);
-        const purchaseDate = parsedData.purchaseDate || '';
-        const formatted = ocrIngredients.map(item => ({
-          ...item,
-          status: item.status || (
-            item.confidence === null || item.confidence === undefined
-              ? 'manual'
-              : item.confidence >= 70
-                ? 'selected'
-                : item.confidence >= 50
-                  ? 'need_check'
-                  : 'uncertain'
-          ),
-          isFrozen: false,
-          purchaseDate: purchaseDate || '',
-          expirationDate: ''
-        }));
+        
+        const formatted = ocrIngredients
+          .map(item => ({
+            name: item.matched_name || item.name || '',
+            text: item.original_text || item.text || '',
+            confidence: item.confidence,
+            status: item.status || 
+              (item.confidence === null || item.confidence === undefined
+                ? 'manual'
+                : item.confidence >= 0.7
+                  ? 'selected'
+                  : item.confidence >= 0.5
+                    ? 'need_check'
+                    : 'uncertain'),
+            category: item.category || '기타',
+            isFrozen: false,
+            purchaseDate: purchaseDate,
+            expirationDate: ''
+          }))
+          .filter(item =>
+            item.confidence !== 0.8 &&
+            item.name !== item.text
+          );
         setIngredients(formatted);
       } catch (e) {
         setIngredients([]);
@@ -120,39 +147,36 @@ export default function Page() {
     setInput('');
   };
 
-
-  // 선택된 재료만 complete로 (세션스토리지에 저장, 쿼리 없이 이동)
+  // 선택된 재료만 complete로
   const handleAddSelected = async () => {
-  const selected = ingredients
-    .filter(ing => ing.status === 'selected' || ing.status === 'manual')
-    .map(ing => ({
-      name: typeof ing.name === 'object' ? ing.name.matchedName : ing.name,
-      category: ing.category || (ing.name?.mainCategory || '미분류'),
-      defaultExpiryDays: null, // 기본값 설정 필요
-      storageMethod: ing.isFrozen ? '냉동' : '냉장', // 냉동여부에 따라 저장방법 설정
-      imageUrl: null // 이미지 URL이 있다면 설정
-    }));
+    const selected = ingredients
+      .filter(ing => ing.status === 'selected' || ing.status === 'manual')
+      .map(ing => ({
+        name: typeof ing.name === 'object' ? ing.name.matchedName : ing.name,
+        category: ing.category || (ing.name?.mainCategory || '미분류'),
+        isFrozen: ing.isFrozen,
+        purchaseDate: ing.purchaseDate,
+        expirationDate: ing.expirationDate,
+        storageMethod: ing.isFrozen ? '냉동' : '냉장'
+      }));
 
-  if (selected.length === 0) {
-    alert('최소 1개 이상의 재료를 선택해주세요.');
-    return;
-  }
+    if (selected.length === 0) {
+      alert('최소 1개 이상의 재료를 선택해주세요.');
+      return;
+    }
 
-  setIsLoading(true);
-  try {
-    // 백엔드로 데이터 전송
-    await saveIngredients(selected);
-    
-    // 성공 시 세션스토리지에 저장하고 다음 페이지로 이동
-    sessionStorage.setItem('ocr_selected_ingredients', JSON.stringify(selected));
-    router.push('/ocr/complete');
-  } catch (error) {
-    alert('재료 저장 중 오류가 발생했습니다.');
-    console.error(error);
-  } finally {
-    setIsLoading(false);
-  }
-};
+    setIsLoading(true);
+    try {
+      await saveIngredients(selected);
+      sessionStorage.setItem('ocr_selected_ingredients', JSON.stringify(selected));
+      router.push('/ocr/complete');
+    } catch (error) {
+      alert('재료 저장 중 오류가 발생했습니다.');
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // 카드 스타일
   const getCardStyle = status => {
@@ -186,7 +210,8 @@ export default function Page() {
       {status === 'selected' || status === 'manual' ? '✓' : ''}
     </button>
   );
-    return (
+
+  return (
     <div className="container">
       <style jsx>{`
         .container { background: #f7faff; min-height: 100vh; padding: 0 0 32px 0; }
@@ -199,7 +224,9 @@ export default function Page() {
         .ingredient-info { flex: 1; }
         .ingredient-name { font-weight: bold; font-size: 1.1em; }
         .ingredient-status { font-size: 0.95em; margin: 2px 0 4px 0; }
-        .ingredient-category { font-size: 0.92em; color: #888; }
+        .ingredient-category {font-size: 0.92em;color: #888;display: flex;align-items: center;min-height: 32px; /* 높이 고정(선택) */gap: 8px;}
+        .category-select-area {min-width: 170px; /* 카테고리 영역 고정 */max-width: 200px;display: flex;align-items: center;}
+        .ingredient-category select { min-width: 100px; /* select 박스 너비 고정 */max-width: 120px;}
         .ingredient-dates { font-size: 0.92em; color: #888; margin-top: 6px; display: flex; gap: 16px; }
         .btn-selected, .btn-add, .btn-uncertain, .btn-manual { border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.1em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn-add { background: #ffd966; color: #f79726; }
@@ -211,18 +238,19 @@ export default function Page() {
         .manual-btn { background: #f79726; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-weight: bold; font-size: 1em; cursor: pointer; }
         .add-btn-row { width: 92vw; max-width: 400px; margin: 0 auto; }
         .add-btn-main { width: 100%; background: #f79726; color: #fff; border: none; border-radius: 12px; padding: 16px 0; font-size: 1.15em; font-weight: bold; margin-top: 8px; cursor: pointer; }
-        .frozen-radio { margin-left: 12px; }
-        .frozen-radio label { margin-right: 8px; }
+        .frozen-radio { margin-left: 12px; white-space: nowrap;}
+        .frozen-radio label { margin-right: 8px; white-space: nowrap;}
         .ingredient-dates input[type="date"] { margin-left: 4px; }
       `}</style>
 
       <div className="header">인식된 재료 확인</div>
       <div className="summary">
-        <span role="img" aria-label="축하">🎉</span> <b>총 {ingredients.filter(ing => ing.status === 'selected' || ing.status === 'manual').length}개의 재료를 찾았어요!</b><br />
+        <span role="img" aria-label="축하">🎉</span> 
+        <b>총 {ingredients.filter(ing => ing.status === 'selected' || ing.status === 'manual').length}개의 재료를 찾았어요!</b><br />
         확인하시고 냉장고에 추가해보세요
       </div>
 
-      {/* 입력창을 맨 위에! */}
+      {/* 입력창 */}
       <div className="manual-add-row">
         <input
           className="manual-input"
@@ -234,7 +262,7 @@ export default function Page() {
         <button className="manual-btn" onClick={handleManualAdd}>추가</button>
       </div>
 
-      {/* 그 아래에 재료 리스트 */}
+      {/* 재료 리스트 */}
       <div className="ingredient-list">
         <div className="list-title">인식된 재료</div>
         {ingredients.map((ing, idx) => (
@@ -249,28 +277,30 @@ export default function Page() {
               </div>
               <div className="ingredient-status" style={{color:'#888'}}>인식된 텍스트: "{typeof ing.text === 'object' && ing.text !== null ? ing.text.originalName : ing.text}"</div>
               <div className="ingredient-category">
-                {ing.status === 'manual' ? (
-                  <>
-                    <span style={{marginRight: 4}}>카테고리:</span>
-                    <select
-                      value={ing.category}
-                      onChange={e => {
-                        const newCategory = e.target.value;
-                        setIngredients(ings =>
-                          ings.map((item, i) =>
-                            i === idx ? { ...item, category: newCategory } : item
-                          )
-                        );
-                      }}
-                    >
-                      {categoryList.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                  </>
-                ) : (
-                  <>카테고리: {ing.category || '기타'}</>
-                )}
+                <div className="category-select-area">
+                  {ing.status === 'manual' ? (
+                    <>
+                      <span style={{marginRight: 4}}>카테고리:</span>
+                      <select
+                        value={ing.category}
+                        onChange={e => {
+                          const newCategory = e.target.value;
+                          setIngredients(ings =>
+                            ings.map((item, i) =>
+                              i === idx ? { ...item, category: newCategory } : item
+                            )
+                          );
+                        }}
+                      >
+                        {categoryList.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    </>
+                  ) : (
+                    <>카테고리: {ing.category || '기타'}</>
+                  )}
+                </div>
                 <span className="frozen-radio">
                   냉동여부: 
                   <label>
@@ -291,26 +321,32 @@ export default function Page() {
                   </label>
                 </span>
               </div>
-              <div className="ingredient-dates">
-                <span style={{whiteSpace: 'nowrap'}}>
-                  구매일자: {ing.purchaseDate ? ing.purchaseDate : '인식된 날짜 없음'}
-                </span>
-                <span>
-                  유통기한: 
-                  <input
-                    type="date"
-                    value={ing.expirationDate || ''}
-                    onChange={e => handleDateChange(idx, 'expirationDate', e.target.value)}
-                  />
-                </span>
-              </div>
+                <div className="ingredient-dates">
+                  <span style={{whiteSpace: 'nowrap'}}>
+                    구매일자: 
+                    <input
+                      type="date"
+                      value={ing.purchaseDate || ''}
+                      onChange={e => handleDateChange(idx, 'purchaseDate', e.target.value)}
+                    />
+                  </span>
+                  <span>
+                    유통기한: {ing.expirationDate ? ing.expirationDate : '인식된 날짜 없음'}
+                  </span>
+                </div>
             </div>
             {getBtn(ing.status, idx)}
           </div>
         ))}
       </div>
+
+      {/* 저장 버튼 */}
       <div className="add-btn-row">
-        <button className="add-btn-main" onClick={handleAddSelected} disabled={isLoading}>
+        <button 
+          className="add-btn-main" 
+          onClick={handleAddSelected} 
+          disabled={isLoading}
+        >
           {isLoading ? '저장 중...' : '선택된 재료 추가하기'}
         </button>
       </div>
