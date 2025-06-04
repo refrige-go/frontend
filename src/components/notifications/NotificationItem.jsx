@@ -9,8 +9,8 @@ const NotificationItem = ({ notification, onClick }) => {
     <div
       onClick={() => onClick(notification)}
       style={{
-        padding: '16px',
-        background: notification.isRead ? '#fff' : '#f0f9ff',
+        padding: '15px 15px 10px 15px',
+        background: notification.read ? '#fff' : '#fff1e6',
         borderRadius: '8px',
         cursor: 'pointer',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',

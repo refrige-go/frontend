@@ -1,26 +1,23 @@
 'use client';
 
 import React from 'react';
-import NotificationList from '@/components/notifications/NotificationList';
+import NotificationList from '../../components/notifications/NotificationList';
+import Header from '../../components/layout/Header';
+import BottomNavigation from '../../components/layout/BottomNavigation';
+import styles from '../../styles/pages/notification.module.css';
 
 const NotificationsPage = () => {
   return (
-    <div style={{
-      paddingTop: '60px',
-      height: 'calc(100vh - 120px)',
-      overflow: 'auto',
-      background: '#f9fafb'
-    }}>
-      <div style={{ padding: '20px' }}>
-        <h1 style={{ 
-          fontSize: '1.5rem', 
-          fontWeight: 'bold',
-          marginBottom: '20px'
-        }}>
-          알림
-        </h1>
-        <NotificationList />
+    <div className="mainContainer">
+      <Header />
+      <div className="appContainer">
+        <div className={styles.pageContainer}>
+          <div className={styles.contentWrapper}>
+            <NotificationList />
+          </div>
+        </div>
       </div>
+      <BottomNavigation />
     </div>
   );
 };
