@@ -1,7 +1,7 @@
 'use client';
 
 import Header from '../../components/layout/Header';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Webcam from 'react-webcam';
 
@@ -11,6 +11,14 @@ export default function OCRPage() {
   const fileInputRef = useRef(null);
   const [preview, setPreview] = useState(null);
   const [useCamera, setUseCamera] = useState(true); // 카메라 사용 여부
+  const [token, setToken] = useState(null);  // 토큰 상태 추가
+
+
+   // 토큰 로드
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    setToken(storedToken);
+  }, []);
 
   // 사진 촬영
   const capture = () => {
@@ -42,6 +50,13 @@ export default function OCRPage() {
 
   // OCR 서버로 전송 (촬영/업로드된 이미지를 백엔드로 보내는 함수)
   const goToResultWithGoodBill = async () => {
+
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
+
     let file;
 
     if (preview) {
@@ -67,15 +82,22 @@ export default function OCRPage() {
       // - method: POST
       // - body: formData (이미지 파일이 포함된 multipart/form-data)
       // Content-Type은 자동으로 multipart/form-data로 설정됨
+      console.log('서버로 요청 전송 시작...'); // 디버깅용 로그
       const response = await fetch('http://localhost:8080/api/ocr/process', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`  // 토큰 헤더 추가
+        },
         body: formData
       });
+
+      console.log('서버 응답 상태:', response.status); // HTTP 상태 코드 확인
 
       if (response.ok) {
         // [5] 서버에서 받은 응답을 JSON으로 파싱
         // (서버가 OCR 결과를 JSON 형태로 반환한다고 가정)
-        let result = await response.json();
+        const result = await response.json();
+        console.log('서버 응답 데이터:', result); // 응답 데이터 확인
 
         // [6] OCR 결과(ingredients, purchaseDate 등)를 sessionStorage에 저장
         // - sessionStorage는 브라우저의 임시 저장소(새로고침/탭 닫으면 사라짐)
@@ -88,6 +110,9 @@ export default function OCRPage() {
          // [7] 결과 페이지로 이동 (예: /ocr/result)
         router.push('/ocr/result');
       } else {
+        const errorText = await response.text(); // 또는 response.json()
+        console.error('서버 응답 상태:', response.status);
+        console.error('서버 응답:', errorText);
         // [8] 서버에서 오류 응답이 오면 경고창 표시
         alert('OCR 서버 오류가 발생했습니다.');
       }
