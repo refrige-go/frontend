@@ -3,13 +3,37 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function IngredientConfirm() {
+
+export default function Page() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const categoryList = [
     "과일", "채소", "육류", "수산물/해산물", "곡류/분말", "조미료/양념", "면/떡", "두류/콩류", "기타"
   ];
   const [ingredients, setIngredients] = useState([]);
   const [input, setInput] = useState('');
+
+    // 프론트 -> 백엔드
+  const saveIngredients = async (ingredients) => {
+  try {
+    const response = await fetch('/api/ocr/confirm', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(ingredients)
+    });
+    
+    if (!response.ok) {
+      throw new Error('저장 실패');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('재료 저장 중 오류:', error);
+    throw error;
+  }
+};
 
   // OCR 결과 불러오기
   useEffect(() => {
@@ -96,21 +120,39 @@ export default function IngredientConfirm() {
     setInput('');
   };
 
+
   // 선택된 재료만 complete로 (세션스토리지에 저장, 쿼리 없이 이동)
-  const handleAddSelected = () => {
-    const selected = ingredients
-      .filter(ing => ing.status === 'selected' || ing.status === 'manual')
-      .map(ing => ({
-        ...ing,
-        category: ing.category || (ing.name?.mainCategory || '미분류')
-      }));
-    if (selected.length === 0) {
-      alert('최소 1개 이상의 재료를 선택해주세요.');
-      return;
-    }
+  const handleAddSelected = async () => {
+  const selected = ingredients
+    .filter(ing => ing.status === 'selected' || ing.status === 'manual')
+    .map(ing => ({
+      name: typeof ing.name === 'object' ? ing.name.matchedName : ing.name,
+      category: ing.category || (ing.name?.mainCategory || '미분류'),
+      defaultExpiryDays: null, // 기본값 설정 필요
+      storageMethod: ing.isFrozen ? '냉동' : '냉장', // 냉동여부에 따라 저장방법 설정
+      imageUrl: null // 이미지 URL이 있다면 설정
+    }));
+
+  if (selected.length === 0) {
+    alert('최소 1개 이상의 재료를 선택해주세요.');
+    return;
+  }
+
+  setIsLoading(true);
+  try {
+    // 백엔드로 데이터 전송
+    await saveIngredients(selected);
+    
+    // 성공 시 세션스토리지에 저장하고 다음 페이지로 이동
     sessionStorage.setItem('ocr_selected_ingredients', JSON.stringify(selected));
     router.push('/ocr/complete');
-  };
+  } catch (error) {
+    alert('재료 저장 중 오류가 발생했습니다.');
+    console.error(error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // 카드 스타일
   const getCardStyle = status => {
@@ -268,8 +310,8 @@ export default function IngredientConfirm() {
         ))}
       </div>
       <div className="add-btn-row">
-        <button className="add-btn-main" onClick={handleAddSelected}>
-          선택된 재료 추가하기
+        <button className="add-btn-main" onClick={handleAddSelected} disabled={isLoading}>
+          {isLoading ? '저장 중...' : '선택된 재료 추가하기'}
         </button>
       </div>
     </div>
