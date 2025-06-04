@@ -60,6 +60,9 @@
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;        
+  max-width: 190px;  
+  margin: 0 auto;    
 }
 
 .frozenCard {
@@ -303,8 +306,8 @@
   position: fixed;
   bottom: 170px;
   right: 50%;
-  transform: translateX(180px);
-  background: #8aca1c;
+  transform: translateX(180px); 
+  background: #f97316;
   color: white;
   width: 48px;
   height: 48px;
@@ -386,6 +389,7 @@
   z-index: 2000;
   align-items: flex-start;  
   padding-top: 350px;    
+  z-index: 11000;
 }
 
 /* 모달 박스 중앙 */
@@ -396,6 +400,7 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
   min-width: 260px;
+  z-index: 11001;
 }
 
 /* 버튼 묶음 */

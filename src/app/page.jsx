@@ -37,7 +37,6 @@ export default function Home() {
       });
   }, [router]);
 
-
   // 마운트 시 찜한 레시피 목록 불러오기
   useEffect(() => {
     if (!token || !userId) return;
@@ -73,7 +72,12 @@ export default function Home() {
             placeholder="Search"
           />
 
-          <WeatherRecommend />
+          <WeatherRecommend
+            userId={userId}
+            bookmarkedIds={bookmarkedIds}
+            onBookmark={handleBookmark}
+            onUnbookmark={handleUnbookmark}
+          />
 
           <TypeRecommendationsSection
             userId={userId}

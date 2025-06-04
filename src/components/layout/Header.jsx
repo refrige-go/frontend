@@ -1,4 +1,3 @@
-// src/components/layout/Header.jsx
 'use client';
 
 import React from 'react';
@@ -24,7 +23,7 @@ const Header = () => {
         boxSizing: 'border-box',
         borderBottom: '2px solid #e5e7eb',
         position: 'fixed',
-        zIndex: 10,
+        zIndex: 1000,
       }}
     >
       {/* 로고 */}
@@ -36,7 +35,7 @@ const Header = () => {
           fontWeight: 'bold',
           fontSize: '2rem',
           userSelect: 'none',
-          cursor: 'pointer', // 클릭 가능함을 표시
+          cursor: 'pointer',
         }}
       >
         {/* 냉장고 이미지 */}
@@ -44,8 +43,8 @@ const Header = () => {
           src="/images/logo.svg"
           alt="로고"
           style={{
-            width: 100, // 크기 조정
-            height: 100, // 크기 조정
+            width: 100,
+            height: 100,
             marginRight: 6,
             objectFit: 'contain',
             verticalAlign: 'middle',
@@ -59,10 +58,10 @@ const Header = () => {
           src="/images/bell.svg"
           alt="알림"
           style={{
-            width: 24, // 크기 조정
-            height: 24, // 크기 조정
+            width: 24,
+            height: 24,
             objectFit: 'contain',
-            cursor: 'pointer', // 클릭 가능함을 표시
+            cursor: 'pointer',
           }}
         />
       </div>

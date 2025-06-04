@@ -1,0 +1,70 @@
+.categorySlider {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  white-space: nowrap;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
+  user-select: none;
+  /* 드래그 중 텍스트 선택 방지 */
+}
+
+.categorySlider::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
+}
+
+.categoryButton {
+  border: none;
+  background-color: #f0f0f0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  white-space: nowrap;
+  user-select: none;
+  /* 버튼 텍스트 선택 방지 */
+}
+
+.categoryButton.selected {
+  background-color: #f59e42;
+  color: white;
+  font-weight: bold;
+}
+
+.recipesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.pagination {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.pageButton {
+  margin: 0 2px;
+  padding: 8px 8px;
+  background-color: #eee;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.pageButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pageButton.active {
+  background-color: #f59e42;
+  color: #fff;
+  font-weight: bold;
+}
