@@ -40,6 +40,8 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
 
       const recipesData = res.data.recipes;
       setRecipes(Array.isArray(recipesData) ? recipesData : []); // 안전하게 설정
+      console.log('서버 응답:', res.data);
+
 
       setWeather(res.data.weather);
       setStatus('추천 완료');
