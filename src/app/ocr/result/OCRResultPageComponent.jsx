@@ -46,11 +46,16 @@ export default function IngredientConfirm() {
   // 선택/해제
   const handleToggle = idx => {
     setIngredients(ings =>
-      ings.map((ing, i) =>
-        i === idx
-          ? { ...ing, status: ing.status === 'selected' ? 'need_check' : 'selected' }
-          : ing
-      )
+      ings.map((ing, i) => {
+        if (i !== idx) return ing;
+        // 직접추가 재료는 manual <-> need_check 토글
+        if (ing.status === 'manual') return { ...ing, status: 'need_check' };
+        if (ing.status === 'need_check' && ing.confidence === null) return { ...ing, status: 'manual' };
+        // OCR 인식 재료는 selected <-> need_check 토글
+        if (ing.status === 'selected') return { ...ing, status: 'need_check' };
+        if (ing.status === 'need_check' && ing.confidence !== null) return { ...ing, status: 'selected' };
+        return ing;
+      })
     );
   };
 
@@ -82,7 +87,7 @@ export default function IngredientConfirm() {
         confidence: null,
         status: 'manual',
         text: input,
-        category: '직접입력',
+        category: categoryList[0],
         isFrozen: false,
         purchaseDate: '',
         expirationDate: ''
@@ -90,7 +95,8 @@ export default function IngredientConfirm() {
     ]);
     setInput('');
   };
-    // 선택된 재료만 complete로 (세션스토리지에 저장, 쿼리 없이 이동)
+
+  // 선택된 재료만 complete로 (세션스토리지에 저장, 쿼리 없이 이동)
   const handleAddSelected = () => {
     const selected = ingredients
       .filter(ing => ing.status === 'selected' || ing.status === 'manual')
@@ -138,8 +144,7 @@ export default function IngredientConfirm() {
       {status === 'selected' || status === 'manual' ? '✓' : ''}
     </button>
   );
-
-  return (
+    return (
     <div className="container">
       <style jsx>{`
         .container { background: #f7faff; min-height: 100vh; padding: 0 0 32px 0; }
@@ -174,6 +179,20 @@ export default function IngredientConfirm() {
         <span role="img" aria-label="축하">🎉</span> <b>총 {ingredients.filter(ing => ing.status === 'selected' || ing.status === 'manual').length}개의 재료를 찾았어요!</b><br />
         확인하시고 냉장고에 추가해보세요
       </div>
+
+      {/* 입력창을 맨 위에! */}
+      <div className="manual-add-row">
+        <input
+          className="manual-input"
+          placeholder="재료명을 입력하세요"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleManualAdd()}
+        />
+        <button className="manual-btn" onClick={handleManualAdd}>추가</button>
+      </div>
+
+      {/* 그 아래에 재료 리스트 */}
       <div className="ingredient-list">
         <div className="list-title">인식된 재료</div>
         {ingredients.map((ing, idx) => (
@@ -189,21 +208,24 @@ export default function IngredientConfirm() {
               <div className="ingredient-status" style={{color:'#888'}}>인식된 텍스트: "{typeof ing.text === 'object' && ing.text !== null ? ing.text.originalName : ing.text}"</div>
               <div className="ingredient-category">
                 {ing.status === 'manual' ? (
-                  <select
-                    value={ing.category}
-                    onChange={e => {
-                      const newCategory = e.target.value;
-                      setIngredients(ings =>
-                        ings.map((item, i) =>
-                          i === idx ? { ...item, category: newCategory } : item
-                        )
-                      );
-                    }}
-                  >
-                    {categoryList.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+                  <>
+                    <span style={{marginRight: 4}}>카테고리:</span>
+                    <select
+                      value={ing.category}
+                      onChange={e => {
+                        const newCategory = e.target.value;
+                        setIngredients(ings =>
+                          ings.map((item, i) =>
+                            i === idx ? { ...item, category: newCategory } : item
+                          )
+                        );
+                      }}
+                    >
+                      {categoryList.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </>
                 ) : (
                   <>카테고리: {ing.category || '기타'}</>
                 )}
@@ -228,7 +250,7 @@ export default function IngredientConfirm() {
                 </span>
               </div>
               <div className="ingredient-dates">
-                <span>
+                <span style={{whiteSpace: 'nowrap'}}>
                   구매일자: {ing.purchaseDate ? ing.purchaseDate : '인식된 날짜 없음'}
                 </span>
                 <span>
@@ -244,16 +266,6 @@ export default function IngredientConfirm() {
             {getBtn(ing.status, idx)}
           </div>
         ))}
-      </div>
-      <div className="manual-add-row">
-        <input
-          className="manual-input"
-          placeholder="재료명을 입력하세요"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleManualAdd()}
-        />
-        <button className="manual-btn" onClick={handleManualAdd}>추가</button>
       </div>
       <div className="add-btn-row">
         <button className="add-btn-main" onClick={handleAddSelected}>

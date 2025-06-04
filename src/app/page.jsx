@@ -37,7 +37,6 @@ export default function Home() {
       });
   }, [router]);
 
-
   // 마운트 시 찜한 레시피 목록 불러오기
   useEffect(() => {
     if (!token || !userId) return;
@@ -72,32 +71,6 @@ export default function Home() {
             onChange={e => setSearch(e.target.value)}
             placeholder="Search"
           />
-
-          {/* OCR 인식 페이지로 이동하는 버튼만 남김 */}
-          <button
-            onClick={() => router.push('/ocr')}
-            style={{
-              position: 'absolute',
-              bottom: '100px', // 원하는 위치로 조정
-              right: '40px',
-              width: '60px',
-              height: '60px',
-              borderRadius: '50%',
-              backgroundColor: '#f79726',
-              color: 'white',
-              border: 'none',
-              fontSize: '24px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-              zIndex: 1000,
-              display: 'flex',              // 중앙 정렬
-              alignItems: 'center',         // 수직 중앙
-              justifyContent: 'center',     // 수평 중앙
-              padding: 0
-
-            }}
-          >
-            <span role="img" aria-label="카메라" style={{ transform: 'translate(1px, -4px)' }}>📷</span>
-          </button>
 
           <WeatherRecommend
             userId={userId}
