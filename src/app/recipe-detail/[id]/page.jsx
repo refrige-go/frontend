@@ -395,9 +395,9 @@ export default function RecipeDetailPage() {
           <div className={styles.similarRecipesSection}>
             <h2 className={styles.similarRecipesTitle}>비슷한 재료를 사용한 레시피</h2>
             <div className={styles.similarRecipesGrid}>
-              {similarRecipes.slice(0, displayCount).map((similarRecipe) => (
+              {similarRecipes.slice(0, displayCount).map((similarRecipe, index) => (
                 <RecipeCard
-                  key={similarRecipe.recipeId}
+                  key={similarRecipe.recipeId || similarRecipe.id || `recipe-${index}`}
                   recipe={{
                     ...similarRecipe,
                     rcpNm: similarRecipe.recipeNm || similarRecipe.RCP_NM || similarRecipe.rcpNm
