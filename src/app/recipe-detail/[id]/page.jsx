@@ -173,6 +173,20 @@ export default function RecipeDetailPage() {
     );
   };
 
+  // D-Day 계산 함수
+  const getDaysRemaining = (expiryDate) => {
+    if (!expiryDate) return null;
+    
+    const today = new Date();
+    const expiry = new Date(expiryDate);
+    const diffTime = expiry - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return `D+${Math.abs(diffDays)}`;
+    if (diffDays === 0) return 'D-Day';
+    return `D-${diffDays}`;
+  };
+
   if (loading) {
     return (
       <div className={styles.mainContainer}>
@@ -184,7 +198,7 @@ export default function RecipeDetailPage() {
           <div style={{ width: '18px' }}></div>
         </div>
 
-        <div className={styles.appContainer}>
+        <div className={`${styles.appContainer} ${isCookingMode ? styles.cookingModeActive : ''}`}>
           <div className={styles.loadingContainer}>
             <div className={styles.loadingSpinner}></div>
             <p>레시피를 불러오는 중...</p>
@@ -206,7 +220,7 @@ export default function RecipeDetailPage() {
           <div style={{ width: '18px' }}></div>
         </div>
 
-        <div className={styles.appContainer}>
+        <div className={`${styles.appContainer} ${isCookingMode ? styles.cookingModeActive : ''}`}>
           <div className={styles.errorMessage}>레시피를 찾을 수 없습니다.</div>
         </div>
         <BottomNavigation />
@@ -221,141 +235,158 @@ export default function RecipeDetailPage() {
           ←
         </button>
         <h2 className={styles.navTitle}>레시피 상세</h2>
-        <button className={styles.startCookingButton} onClick={handleStartCooking}>
-          요리 시작
-        </button>
+        <div style={{ width: '18px' }}></div>
       </div>
 
-      <div className={styles.appContainer}>
-        {/* 요리 모드일 때 재료 사용 체크 */}
+      <div className={`${styles.appContainer} ${isCookingMode ? styles.cookingModeActive : ''}`}>
+        {/* 요리 모드일 때 재료 사용 체크 - header 바로 아래에 고정 위치 */}
         {isCookingMode && (
-          <div className={styles.cookingMode}>
-            <h3 className={styles.cookingModeTitle}>🍳 요리 진행 중</h3>
-            <p className={styles.cookingModeDescription}>
-              사용한 재료를 체크해주세요. 요리 완료 후 냉장고에서 자동으로 차감됩니다.
-            </p>
+          <div className={styles.cookingModeFixed}>
+            <div className={styles.cookingMode}>
+              <h3 className={styles.cookingModeTitle}>🍳 요리 진행 중</h3>
+              <p className={styles.cookingModeDescription}>
+                사용한 재료를 체크해주세요. 요리 완료 후 냉장고에서 자동으로 차감됩니다.
+              </p>
 
-            <div className={styles.ingredientList}>
-              {getMatchedIngredients().map(ingredient => (
-                <div key={ingredient.id} className={styles.ingredientItem}>
-                  <span className={styles.ingredientName}>{ingredient.name}</span>
-                  <button
-                    onClick={() => toggleIngredientUsage(ingredient.id)}
-                    className={`${styles.ingredientButton} ${ingredientUsage[ingredient.id] === 'used' ? styles.used : ''
-                      }`}
-                  >
-                    {ingredientUsage[ingredient.id] === 'used' ? '다씀' : '남음'}
-                  </button>
+              <div className={styles.ingredientList}>
+                {getMatchedIngredients().map(ingredient => (
+                  <div key={ingredient.id} className={styles.ingredientItem}>
+                    <div className={styles.ingredientInfo}>
+                      <span className={styles.ingredientName}>{ingredient.name}</span>
+                      {ingredient.expiryDate && (
+                        <span className={styles.ingredientDday}>
+                          {getDaysRemaining(ingredient.expiryDate)}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => toggleIngredientUsage(ingredient.id)}
+                      className={`${styles.ingredientButton} ${ingredientUsage[ingredient.id] === 'used' ? styles.used : ''
+                        }`}
+                    >
+                      {ingredientUsage[ingredient.id] === 'used' ? '다씀' : '남음'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.buttonGroup}>
+                <button className={styles.cancelButton} onClick={() => setIsCookingMode(false)}>
+                  취소
+                </button>
+                <button className={styles.completeButton} onClick={handleFinishCooking}>
+                  요리 완료
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 레시피 전체 컨텐츠 영역 */}
+        <div className={styles.recipeContentContainer}>
+          {/* 레시피 기본 정보 영역 - 제목, 사진, 기본정보, 영양정보를 하나로 통합 */}
+          <div className={styles.recipeOverview}>
+            <h1 className={styles.recipeTitle}>{recipe.RCP_NM}</h1>
+            
+            {recipe.ATT_FILE_NO_MAIN && (
+              <div className={styles.mainImageContainer}>
+                <Image
+                  src={recipe.ATT_FILE_NO_MAIN}
+                  alt={recipe.RCP_NM}
+                  width={500}
+                  height={300}
+                  className={styles.mainImage}
+                  priority
+                />
+              </div>
+            )}
+
+            <div className={styles.recipeInfoContainer}>
+              <div className={styles.basicInfoRow}>
+                <div className={styles.basicInfoItem}>
+                  <span className={styles.label}>요리 종류</span>
+                  <span className={styles.value}>{recipe.RCP_PAT2}</span>
                 </div>
-              ))}
-            </div>
-
-            <div className={styles.buttonGroup}>
-              <button className={styles.cancelButton} onClick={() => setIsCookingMode(false)}>
-                취소
-              </button>
-              <button className={styles.completeButton} onClick={handleFinishCooking}>
-                요리 완료
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* 기존 레시피 상세 내용 */}
-        <div className={styles.recipeHeader}>
-          <h1 className={styles.recipeTitle}>{recipe.RCP_NM}</h1>
-        </div>
-
-        {recipe.ATT_FILE_NO_MAIN && (
-          <div className={styles.mainImageContainer}>
-            <Image
-              src={recipe.ATT_FILE_NO_MAIN}
-              alt={recipe.RCP_NM}
-              width={500}
-              height={300}
-              className={styles.mainImage}
-              priority
-            />
-          </div>
-        )}
-
-        <div className={styles.recipeInfo}>
-          <div className={styles.infoCard}>
-            <h2 className={styles.infoCardTitle}>기본 정보</h2>
-            <div className={styles.infoGrid}>
-              <div className={styles.infoItem}>
-                <span className={styles.label}>요리 종류</span>
-                <span className={styles.value}>{recipe.RCP_PAT2}</span>
+                <div className={styles.basicInfoItem}>
+                  <span className={styles.label}>조리 방법</span>
+                  <span className={styles.value}>{recipe.RCP_WAY2}</span>
+                </div>
               </div>
-              <div className={styles.infoItem}>
-                <span className={styles.label}>조리 방법</span>
-                <span className={styles.value}>{recipe.RCP_WAY2}</span>
-              </div>
-            </div>
-          </div>
 
-          <div className={styles.infoCard}>
-            <h2 className={styles.infoCardTitle}>영양 정보</h2>
-            <div className={styles.nutritionGrid}>
-              <div className={styles.nutritionItem}>
-                <span className={styles.label}>칼로리</span>
-                <span className={styles.value}>{recipe.INFO_ENG} kcal</span>
-              </div>
-              <div className={styles.nutritionItem}>
-                <span className={styles.label}>탄수화물</span>
-                <span className={styles.value}>{recipe.INFO_CAR}g</span>
-              </div>
-              <div className={styles.nutritionItem}>
-                <span className={styles.label}>단백질</span>
-                <span className={styles.value}>{recipe.INFO_PRO}g</span>
-              </div>
-              <div className={styles.nutritionItem}>
-                <span className={styles.label}>지방</span>
-                <span className={styles.value}>{recipe.INFO_FAT}g</span>
-              </div>
-              <div className={styles.nutritionItem}>
-                <span className={styles.label}>나트륨</span>
-                <span className={styles.value}>{recipe.INFO_NA}mg</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.infoCard}>
-            <h2 className={styles.infoCardTitle}>재료</h2>
-            <p className={styles.ingredients}>{recipe.RCP_PARTS_DTLS}</p>
-          </div>
-        </div>
-
-        <div className={styles.cookSteps}>
-          <div className={styles.infoCard}>
-            <h2 className={styles.infoCardTitle}>조리 순서</h2>
-            {Array.from({ length: 20 }).map((_, i) => {
-              const stepKey = `MANUAL${String(i + 1).padStart(2, '0')}`;
-              const imgKey = `MANUAL_IMG${String(i + 1).padStart(2, '0')}`;
-              const rawStep = recipe[stepKey];
-              const img = recipe[imgKey];
-              const cleanedStep = rawStep?.replace(/^\d+\.\s*/, "");
-
-              return rawStep ? (
-                <div key={i} className={styles.step}>
-                  <div className={styles.stepNumber}>{i + 1}</div>
-                  <div className={styles.stepContent}>
-                    <p>{cleanedStep}</p>
-                    {img && (
-                      <div className={styles.stepImageContainer}>
-                        <Image
-                          src={img}
-                          alt={`Step ${i + 1}`}
-                          width={400}
-                          height={250}
-                          className={styles.stepImage}
-                        />
-                      </div>
-                    )}
+              <div className={styles.nutritionCompact}>
+                <h3 className={styles.sectionTitle}>영양 정보</h3>
+                <div className={styles.nutritionRow}>
+                  <div className={styles.nutritionItem}>
+                    <span className={styles.nutritionLabel}>칼로리</span>
+                    <span className={styles.nutritionValue}>{recipe.INFO_ENG} kcal</span>
+                  </div>
+                  <div className={styles.nutritionItem}>
+                    <span className={styles.nutritionLabel}>탄수화물</span>
+                    <span className={styles.nutritionValue}>{recipe.INFO_CAR}g</span>
+                  </div>
+                  <div className={styles.nutritionItem}>
+                    <span className={styles.nutritionLabel}>단백질</span>
+                    <span className={styles.nutritionValue}>{recipe.INFO_PRO}g</span>
+                  </div>
+                  <div className={styles.nutritionItem}>
+                    <span className={styles.nutritionLabel}>지방</span>
+                    <span className={styles.nutritionValue}>{recipe.INFO_FAT}g</span>
+                  </div>
+                  <div className={styles.nutritionItem}>
+                    <span className={styles.nutritionLabel}>나트륨</span>
+                    <span className={styles.nutritionValue}>{recipe.INFO_NA}mg</span>
                   </div>
                 </div>
-              ) : null;
-            })}
+              </div>
+            </div>
+          </div>
+          
+          {/* 재료 영역 */}
+          <div className={styles.ingredientsSection}>
+            <h2 className={styles.sectionMainTitle}>🥬 재료</h2>
+            <div className={styles.ingredientsContent}>
+              <div className={styles.ingredientTags}>
+                {recipe.RCP_PARTS_DTLS && recipe.RCP_PARTS_DTLS.split(',').map((ingredient, index) => (
+                  <div key={index} className={styles.ingredientTag}>
+                    <span className={styles.ingredientTagText}>{ingredient.trim()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 조리 순서 */}
+          <div className={styles.cookStepsSection}>
+            <h2 className={styles.sectionMainTitle}>👩‍🍳 조리 순서</h2>
+            <div className={styles.cookSteps}>
+              {Array.from({ length: 20 }).map((_, i) => {
+                const stepKey = `MANUAL${String(i + 1).padStart(2, '0')}`;
+                const imgKey = `MANUAL_IMG${String(i + 1).padStart(2, '0')}`;
+                const rawStep = recipe[stepKey];
+                const img = recipe[imgKey];
+                const cleanedStep = rawStep?.replace(/^\d+\.\s*/, "");
+
+                return rawStep ? (
+                  <div key={i} className={styles.step}>
+                    <div className={styles.stepNumber}>{i + 1}</div>
+                    <div className={styles.stepContent}>
+                      <p>{cleanedStep}</p>
+                      {img && (
+                        <div className={styles.stepImageContainer}>
+                          <Image
+                            src={img}
+                            alt={`Step ${i + 1}`}
+                            width={400}
+                            height={250}
+                            className={styles.stepImage}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : null;
+              })}
+            </div>
           </div>
         </div>
 
@@ -382,6 +413,9 @@ export default function RecipeDetailPage() {
             )}
           </div>
         )}
+
+        {/* 하단 여백 */}
+        <div className={styles.bottomSpacing}></div>
 
         {/* 하단 요리 시작하기 버튼 */}
         {!isCookingMode && (

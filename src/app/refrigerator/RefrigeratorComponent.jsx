@@ -150,7 +150,7 @@ export default function RefrigeratorComponent() {
     );
   };
 
-// 레시피 추천 API 호출
+// 스마트 레시피 추천 API 호출
 const handleModalRecommend = async () => {
   try {
     setIsRecommending(true);
@@ -159,24 +159,37 @@ const handleModalRecommend = async () => {
       .filter(ingredient => modalSelectedIngredientIds.includes(ingredient.id))
       .map(ingredient => ingredient.name);
     
-    // 요청 데이터 구성
+    // 사용자 재료 정보 구성 (유통기한 포함)
+    const userIngredients = ingredients
+      .filter(ingredient => modalSelectedIngredientIds.includes(ingredient.id))
+      .map(ingredient => ({
+        name: ingredient.name,
+        expiryDaysLeft: ingredient.expiryDaysLeft,
+        frozen: ingredient.frozen,
+        category: ingredient.category,
+        customName: ingredient.customName
+      }));
+    
+    // 스마트 추천 요청 데이터 구성
     const requestData = {
-      userId: username, // null 대신 username 사용
+      userId: username,
       selectedIngredients: selectedIngredientNames,
+      userIngredients: userIngredients,
       limit: 10
     };
 
-    console.log('추천 요청 데이터:', requestData);
+    console.log('스마트 추천 요청 데이터:', requestData);
     console.log('선택된 재료 이름들:', selectedIngredientNames);
+    console.log('사용자 재료 정보:', userIngredients);
 
-    // 최소 2개 재료 검증
-    if (selectedIngredientNames.length < 2) {
-      alert('최소 2개 이상의 재료를 선택해주세요.');
+    // 최소 1개 재료 검증 (스마트 추천은 1개부터 가능)
+    if (selectedIngredientNames.length < 1) {
+      alert('최소 1개 이상의 재료를 선택해주세요.');
       return;
     }
 
-    // API 호출 - axiosInstance 대신 fetch 사용
-    const response = await fetch(`${baseUrl}/api/recommendations/recipes`, {
+    // 스마트 추천 API 호출
+    const response = await fetch(`${baseUrl}/api/recommendations/smart`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -186,7 +199,6 @@ const handleModalRecommend = async () => {
     });
 
     console.log('응답 상태:', response.status);
-    console.log('응답 헤더:', response.headers);
 
     const responseText = await response.text();
     console.log('응답 텍스트:', responseText);
@@ -203,37 +215,64 @@ const handleModalRecommend = async () => {
       throw new Error('서버 응답을 파싱할 수 없습니다.');
     }
 
-    console.log('추천 결과:', data);
+    console.log('스마트 추천 결과:', data);
       
-      // 추천 결과 처리
-      if (data && data.recommendedRecipes) {
-        const recipes = data.recommendedRecipes.map(r => ({
-          ...r,
-          name: r.recipeName
-        }));
-        
-        // 추천 레시피를 sessionStorage에 저장
-        sessionStorage.setItem('recommendedRecipes', JSON.stringify(data));
-        
-        // 모달 닫기
-        setShowRecommendModal(false);
-        setModalSelectedIngredientIds([]);
-        
-        alert(`${recipes.length}개의 레시피를 추천받았습니다!`);
-        
-        // 레시피 페이지로 이동
-        router.push('/recipes/recommended');
-      } else {
-        alert('추천할 레시피가 없습니다. 다른 재료를 선택해보세요.');
+    // 추천 결과 처리
+    if (data && data.recommendedRecipes) {
+      // 각 레시피의 missingIngredients 디버깅
+      data.recommendedRecipes.forEach((recipe, index) => {
+        console.log(`레시피 ${index + 1}: ${recipe.recipeName}`);
+        console.log(`- missingIngredients:`, recipe.missingIngredients);
+        console.log(`- missingIngredients type:`, typeof recipe.missingIngredients);
+        console.log(`- missingIngredients is array:`, Array.isArray(recipe.missingIngredients));
+        if (Array.isArray(recipe.missingIngredients)) {
+          console.log(`- missingIngredients length:`, recipe.missingIngredients.length);
+        }
+        console.log(`- matchedIngredients:`, recipe.matchedIngredients);
+        console.log('---');
+      });
+      // 스마트 추천 결과를 sessionStorage에 저장
+      sessionStorage.setItem('smartRecommendedRecipes', JSON.stringify(data));
+      
+      // 모달 닫기
+      setShowRecommendModal(false);
+      setModalSelectedIngredientIds([]);
+      
+      // 카테고리별 개수 정보 표시
+      const { categoryInfo, urgentIngredients } = data;
+      let alertMessage = `${data.totalCount}개의 레시피를 추천받았습니다!\n`;
+      
+      if (categoryInfo) {
+        if (categoryInfo.perfectMatches > 0) {
+          alertMessage += `✅ 바로 만들 수 있는 요리: ${categoryInfo.perfectMatches}개\n`;
+        }
+        if (categoryInfo.oneMissingMatches > 0) {
+          alertMessage += `🛒 재료 1개만 사면 OK: ${categoryInfo.oneMissingMatches}개\n`;
+        }
+        if (categoryInfo.twoMissingMatches > 0) {
+          alertMessage += `🛒 재료 2개만 사면 OK: ${categoryInfo.twoMissingMatches}개\n`;
+        }
       }
       
-    } catch (error) {
-      console.error('추천 오류:', error);
-      alert(`레시피 추천에 실패했습니다: ${error.message}`);
-    } finally {
-      setIsRecommending(false);
+      if (urgentIngredients && urgentIngredients.length > 0) {
+        alertMessage += `⚠️ 빨리 사용해야 할 재료: ${urgentIngredients.join(', ')}`;
+      }
+      
+      alert(alertMessage);
+      
+      // 레시피 페이지로 이동
+      router.push('/recipes/recommended');
+    } else {
+      alert('추천할 레시피가 없습니다. 다른 재료를 선택해보세요.');
     }
-  };
+      
+  } catch (error) {
+    console.error('스마트 추천 오류:', error);
+    alert(`레시피 추천에 실패했습니다: ${error.message}`);
+  } finally {
+    setIsRecommending(false);
+  }
+};
 
   const filteredIngredients = ingredients
   .filter((item) =>
@@ -501,7 +540,7 @@ const handleModalRecommend = async () => {
               position: 'relative',
             }}>
               <h2 style={{ marginBottom: 20, fontWeight: 700, fontSize: 22, color: '#f97316' }}>
-                재료 선택 (최소 2개)
+                스마트 재료 선택 (최소 1개)
               </h2>
               <div style={{ maxHeight: 320, overflowY: 'auto', marginBottom: 24, width: '100%' }}>
                 {ingredients.length > 0 ? (
@@ -575,21 +614,21 @@ const handleModalRecommend = async () => {
                 </button>
                 <button 
                   onClick={handleModalRecommend} 
-                  disabled={isRecommending || modalSelectedIngredientIds.length < 2}
+                  disabled={isRecommending || modalSelectedIngredientIds.length < 1}
                   style={{
                     padding: '0.6rem 1.2rem',
-                    background: (isRecommending || modalSelectedIngredientIds.length < 2) ? '#ccc' : '#f97316',
+                    background: (isRecommending || modalSelectedIngredientIds.length < 1) ? '#ccc' : '#f97316',
                     color: '#fff',
                     border: 'none',
                     borderRadius: 8,
                     fontWeight: 600,
                     fontSize: 16,
-                    cursor: (isRecommending || modalSelectedIngredientIds.length < 2) ? 'not-allowed' : 'pointer',
+                    cursor: (isRecommending || modalSelectedIngredientIds.length < 1) ? 'not-allowed' : 'pointer',
                     boxShadow: '0 2px 8px rgba(247,151,22,0.08)',
                     transition: 'background 0.2s',
                   }}
                 >
-                  {isRecommending ? '추천 중...' : `추천받기 (${modalSelectedIngredientIds.length}개 선택)`}
+                  {isRecommending ? '추천 중...' : `스마트 추천받기 (${modalSelectedIngredientIds.length}개 선택)`}
                 </button>
               </div>
             </div>
