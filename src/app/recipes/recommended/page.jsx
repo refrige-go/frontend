@@ -10,7 +10,10 @@ export default function RecommendedRecipesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedData = sessionStorage.getItem('recommendedRecipes');
+    // 스마트 추천 데이터 우선 조회, 없으면 기본 추천 데이터 조회
+    const smartData = sessionStorage.getItem('smartRecommendedRecipes');
+    const basicData = sessionStorage.getItem('recommendedRecipes');
+    const storedData = smartData || basicData;
     
     if (storedData) {
       try {
@@ -35,6 +38,7 @@ export default function RecommendedRecipesPage() {
 
   const handleBackToRefrigerator = () => {
     sessionStorage.removeItem('recommendedRecipes');
+    sessionStorage.removeItem('smartRecommendedRecipes');
     router.push('/refrigerator');
   };
 
@@ -200,7 +204,7 @@ export default function RecommendedRecipesPage() {
           fontWeight: 'bold',
           margin: 0
         }}>
-          추천 레시피 ({totalCount}개)
+          {recommendationData.categoryInfo ? '스마트 추천' : '추천 레시피'} ({totalCount}개)
         </h2>
         <div style={{ width: '18px' }}></div> {/* 균형을 위한 빈 공간 */}
       </div>
@@ -254,9 +258,9 @@ export default function RecommendedRecipesPage() {
               >
                 {/* 레시피 이미지 */}
                 <div style={{
-                  width: '80px',
-                  height: '80px',
-                  borderRadius: '8px',
+                  width: '100px',
+                  height: '100px',
+                  borderRadius: '12px',
                   overflow: 'hidden',
                   flexShrink: 0,
                   background: '#f5f5f5'
@@ -277,73 +281,208 @@ export default function RecommendedRecipesPage() {
 
                 {/* 레시피 정보 */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <h3 style={{ 
-                    fontSize: '18px', 
-                    fontWeight: 'bold', 
-                    color: '#333',
-                    margin: '0 0 0.5rem 0'
-                  }}>
-                    {recipe.recipeName}
-                  </h3>
                   
-                  <div style={{ marginBottom: '0.8rem' }}>
+                  {/* 제목 */}
+                  <div style={{
+                    marginBottom: '0.75rem'
+                  }}>
+                    <h3 style={{ 
+                      fontSize: '18px', 
+                      fontWeight: 'bold', 
+                      color: '#333',
+                      margin: 0,
+                      lineHeight: '1.3',
+                      wordBreak: 'keep-all'
+                    }}>
+                      {recipe.recipeName}
+                    </h3>
+                  </div>
+
+                  {/* 상태 배지들 - 한 줄로 배치 */}
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem',
+                    marginBottom: '0.75rem',
+                    alignItems: 'center'
+                  }}>
+                    {/* 매칭 정보 배지 */}
                     <span style={{
                       background: '#f97316',
                       color: 'white',
-                      padding: '0.3rem 0.6rem',
-                      borderRadius: '20px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      marginRight: '0.5rem'
+                      padding: '0.25rem 0.6rem',
+                      borderRadius: '15px',
+                      fontSize: '11px',
+                      fontWeight: '600'
                     }}>
                       매칭 {recipe.matchedIngredientCount}개
                     </span>
+                    
                     <span style={{
                       background: '#f0f0f0',
                       color: '#666',
-                      padding: '0.3rem 0.6rem',
-                      borderRadius: '20px',
-                      fontSize: '12px'
+                      padding: '0.25rem 0.6rem',
+                      borderRadius: '15px',
+                      fontSize: '11px',
+                      fontWeight: '500'
                     }}>
-                      점수: {Math.round(recipe.matchScore * 100)}%
+                      {Math.round(recipe.matchScore * 100)}%
                     </span>
+
+                    {/* 상태 배지 */}
+                    {recipe.matchStatus === 'PERFECT' && (
+                      <span style={{
+                        background: '#10b981',
+                        color: 'white',
+                        padding: '0.25rem 0.6rem',
+                        borderRadius: '15px',
+                        fontSize: '11px',
+                        fontWeight: '600'
+                      }}>
+                        ✅ 완벽매칭
+                      </span>
+                    )}
+                    {recipe.matchStatus === 'MISSING_1' && (
+                      <span style={{
+                        background: '#f59e0b',
+                        color: 'white',
+                        padding: '0.25rem 0.6rem',
+                        borderRadius: '15px',
+                        fontSize: '11px',
+                        fontWeight: '600'
+                      }}>
+                        🛒 1개부족
+                      </span>
+                    )}
+                    {recipe.matchStatus === 'MISSING_2' && (
+                      <span style={{
+                        background: '#f59e0b',
+                        color: 'white',
+                        padding: '0.25rem 0.6rem',
+                        borderRadius: '15px',
+                        fontSize: '11px',
+                        fontWeight: '600'
+                      }}>
+                        🛒 2개부족
+                      </span>
+                    )}
+                    
+                    {/* 긴급 재료 배지 */}
+                    {recipe.urgentIngredients && recipe.urgentIngredients.length > 0 && (
+                      <span style={{
+                        background: '#ef4444',
+                        color: 'white',
+                        padding: '0.25rem 0.6rem',
+                        borderRadius: '15px',
+                        fontSize: '11px',
+                        fontWeight: '600'
+                      }}>
+                        ⚠️ 곧만료
+                      </span>
+                    )}
                   </div>
 
+                  {/* 매칭된 재료 표시 */}
                   {recipe.matchedIngredients && recipe.matchedIngredients.length > 0 && (
-                    <div style={{ marginBottom: '0.8rem' }}>
-                      <p style={{ 
-                        fontSize: '14px', 
-                        color: '#666', 
-                        margin: '0 0 0.3rem 0',
-                        fontWeight: '500'
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <div style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '0.4rem'
                       }}>
-                        매칭 재료:
-                      </p>
-                      <p style={{ 
-                        fontSize: '14px', 
-                        color: '#f97316',
-                        margin: 0,
-                        fontWeight: '500'
-                      }}>
-                        {recipe.matchedIngredients.join(', ')}
-                      </p>
+                        {recipe.matchedIngredients.slice(0, 4).map((ingredient, index) => {
+                          const isUrgent = recipe.urgentIngredients?.includes(ingredient);
+                          return (
+                            <span key={index} style={{
+                              background: isUrgent ? '#fee2e2' : '#fff7ed',
+                              color: isUrgent ? '#dc2626' : '#f97316',
+                              border: isUrgent ? '1px solid #fca5a5' : '1px solid #fed7aa',
+                              padding: '0.3rem 0.6rem',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: '500',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.2rem'
+                            }}>
+                              {isUrgent && '⚠️'}
+                              {ingredient}
+                            </span>
+                          );
+                        })}
+                        {recipe.matchedIngredients.length > 4 && (
+                          <span style={{
+                            background: '#f3f4f6',
+                            color: '#6b7280',
+                            padding: '0.3rem 0.6rem',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: '500'
+                          }}>
+                            +{recipe.matchedIngredients.length - 4}개
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
 
-                  {recipe.ingredients && (
-                    <p style={{ 
-                      fontSize: '13px', 
-                      color: '#999', 
-                      margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical'
+                  {/* 추천 이유 또는 부족한 재료 정보 */}
+                  {(() => {
+                    // 부족한 재료 정보가 있고 비어있지 않으면 우선 표시
+                    if (recipe.missingIngredients && 
+                        recipe.missingIngredients !== null &&
+                        ((Array.isArray(recipe.missingIngredients) && recipe.missingIngredients.length > 0) ||
+                         (!Array.isArray(recipe.missingIngredients) && recipe.missingIngredients.trim() !== ''))) {
+                      const missingText = Array.isArray(recipe.missingIngredients) 
+                        ? recipe.missingIngredients.join(', ') 
+                        : recipe.missingIngredients;
+                        
+                      return (
+                        <div style={{
+                          background: '#fef3c7',
+                          border: '1px solid #fcd34d',
+                          borderRadius: '8px',
+                          padding: '0.6rem',
+                          marginBottom: '0.75rem'
+                        }}>
+                          <p style={{ 
+                            fontSize: '12px', 
+                            color: '#d97706',
+                            margin: 0,
+                            fontWeight: '600'
+                          }}>
+                            💡 {missingText}만 더 있으면 완성!
+                          </p>
+                        </div>
+                      );
+                    }
+                    
+                    return null;
+                  })()}
+
+                  {/* 추가 정보 */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingTop: '0.5rem',
+                    borderTop: '1px solid #f3f4f6'
+                  }}>
+                    <span style={{
+                      fontSize: '11px',
+                      color: '#9ca3af',
+                      fontWeight: '500'
                     }}>
-                      전체 재료: {recipe.ingredients}
-                    </p>
-                  )}
+                      전체 재료 {recipe.ingredients ? recipe.ingredients.split(',').length : 0}개
+                    </span>
+                    <span style={{
+                      fontSize: '11px',
+                      color: '#9ca3af',
+                      fontWeight: '500'
+                    }}>
+                      상세보기 &gt;
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
