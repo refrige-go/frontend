@@ -38,6 +38,7 @@ export default function Page() {
             name: item.matched_name || item.name || '',
             text: item.original_text || item.text || '',
             confidence: item.confidence,
+            ingredient_id: item.ingredient_id || null,
             status: item.status || 
               (item.confidence === null || item.confidence === undefined
                 ? 'manual'
@@ -202,7 +203,8 @@ export default function Page() {
         isFrozen: ing.isFrozen,
         purchaseDate: ing.purchaseDate,
         expirationDate: ing.expirationDate,
-        storageMethod: ing.isFrozen ? '냉동' : '냉장'
+        storageMethod: ing.isFrozen ? '냉동' : '냉장',
+        ingredient_id: ing.ingredient_id || ing.id || ing.matched_id || null
       }));
 
     if (selected.length === 0) {
