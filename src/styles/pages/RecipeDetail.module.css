@@ -54,17 +54,21 @@
   font-size: 18px;
   font-weight: bold;
   margin: 0;
+  text-align: center;
+  flex: 1;
 }
 
-.startCookingButton {
-  background: #f97316;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
+/* 요리 진행 중 영역 - 헤더 바로 아래에 고정 */
+.cookingModeFixed {
+  position: fixed;
+  top: 70px; /* navBar 높이 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 420px;
+  padding: 0 15px;
+  z-index: 9;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .cookingMode {
@@ -78,6 +82,7 @@
 .cookingModeTitle {
   color: #22c55e;
   margin: 0 0 1rem 0;
+  font-size: 1.1rem;
 }
 
 .cookingModeDescription {
@@ -102,8 +107,24 @@
   border: 1px solid #e0e0e0;
 }
 
+.ingredientInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .ingredientName {
   font-size: 16px;
+  font-weight: 500;
+}
+
+.ingredientDday {
+  font-size: 12px;
+  background: #ff6b6b;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: bold;
 }
 
 .ingredientButton {
@@ -151,18 +172,27 @@
   cursor: pointer;
 }
 
-.recipeHeader {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
+/* 레시피 전체 컨텐츠 컴팩하게 */
+.recipeContentContainer {
+  margin: 20px 0 30px 0;
+}
+
+/* 레시피 기본 정보 영역 통합 */
+.recipeOverview {
+  background: white;
+  border-radius: 20px 20px 0 0;
+  padding: 25px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: none;
 }
 
 .recipeTitle {
-  font-size: 2rem;
+  font-size: 1.6rem;
   color: #333;
-  margin: 0;
+  margin: 0 0 20px 0;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .mainImageContainer {
@@ -177,82 +207,177 @@
   object-fit: cover;
 }
 
-.recipeInfo {
-  display: grid;
-  gap: 20px;
-  margin: 30px 0;
-}
-
-.infoCard {
-  background: white;
-  border-radius: 15px;
+.recipeInfoContainer {
+  margin-top: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
   padding: 20px;
-  border: 2px solid rgba(0, 0, 0, 0.05);
 }
 
-.infoCardTitle {
-  color: #f59e42;
-  margin-bottom: 15px;
-  font-size: 1.3rem;
-}
-
-.infoGrid,
-.nutritionGrid {
+.basicInfoRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e9ecef;
 }
 
-.infoItem,
-.nutritionItem {
+.basicInfoItem {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  text-align: center;
 }
 
-.label {
+
+.sectionTitle {
+  color: #f59e42;
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.nutritionRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.nutritionItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: white;
+  border-radius: 8px;
+}
+
+.label, .nutritionLabel {
   color: #666;
+  font-size: 0.85rem;
+}
+
+.value, .nutritionValue {
+  color: #333;
+  font-weight: 500;
   font-size: 0.9rem;
 }
 
-.value {
-  color: #333;
-  font-weight: 500;
+/* 재료 영역 */
+.ingredientsSection {
+  margin: 0;
+  background: white;
+  border-radius: 0;
+  padding: 20px 25px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-top: none;
+  border-bottom: none;
+  box-shadow: none;
 }
 
-.ingredients {
-  line-height: 1.6;
-  color: #444;
+.sectionMainTitle {
+  color: #f59e42;
+  margin: 0 0 15px 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.ingredientsContent {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.ingredientTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.ingredientTag {
+  background: linear-gradient(135deg, #f59e42 0%, #ff7849 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(245, 158, 66, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.ingredientTag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 66, 0.4);
+  border-color: #ffffff;
+  background: linear-gradient(135deg, #ff7849 0%, #f59e42 100%);
+}
+
+.ingredientTagText {
+  white-space: nowrap;
+  display: block;
+}
+
+/* 조리 순서 */
+.cookStepsSection {
+  margin: 0 0 30px 0;
+  background: white;
+  border-radius: 0 0 20px 20px;
+  padding: 20px 25px 25px 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-top: none;
+}
+
+.cookStepsSection .sectionMainTitle {
+  color: #f59e42;
+  text-align: center;
 }
 
 .cookSteps {
-  margin: 40px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 }
 
 .step {
   display: flex;
   gap: 20px;
-  background: white;
+  background: #f8f9fa;
   border-radius: 15px;
-  padding: 5px;
+  padding: 20px;
 }
 
 .stepNumber {
   background: #f59e42;
   color: white;
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   flex-shrink: 0;
-  margin: auto;
+  font-size: 16px;
 }
 
 .stepContent {
   flex: 1;
+}
+
+.stepContent p {
+  margin: 0 0 15px 0;
+  line-height: 1.5;
+  color: #333;
 }
 
 .stepImageContainer {
@@ -281,8 +406,15 @@
 }
 
 .similarRecipesGrid {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 20px;
+}
+
+/* 하단 여백 */
+.bottomSpacing {
+  height: 120px; /* 플로팅 버튼과 네비게이션 높이만큼 여백 */
 }
 
 .bottomButton {
@@ -306,6 +438,13 @@
   font-weight: bold;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  transition: all 0.2s;
+}
+
+.startCookingBottomButton:hover {
+  background: #16a34a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
 }
 
 .loadingContainer {
@@ -347,4 +486,48 @@
   text-align: center;
   margin-top: 20px;
   color: #666;
+}
+
+/* 요리 모드일 때 컨텐츠 상단 여백 조정 */
+.appContainer.cookingModeActive {
+  padding-top: 280px; /* 요리 모드 영역만큼 추가 여백 */
+}
+
+/* 반응형 조정 */
+@media (max-width: 480px) {
+  .nutritionRow {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  
+  .basicInfoRow {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .nutritionItem {
+    padding: 6px 2px;
+  }
+  
+  .nutritionLabel, .nutritionValue {
+    font-size: 0.8rem;
+  }
+  
+  .ingredientTags {
+    gap: 6px;
+  }
+  
+  .ingredientTag {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+  
+  .ingredientsContent {
+    padding: 15px;
+  }
+  
+  .sectionMainTitle {
+    font-size: 1.1rem;
+    margin: 0 0 12px 0;
+  }
 }
