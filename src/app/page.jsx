@@ -65,7 +65,11 @@ export default function Home() {
     <div className='mainContainer'>
       <Header />
       <div className='appContainer' style={{ position: 'relative' }}>
-        <main style={{ padding: '1rem', fontFamily: 'sans-serif' }}>
+        <main style={{
+            fontFamily: 'sans-serif' ,
+  
+            
+            }}>
           <SearchWithCategory
             value={search}
             onChange={e => setSearch(e.target.value)}

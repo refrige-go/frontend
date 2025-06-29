@@ -5,12 +5,14 @@ export default function SearchBar({ value, onChange, placeholder = "Search" }) {
   return (
     <div
       style={{
-        background: '#f5f5f6',
-        borderRadius: '10px',
         padding: '12px 16px',
         display: 'flex',
         alignItems: 'center',
         marginBottom: '24px',
+        marginTop: '24px',
+        borderRadius: '8px',
+        border: '1px solid var(--Neutral-neutral-50, #E9EAEB)',
+        background: 'rgba(31, 42, 55, 0.05)',
         width: '100%',
         maxWidth: 420,
       }}
@@ -19,8 +21,8 @@ export default function SearchBar({ value, onChange, placeholder = "Search" }) {
         src="/images/search.svg"
         alt="검색"
         style={{
-          width: 24,
-          height: 24,
+          width: 22,
+          height: 22,
           marginRight: 8,
           opacity: 0.5,
         }}
@@ -34,9 +36,12 @@ export default function SearchBar({ value, onChange, placeholder = "Search" }) {
           border: 'none',
           outline: 'none',
           background: 'transparent',
-          fontSize: 16,
           color: '#888',
           width: '100%',
+          color: '#0D1217',
+          fontSize: '16px',
+          fontWeight: 400,
+          lineHeight: 'normal'
         }}
       />
     </div>
