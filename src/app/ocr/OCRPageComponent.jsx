@@ -99,14 +99,31 @@ export default function OCRPage() {
         const result = await response.json();
         console.log('서버 응답 데이터:', result); // 응답 데이터 확인
 
+        // 디버깅: ingredient_id 확인
+        console.log('AI 서버에서 받은 ingredients:', result.ingredients);
+        result.ingredients.forEach((item, index) => {
+          console.log(`재료 ${index + 1}:`, {
+            original_text: item.original_text,
+            matched_name: item.matched_name,
+            ingredient_id: item.ingredient_id,
+            confidence: item.confidence
+          });
+        });
+
         // [6] OCR 결과(ingredients, purchaseDate 등)를 sessionStorage에 저장
         // - sessionStorage는 브라우저의 임시 저장소(새로고침/탭 닫으면 사라짐)
         // - JSON.stringify로 JS 객체를 문자열로 변환해서 저장
         // - 나중에 결과 페이지에서 JSON.parse로 다시 객체로 꺼내서 사용
-        sessionStorage.setItem('ocr_ingredients', JSON.stringify({
-          ingredients: result.ingredients,
+        const storageData = {
+          ingredients: result.ingredients.map(item => ({
+            ...item,
+            ingredient_id: item.ingredient_id || null  // ingredient_id 필드 명시적 포함
+          })),
           purchaseDate: result.purchaseDate
-        }));
+        };
+        
+        console.log('sessionStorage에 저장할 데이터:', storageData);
+        sessionStorage.setItem('ocr_ingredients', JSON.stringify(storageData));
          // [7] 결과 페이지로 이동 (예: /ocr/result)
         router.push('/ocr/result');
       } else {
