@@ -10,7 +10,13 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+// 서버 사이드에서 실행되지 않도록 체크
+let app;
+let messaging;
+
+if (typeof window !== 'undefined') {
+  app = initializeApp(firebaseConfig);
+  messaging = getMessaging(app);
+}
 
 export { app, messaging }; 
