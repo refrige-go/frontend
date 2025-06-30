@@ -14,7 +14,8 @@ const Header = () => {
   return (
     <header
       style={{
-        width: '420px',
+        maxWidth:'420px',
+        width: '100%',
         height: '60px',
         background: '#fff',
         display: 'flex',
@@ -22,7 +23,7 @@ const Header = () => {
         justifyContent: 'space-between',
         padding: '0 28px 0 28px',
         boxSizing: 'border-box',
-        borderBottom: '2px solid #e5e7eb',
+        borderBottom: '1px solid #e5e7eb',
         position: 'fixed',
         zIndex: 1000,
       }}

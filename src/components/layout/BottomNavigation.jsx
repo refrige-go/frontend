@@ -73,15 +73,16 @@ const BottomNavigation = ({ className = '' }) => {
     <nav
       style={{
         position: 'fixed',
-        width: '420px',
-        bottom: 0,
+        maxWidth:'390px',
+        width: '100%',
+        bottom: 20,
         left: 0,
         right: 0,
         background: '#fff',
-        borderTop: '2px solid #e5e7eb',
+        borderRadius: '12px',
+        boxShadow: '0px 0px 17px 0px rgb(13 10 44 / 9%)',
         zIndex: 1000,
         height: 70,
-        maxWidth: '100%',
         margin: '0 auto',
       }}
       className={className}

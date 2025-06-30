@@ -130,7 +130,7 @@ export default function CategoryPage() {
     <div className="mainContainer">
       <Header />
       <div className="appContainer">
-        <main style={{ padding: '1rem', fontFamily: 'sans-serif' }}>
+        <main style={{ padding: '20px 0px', fontFamily: 'sans-serif' }}>
           {loading ? (
             <p>불러오는 중...</p>
           ) : recipes.length === 0 ? (

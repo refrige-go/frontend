@@ -1,21 +1,15 @@
-.pageContainer {
-  min-height: 100vh;
-}
 
 .contentWrapper {
-  max-width: 1024px;
-  margin: 0 auto;
-  padding: 20px;
-  padding-bottom: 80px;
+  padding-top: 20px;
+  margin: 0 auto; 
 }
 
 .titleSection {
-  background: linear-gradient(135deg, #f59e42, #f58d1f);
+  background-color: #f59e42;
   color: white;
   padding: 24px;
   border-radius: 20px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 15px rgba(255, 133, 162, 0.2);
 }
 
 .titleSection h1 {
@@ -42,7 +36,6 @@
   gap: 10px;
   margin-bottom: 24px;
   overflow-x: auto;
-  padding: 10px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -70,14 +63,20 @@
 .tabButton.active {
   background-color: #f59e42;
   color: white;
-  box-shadow: 0 4px 10px rgba(255, 172, 133, 0.3);
 }
 
 .recipeGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(2, 1fr); 
   gap: 20px;
   animation: fadeIn 0.3s ease-in-out;
+  padding-bottom: 30px;
+
+}
+
+.recipeGrid a{
+  display: flex;
+  justify-content: center;
 }
 
 @keyframes fadeIn {

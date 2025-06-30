@@ -48,21 +48,21 @@
 /* 재료 카드 그리드 */
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(2, 175px);
+  gap: 20px;
+  padding-bottom: 60px;
 }
 
 .card {
   background: #f9fafb;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  padding: 17px;
+  border-radius: 10px;
   position: relative;
   display: flex;
   align-items: center;
   width: 100%;        
   max-width: 190px;  
   margin: 0 auto;    
+  padding: 10px 5px;
 }
 
 .frozenCard {
@@ -73,7 +73,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 100%;
 }
 
 .textContent {
@@ -101,14 +100,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 43px;               /* 가로 크기 */
-  height: 23px;              /* 세로 크기 */
+  line-height: 17px;
+  width: 35px;               /* 가로 크기 */
+  height: 17px;              /* 세로 크기 */
   background-color: white;   /* 배경색 흰색 */
   color: #f59e42;          /* 텍스트 색 */
   border: 2px solid #f59e42;/* 테두리 색 */
   border-radius: 12px;        /* 모서리 둥글게 */
   font-weight: bold;
-  font-size: 12px;
+  font-size: 10px;
   margin-left: 5px;          /* 간격 */
   user-select: none;
 }
@@ -163,8 +163,6 @@
   overflow-y: auto;
   z-index: 10000;          /* 최상단 보장 */
   box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-  transform: translateX(-2%);
-
 }
 
 
@@ -290,7 +288,7 @@
 /* 버튼 */
 .recipeRecommendBtn {
   position: fixed;
-  bottom: 85px;
+  bottom: 105px;
   left: 50%;
   transform: translateX(-50%);
   background: #f59e42;
@@ -317,7 +315,6 @@
   font-size: 28px;
   font-weight: bold;
   border: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   cursor: pointer;
   z-index: 1000;
 }
@@ -367,8 +364,6 @@
   padding: 10px 18px;
   font-weight: bold;
   font-size: 14px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: background-color 0.2s ease;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -504,11 +499,10 @@
 }
 
 .scrollArea {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 80px; 
-    scrollbar-width: none;     
-    -ms-overflow-style: none; 
+overflow: scroll;
+height: 50vh;
+
+
 }
 
 .scrollArea::-webkit-scrollbar {
@@ -522,7 +516,6 @@
   margin: 20px 0;
   justify-content: space-between;
   align-items: center;
-  padding: 0 4px;
 }
 
 .searchInput {
@@ -531,7 +524,7 @@
   border: 1px solid #e2e8f0;
   border-radius: 999px;
   background-color: #f9fafb;
-  font-size: 15px;
+  font-size: 14px;
   transition: all 0.2s ease;
 }
 
@@ -539,7 +532,7 @@
   outline: none;
   border-color: #f59e42;
   background-color: #fff;
-  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+  box-shadow: 0 0 0 2px rgba(37, 33, 30, 0.2);
 }
 
 .sortSelect {
@@ -547,7 +540,7 @@
   border: 1px solid #e2e8f0;
   border-radius: 999px;
   background-color: #f9fafb;
-  font-size: 15px;
+  font-size: 14px;
   color: #333;
   transition: all 0.2s ease;
 }

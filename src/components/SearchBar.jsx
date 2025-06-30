@@ -44,6 +44,7 @@ export default function SearchBar({
           display: 'flex',
           alignItems: 'center',
           marginBottom: '24px',
+          marginTop:'24px',
           width: '100%',
           maxWidth: 420,
         }}

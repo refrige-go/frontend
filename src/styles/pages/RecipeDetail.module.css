@@ -1,10 +1,21 @@
 .appContainer {
-  width: 420px;
+   max-width: 420px;
+  width: 100%;
+   /* width: 420px; */
   background-color: #fff;
-  padding: 0 15px;
-  padding-top: 90px; /* Header 높이 + 상단 여백 */
-  padding-bottom: 20px; /* 기본 하단 여백만 */
-  flex: 1 1 auto;
+  padding: 0 24px;
+  padding-top: 60px;
+  /* Header 높이 */
+  height: calc(100vh - 100px);
+  overflow-y: auto;
+  scrollbar-width: none;      
+  -ms-overflow-style: none;
+  padding-bottom: 100px;
+}
+
+
+.appContainer::-webkit-scrollbar {
+  display: none;              /* Chrome, Safari */
 }
 
 .mainContainer {
@@ -12,6 +23,7 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: #fff;
 }
 
 .navBar {
@@ -218,9 +230,6 @@
   text-align: center;
 }
 
-.nutritionCompact {
-  /* 영양 정보 컴팩트 영역 */
-}
 
 .sectionTitle {
   color: #f59e42;
@@ -410,7 +419,7 @@
 
 .bottomButton {
   position: fixed;
-  bottom: 80px;
+  bottom: 110px;
   left: 50%;
   transform: translateX(-50%);
   width: 380px;
