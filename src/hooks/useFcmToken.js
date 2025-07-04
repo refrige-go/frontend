@@ -10,7 +10,9 @@ const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
 
 export default function useFcmToken() {
   useEffect(() => {
-    if (typeof window === "undefined" || !messaging) return;
+    // accessToken이 없으면 실행하지 않음
+    const accessToken = typeof window !== "undefined" ? localStorage.getItem('accessToken') : null;
+    if (!accessToken || typeof window === "undefined" || !messaging) return;
 
     Notification.requestPermission().then((permission) => {
       if (permission === "granted") {
