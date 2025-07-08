@@ -43,21 +43,36 @@
   padding: 14px 12px;  
   border-radius: 12px;
   border: 1px solid #ddd;
-  margin: 14px 0;    
+  margin-bottom: 14px;   
+  margin-top: 10px; 
 }
 
 .categoryGrid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); 
+  grid-template-columns: repeat(7, 1fr); 
+  grid-template-rows: repeat(2, 1fr); 
   gap: 10px;
-  margin: 20px 0;
+  margin-bottom: 10px;
+  overflow-x: auto;
+  scrollbar-width: thin;           
+  scrollbar-color: #ededed transparent;
+  padding-bottom: 10px;
+  
 }
+
+.categoryGrid::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #ffa726, #fb8c00);
+  border-radius: 8px;
+}
+
+
+
 
 .categoryBtn {
   background: white;
   color: #f59e42;   
   border: 1px solid white;
-  padding: 6px;
+  
   font-size: 13px;
   border-radius: 12px;
   display: flex;
@@ -65,9 +80,8 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  gap: 5px;
-  width: 72px;
-  height: 72px;
+  width: 70px;
+  height: 70px;
   white-space: nowrap;
   word-break: keep-all;
 }
@@ -94,7 +108,6 @@
 .ingredientList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
   margin-bottom: 60px;
   padding: 0;         
   margin: 0;
@@ -145,10 +158,9 @@
 }
 
 .ingredientScroll {
-  overflow-y: auto;
-  max-height: calc(200vh - 200px);
-  padding-bottom: 20px;
-
+  overflow: auto;
+  height: 40vh;
+  padding-bottom: 50px;
   /* 스크롤바 숨기기 */
   scrollbar-width: none;          
   -ms-overflow-style: none;       
@@ -177,7 +189,6 @@
 .searchWrap {
   position: relative;
   width: 100%;
-  margin: 16px 0;
 }
 
 .searchInput {
@@ -206,7 +217,7 @@
 }
 
 .ingredientName {
-  font-size: 16px;
+  font-size: 14px;
   color: #333;
 }
 
