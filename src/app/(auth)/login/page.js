@@ -70,7 +70,6 @@ export default function LoginPage() {
         </form>
         <div className="authActionBox">
           <Link href="/signup"><span>회원가입</span></Link>
-          <Link href="/"><span>둘러보기</span></Link>
         </div>
       </div>
     </div>

@@ -36,7 +36,6 @@ export default function MyPage() {
       const exp = payload.exp;
       const expDate = new Date(exp * 1000);
 
-      console.log('AccessToken:', accessToken);
       console.log('만료시간(exp):', exp, '->', expDate.toLocaleString());
       console.log('현재시간:', new Date().toLocaleString());
 
@@ -63,6 +62,8 @@ export default function MyPage() {
         router.replace("/login");
       });
   }, [router]);
+
+  
 
   // 로그아웃
   const handleLogout = async () => {
