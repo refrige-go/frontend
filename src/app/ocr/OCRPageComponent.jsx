@@ -83,7 +83,7 @@ export default function OCRPage() {
       // - body: formData (이미지 파일이 포함된 multipart/form-data)
       // Content-Type은 자동으로 multipart/form-data로 설정됨
       console.log('서버로 요청 전송 시작...'); // 디버깅용 로그
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:8080';
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
       const response = await fetch(`${baseUrl}/api/ocr/process`, {
         method: 'POST',
         headers: {
