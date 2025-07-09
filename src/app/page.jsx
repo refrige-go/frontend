@@ -19,23 +19,7 @@ export default function Home() {
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem('accessToken');
-    if (storedToken) {
-      setToken(storedToken);
-    }
-    if (!storedToken) {
-      alert("로그인 후 이용 가능합니다.");
-      router.replace("/login");
-      return;
-    }
-    axiosInstance.get("/secure/ping")
-      .catch(() => {
-        alert("세션이 만료되었습니다. 다시 로그인 해주세요.");
-        localStorage.removeItem('accessToken');
-        router.replace("/login");
-      });
-  }, [router]);
+  
 
   // 마운트 시 찜한 레시피 목록 불러오기
   useEffect(() => {
