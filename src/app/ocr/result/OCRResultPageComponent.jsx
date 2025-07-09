@@ -169,7 +169,8 @@ export default function Page() {
         return;
       }
 
-      const response = await fetch('http://localhost:8080/api/ocr/confirm', {
+      const baseUrl= process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:8080';
+      const response = await fetch(`${baseUrl}/api/ocr/confirm`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
