@@ -2,13 +2,16 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
-const Header = () => {
+const SubPageHeader = ({ title, onBack, rightAction }) => {
   const router = useRouter();
 
-  const handleLogoClick = () => {
-    router.push('/');
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      router.back();
+    }
   };
 
   return (
@@ -18,7 +21,7 @@ const Header = () => {
         top: 0,
         left: 0, /* 중앙 정렬 제거 */
         width: '100vw', /* 전체 너비 사용 */
-        height: '60px',
+        height: '60px', // 메인 헤더와 동일한 높이
         background: '#fff',
         display: 'flex',
         alignItems: 'center',
@@ -29,46 +32,57 @@ const Header = () => {
         zIndex: 1002, /* 스크롤 콘텐츠보다 높은 z-index */
       }}
     >
-      {/* 로고 */}
-      <div
-        onClick={handleLogoClick}
+      {/* 뒤로가기 버튼 */}
+      <button
+        onClick={handleBack}
         style={{
+          background: 'none',
+          border: 'none',
+          fontSize: '24px',
+          cursor: 'pointer',
+          color: '#333',
+          padding: '8px',
           display: 'flex',
           alignItems: 'center',
-          fontWeight: 'bold',
-          fontSize: '2rem',
-          userSelect: 'none',
-          cursor: 'pointer',
+          justifyContent: 'center',
+          minWidth: '40px',
+          minHeight: '40px',
+          borderRadius: '8px',
+          transition: 'background-color 0.2s',
+        }}
+        onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+        onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+      >
+        ←
+      </button>
+
+      {/* 페이지 제목 */}
+      <h1
+        style={{
+          fontSize: '18px',
+          fontWeight: '600',
+          color: '#333',
+          margin: 0,
+          flex: 1,
+          textAlign: 'center',
+          paddingLeft: '40px', // 뒤로가기 버튼 너비만큼 보상
+          paddingRight: '40px', // 오른쪽 액션 버튼 너비만큼 보상
         }}
       >
-        {/* 냉장고 이미지 */}
-        <img
-          src="/images/logo.svg"
-          alt="로고"
-          style={{
-            width: 100,
-            height: 100,
-            marginRight: 6,
-            objectFit: 'contain',
-            verticalAlign: 'middle',
-          }}
-        />
-      </div>
-      {/* 우측 아이콘들 */}
-      <div style={{ display: 'flex', gap: '16px' }}>
-        {/* 알림 아이콘 */}
-        <Link href="/notifications" style={{ display: 'flex', alignItems: 'center' }}>
-          <img
-            src="/images/bell.svg"
-            alt="알림"
-            style={{
-              width: 24,
-              height: 24,
-              objectFit: 'contain',
-              cursor: 'pointer',
-            }}
-          />
-        </Link>
+        {title}
+      </h1>
+
+      {/* 오른쪽 액션 버튼 */}
+      <div
+        style={{
+          minWidth: '40px',
+          minHeight: '40px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {rightAction || <div style={{ width: '40px' }} />}
       </div>
       
       {/* 기기별 패딩 조정을 위한 스타일 */}
@@ -105,7 +119,7 @@ const Header = () => {
         @media (min-width: 501px) {
           header {
             position: fixed !important;
-            top: 20px !important; /* PC 환경 상단 여백 고려 */
+            top: 20px !important;
             left: 50% !important;
             transform: translateX(-50%) !important;
             width: 430px !important;
@@ -118,4 +132,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default SubPageHeader;

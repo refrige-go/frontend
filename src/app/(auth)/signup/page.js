@@ -1,13 +1,11 @@
-
 'use client';
 
 import axios from 'axios';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-
-
+import Header from '../../../components/layout/Header';
+import BottomNavigation from '../../../components/layout/BottomNavigation';
 import "../../../styles/pages/signup.css"
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
@@ -60,6 +58,7 @@ export default function SignupPage() {
 
   return (
     <div className="mainContainer">
+      <Header />
       <div className="appContainer singup">
         <div>
           <h1>회원가입</h1>
@@ -96,6 +95,7 @@ export default function SignupPage() {
           <Link className='btn-gray' href="/"> <button>이전</button></Link>
         </div>
       </div>
+      <BottomNavigation />
     </div>
   );
 }

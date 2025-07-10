@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNavigation from '../../../components/layout/BottomNavigation';
+import SubPageHeader from '../../../components/layout/SubPageHeader';
 
 export default function RecommendedRecipesPage() {
   const router = useRouter();
@@ -45,43 +46,7 @@ export default function RecommendedRecipesPage() {
   if (loading) {
     return (
       <div className="mainContainer">
-        {/* 상단 네비게이션 바 */}
-        <div style={{
-          width: '420px',
-          height: '70px',
-          background: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 28px 0 20px',
-          boxSizing: 'border-box',
-          position: 'fixed',
-          top: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-          borderBottom: '1px solid #e0e0e0'
-        }}>
-          <button 
-            onClick={handleBackToRefrigerator}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '18px',
-              cursor: 'pointer'
-            }}
-          >
-            ←
-          </button>
-          <h2 style={{
-            fontSize: '18px',
-            fontWeight: 'bold',
-            margin: 0
-          }}>
-            추천 레시피
-          </h2>
-          <div style={{ width: '18px' }}></div> {/* 균형을 위한 빈 공간 */}
-        </div>
+        <SubPageHeader title="추천 레시피" onBack={handleBackToRefrigerator} />
 
         <div className="appContainer">
           <div style={{ 
@@ -103,43 +68,7 @@ export default function RecommendedRecipesPage() {
   if (!recommendationData || !recommendationData.recommendedRecipes) {
     return (
       <div className="mainContainer">
-        {/* 상단 네비게이션 바 */}
-        <div style={{
-          width: '420px',
-          height: '70px',
-          background: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 28px 0 20px',
-          boxSizing: 'border-box',
-          position: 'fixed',
-          top: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-          borderBottom: '1px solid #e0e0e0'
-        }}>
-          <button 
-            onClick={handleBackToRefrigerator}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '18px',
-              cursor: 'pointer'
-            }}
-          >
-            ←
-          </button>
-          <h2 style={{
-            fontSize: '18px',
-            fontWeight: 'bold',
-            margin: 0
-          }}>
-            추천 레시피
-          </h2>
-          <div style={{ width: '18px' }}></div> {/* 균형을 위한 빈 공간 */}
-        </div>
+        <SubPageHeader title="추천 레시피" onBack={handleBackToRefrigerator} />
 
         <div className="appContainer">
           <div style={{ padding: '2rem', textAlign: 'center', marginTop: '70px' }}>
@@ -171,45 +100,9 @@ export default function RecommendedRecipesPage() {
 
   return (
     <div className="mainContainer">
-      {/* 상단 네비게이션 바 */}
-      <div style={{
-        width: '420px',
-        height: '70px',
-        background: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 28px 0 20px',
-        boxSizing: 'border-box',
-        position: 'fixed',
-        top: 0,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 10,
-        borderBottom: '1px solid #e0e0e0'
-      }}>
-        <button 
-          onClick={handleBackToRefrigerator}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '18px',
-            cursor: 'pointer'
-          }}
-        >
-          ←
-        </button>
-        <h2 style={{
-          fontSize: '18px',
-          fontWeight: 'bold',
-          margin: 0
-        }}>
-          {recommendationData.categoryInfo ? '스마트 추천' : '추천 레시피'} ({totalCount}개)
-        </h2>
-        <div style={{ width: '18px' }}></div> {/* 균형을 위한 빈 공간 */}
-      </div>
+      <SubPageHeader title="추천 레시피" onBack={handleBackToRefrigerator} />
 
-      <div className="appContainer" style={{ paddingTop: '70px' }}>
+      <div className="appContainer" style={{ paddingTop: '70px', paddingBottom: '80px' }}>
         
         {/* 선택한 재료 정보 박스 */}
         <div style={{

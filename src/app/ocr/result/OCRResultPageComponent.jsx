@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import SubPageHeader from '../../../components/layout/SubPageHeader.jsx';
+import BottomNavigation from '../../../components/layout/BottomNavigation.jsx';
 
 export default function Page() {
   const router = useRouter();
@@ -14,6 +16,7 @@ export default function Page() {
   const [manualIngredients, setManualIngredients] = useState([]); // 직접 추가 재료
   const [input, setInput] = useState('');
   const [bulkPurchaseDate, setBulkPurchaseDate] = useState('');
+  const [selectedIdxs, setSelectedIdxs] = useState([]);
 
   // 토큰 로드
   useEffect(() => {
@@ -63,41 +66,38 @@ export default function Page() {
   // 구매일자 일괄 변경 함수
   const handleBulkPurchaseDateChange = (date) => {
     setBulkPurchaseDate(date);
+    
+    // 유통기한을 구매일자 + 7일로 계산
+    const expirationDate = date ? new Date(new Date(date).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : '';
+    
     setManualIngredients(ings =>
       ings.map(ing => ({
         ...ing,
-        purchaseDate: date
+        purchaseDate: date,
+        expirationDate: expirationDate
       }))
     );
     setOcrIngredients(ings =>
       ings.map(ing => ({
         ...ing,
-        purchaseDate: date
+        purchaseDate: date,
+        expirationDate: expirationDate
       }))
     );
   };
 
-  // 선택/해제
-  const handleToggle = (idx, isManual) => {
-    if (isManual) {
-      setManualIngredients(ings =>
-        ings.map((ing, i) => {
-          if (i !== idx) return ing;
-          if (ing.status === 'manual') return { ...ing, status: 'need_check' };
-          if (ing.status === 'need_check' && ing.confidence === null) return { ...ing, status: 'manual' };
-          return ing;
-        })
-      );
-    } else {
-      setOcrIngredients(ings =>
-        ings.map((ing, i) => {
-          if (i !== idx) return ing;
-          if (ing.status === 'selected') return { ...ing, status: 'need_check' };
-          if (ing.status === 'need_check' && ing.confidence !== null) return { ...ing, status: 'selected' };
-          return ing;
-        })
-      );
-    }
+  // 선택/해제 (개별)
+  const handleSelect = (idx) => {
+    setSelectedIdxs((prev) =>
+      prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
+    );
+  };
+  // 전체 선택/해제
+  const handleSelectAll = () => {
+    setSelectedIdxs([...Array(manualIngredients.length + ocrIngredients.length).keys()]);
+  };
+  const handleDeselectAll = () => {
+    setSelectedIdxs([]);
   };
 
   // 냉동여부 변경
@@ -109,9 +109,10 @@ export default function Page() {
         )
       );
     } else {
+      const ocrIdx = idx - manualIngredients.length;
       setOcrIngredients(ings =>
         ings.map((ing, i) =>
-          i === idx ? { ...ing, isFrozen: value } : ing
+          i === ocrIdx ? { ...ing, isFrozen: value } : ing
         )
       );
     }
@@ -126,9 +127,10 @@ export default function Page() {
         )
       );
     } else {
+      const ocrIdx = idx - manualIngredients.length;
       setOcrIngredients(ings =>
         ings.map((ing, i) =>
-          i === idx ? { ...ing, [field]: value } : ing
+          i === ocrIdx ? { ...ing, [field]: value } : ing
         )
       );
     }
@@ -144,16 +146,20 @@ export default function Page() {
       setInput('');
       return;
     }
+    
+    // 새 재료 추가 시 일괄 설정된 날짜 적용
+    const expirationDate = bulkPurchaseDate ? new Date(new Date(bulkPurchaseDate).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : '';
+    
     setManualIngredients([
       {
         name: input,
         confidence: null,
         status: 'manual',
         text: input,
-        category: categoryList[0],
+        category: '기타',
         isFrozen: false,
-        purchaseDate: '',
-        expirationDate: ''
+        purchaseDate: bulkPurchaseDate,
+        expirationDate: expirationDate
       },
       ...manualIngredients
     ]);
@@ -197,7 +203,7 @@ export default function Page() {
   const handleAddSelected = async () => {
     const allIngredients = [...manualIngredients, ...ocrIngredients];
     const selected = allIngredients
-      .filter(ing => ing.status === 'selected' || ing.status === 'manual')
+      .filter((ing, idx) => selectedIdxs.includes(idx))
       .map(ing => ({
         name: typeof ing.name === 'object' ? ing.name.matchedName : ing.name,
         category: ing.category || (ing.name?.mainCategory || '미분류'),
@@ -234,113 +240,101 @@ export default function Page() {
     return {};
   };
 
-  // 선택 버튼
-  const getBtn = (status, idx, isManual) => (
-    <button
-      className={`btn-${status}`}
-      onClick={() => handleToggle(idx, isManual)}
-      style={{
-        background: status === 'selected' || status === 'manual' ? '#f79726' : '#e0e0e0',
-        color: '#000',
-        border: 'none',
-        borderRadius: '50%',
-        width: '36px',
-        height: '36px',
-        fontSize: '1.1em',
-        fontWeight: 'bold',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-    >
-      {status === 'selected' || status === 'manual' ? '✓' : ''}
-    </button>
-  );
-
   return (
-    <div className="container">
-      <style jsx>{`
-        .container { background: #f7faff; min-height: 100vh; padding: 0 0 32px 0; }
-        .header { background: #f79726; color: #fff; font-weight: bold; font-size: 1.3em; text-align: center; border-radius: 0 0 18px 18px; padding: 18px 0 14px 0; margin-bottom: 18px; }
-        .summary { background: #e6fff2; color: #22c55e; border-radius: 12px; padding: 12px 18px; margin: 0 auto 18px auto; width: 92vw; max-width: 400px; font-size: 1.1em; }
-        .summary b { color: #22c55e; }
-        .list-title { font-weight: bold; font-size: 1.1em; margin: 0 0 10px 0; }
-        .ingredient-list { width: 92vw; max-width: 400px; margin: 0 auto 18px auto; }
-        .ingredient-item { border-radius: 14px; margin-bottom: 12px; padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px #0001; }
-        .ingredient-info { flex: 1; }
-        .ingredient-name { font-weight: bold; font-size: 1.1em; }
-        .ingredient-status { font-size: 0.95em; margin: 2px 0 4px 0; }
-        .ingredient-category {font-size: 0.92em;color: #888;display: flex;align-items: center;min-height: 32px;gap: 8px;}
-        .category-select-area {min-width: 170px;max-width: 200px;display: flex;align-items: center;}
-        .ingredient-category select { min-width: 100px;max-width: 120px;}
-        .ingredient-dates { font-size: 0.92em; color: #888; margin-top: 6px; display: flex; gap: 16px; }
-        .btn-selected, .btn-add, .btn-uncertain, .btn-manual { border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.1em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-add { background: #ffd966; color: #f79726; }
-        .btn-uncertain { background: #ff7b7b; color: #fff; }
-        .btn-manual { background: #ffd966; color: #f79726; }
-        .btn-selected { background: #ffd966; color: #f79726; }
-        .manual-add-row { display: flex; align-items: center; width: 92vw; max-width: 400px; margin: 0 auto 18px auto; }
-        .manual-input { flex: 1; border: 1.5px solid #f79726; border-radius: 8px; padding: 10px; font-size: 1em; margin-right: 8px; }
-        .manual-btn { background: #f79726; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-weight: bold; font-size: 1em; cursor: pointer; }
-        .add-btn-row { width: 92vw; max-width: 400px; margin: 0 auto; }
-        .add-btn-main { width: 100%; background: #f79726; color: #fff; border: none; border-radius: 12px; padding: 16px 0; font-size: 1.15em; font-weight: bold; margin-top: 8px; cursor: pointer; }
-        .frozen-radio { margin-left: 12px; white-space: nowrap;}
-        .frozen-radio label { margin-right: 8px; white-space: nowrap;}
-        .ingredient-dates input[type="date"] { margin-left: 4px; }
-      `}</style>
+    <div className="mainContainer">
+      <SubPageHeader title="인식 결과 확인" />
+      <div className="appContainer" style={{ paddingTop: 76 }}>
+        {/* 기존 .header, .summary, .manual-add-row, .ingredient-list 등 모든 내용 이곳에 배치 */}
+        <div style={{ background: '#e6fff2', color: '#22c55e', borderRadius: 12, padding: '12px 18px', margin: '0 auto 18px auto', width: '100%', maxWidth: 400, fontSize: '1.1em', textAlign: 'center', fontWeight: 500 }}>
+          <span role="img" aria-label="축하">🎉</span>
+          <b>총 {[...manualIngredients, ...ocrIngredients].filter((_, idx) => selectedIdxs.includes(idx)).length}개의 재료를 선택했어요!</b><br />
+          <span style={{ color: '#333', fontWeight: 400 }}>확인하시고 냉장고에 추가해보세요</span>
+        </div>
 
-      <div className="header">인식된 재료 확인</div>
-      <div className="summary">
-        <span role="img" aria-label="축하">🎉</span> 
-        <b>총 {[...manualIngredients, ...ocrIngredients].filter(ing => ing.status === 'selected' || ing.status === 'manual').length}개의 재료를 찾았어요!</b><br />
-        확인하시고 냉장고에 추가해보세요
-      </div>
+        {/* 일괄 날짜 설정 섹션 */}
+        <div style={{ width: '100%', maxWidth: 400, margin: '0 auto 18px auto', background: '#f8f9fa', borderRadius: 12, padding: '16px', border: '1px solid #e9ecef' }}>
+          <div style={{ fontWeight: 600, fontSize: '15px', marginBottom: 10, color: '#333' }}>일괄 날짜 설정</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: '14px', color: '#666', minWidth: '70px' }}>구매일자</span>
+            <input
+              type="date"
+              value={bulkPurchaseDate}
+              onChange={e => handleBulkPurchaseDateChange(e.target.value)}
+              style={{ 
+                flex: 1, 
+                border: '1px solid #d1d5db', 
+                borderRadius: 8, 
+                padding: '8px 12px', 
+                fontSize: '14px', 
+                background: '#fff' 
+              }}
+            />
+          </div>
+          <div style={{ fontSize: '12px', color: '#888', marginTop: 8 }}>
+            💡 구매일자를 설정하면 모든 재료의 구매일자와 유통기한(+1주일)이 자동으로 설정됩니다
+          </div>
+        </div>
 
-      {/* 구매일자 일괄 변경 입력창 */}
-      <div style={{ width: '92vw', maxWidth: 400, margin: '0 auto 18px auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontWeight: 'bold' }}>구매일자 일괄 변경:</span>
-        <input
-          type="date"
-          value={bulkPurchaseDate}
-          onChange={e => handleBulkPurchaseDateChange(e.target.value)}
-          style={{ padding: '6px 10px', borderRadius: 6, border: '1.2px solid #f79726' }}
-        />
-      </div>
-
-      {/* 입력창 */}
-      <div className="manual-add-row">
-        <input
-          className="manual-input"
-          placeholder="재료명을 입력하세요"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleManualAdd()}
-        />
-        <button className="manual-btn" onClick={handleManualAdd}>추가</button>
-      </div>
-
-      {/* 재료 리스트 */}
-      <div className="ingredient-list">
-        <div className="list-title">인식된 재료</div>
-        {[...manualIngredients, ...ocrIngredients].map((ing, idx) => {
-          const isManual = idx < manualIngredients.length;
-          return (
-            <div key={idx} className="ingredient-item" style={getCardStyle(ing.status)}>
-              <div className="ingredient-info">
-                <div className="ingredient-name">{typeof ing.name === 'object' && ing.name !== null ? ing.name.matchedName : ing.name}</div>
-                <div className="ingredient-status">
-                  {ing.status === 'selected' && <>자동 선택됨</>}
-                  {ing.status === 'need_check' && <><span style={{color:'#f79726'}}>확인 필요</span></>}
-                  {ing.status === 'uncertain' && <><span style={{color:'#ff7b7b'}}>불확실</span></>}
-                  {ing.status === 'manual' && <>직접 추가</>}
+        <div style={{ width: '100%', maxWidth: 400, margin: '0 auto 10px auto', fontSize: '15px', color: '#333', textAlign: 'left', fontWeight: 500 }}>
+          추가할 재료를 선택하세요
+        </div>
+        <div style={{ width: '100%', maxWidth: 400, margin: '0 auto 14px auto', display: 'flex', gap: 8 }}>
+          <button onClick={handleSelectAll} style={{ flex: 1, background: '#f79726', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 0', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>전체 선택</button>
+          <button onClick={handleDeselectAll} style={{ flex: 1, background: '#e5e7eb', color: '#333', border: 'none', borderRadius: 8, padding: '8px 0', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>전체 해제</button>
+        </div>
+        <div className="manual-add-row" style={{ width: '100%', maxWidth: 400, margin: '0 auto 18px auto', display: 'flex', gap: 8 }}>
+          <input
+            className="manual-input"
+            placeholder="재료명을 입력하세요"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleManualAdd()}
+            style={{ flex: 1, border: '1.5px solid #f79726', borderRadius: 8, padding: '10px', fontSize: '15px', marginRight: 0 }}
+          />
+          <button className="manual-btn" onClick={handleManualAdd} style={{ background: '#f79726', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 18px', fontWeight: 600, fontSize: '15px', cursor: 'pointer' }}>추가</button>
+        </div>
+        <div className="ingredient-list" style={{ width: '100%', maxWidth: 400, margin: '0 auto 18px auto' }}>
+          {[...manualIngredients, ...ocrIngredients].map((ing, idx) => {
+            const isManual = idx < manualIngredients.length;
+            const isSelected = selectedIdxs.includes(idx);
+            return (
+              <div
+                key={idx}
+                className="ingredient-item"
+                style={{
+                  border: isSelected ? '2px solid #f79726' : '1.5px solid #e5e7eb',
+                  background: isSelected ? '#fff8f0' : '#f9fafb',
+                  borderRadius: 16,
+                  marginBottom: 22,
+                  padding: '20px 18px 18px 18px',
+                  boxShadow: isSelected ? '0 4px 16px rgba(245,151,38,0.08)' : '0 2px 8px rgba(0,0,0,0.06)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 12,
+                  minHeight: 120,
+                  position: 'relative',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => handleSelect(idx)}
+                    style={{ width: 22, height: 22, accentColor: '#f79726', marginRight: 6, cursor: 'pointer' }}
+                  />
+                  <span style={{ fontWeight: 700, fontSize: '18px', color: '#222', letterSpacing: '-0.5px', flex: 1 }}>{typeof ing.name === 'object' && ing.name !== null ? ing.name.matchedName : ing.name}</span>
+                  <span style={{ fontSize: '13px', color: '#888', fontWeight: 500, marginLeft: 2 }}>{ing.status === 'manual' ? '직접 입력' : '영수증 인식됨'}</span>
                 </div>
-                <div className="ingredient-status" style={{color:'#888'}}>인식된 텍스트: "{typeof ing.text === 'object' && ing.text !== null ? ing.text.originalName : ing.text}"</div>
-                <div className="ingredient-category">
-                  <div className="category-select-area">
-                    {ing.status === 'manual' ? (
-                      <>
-                        <span style={{marginRight: 4}}>카테고리:</span>
+                {ing.status !== 'manual' && (
+                  <div style={{ fontSize: '13px', color: '#888', marginBottom: 6, lineHeight: 1.4 }}>
+                    인식된 텍스트: <span style={{ color: '#666' }}>&quot;{typeof ing.text === 'object' && ing.text !== null ? ing.text.originalName : ing.text}&quot;</span>
+                  </div>
+                )}
+                {isSelected && (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ fontSize: '13px', color: '#888', fontWeight: 500 }}>카테고리</span>
                         <select
                           value={ing.category}
                           onChange={e => {
@@ -352,70 +346,94 @@ export default function Page() {
                                 )
                               );
                             } else {
+                              const ocrIdx = idx - manualIngredients.length;
                               setOcrIngredients(ings =>
                                 ings.map((item, i) =>
-                                  i === idx - manualIngredients.length ? { ...item, category: newCategory } : item
+                                  i === ocrIdx ? { ...item, category: newCategory } : item
                                 )
                               );
                             }
                           }}
+                          style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: '4px 10px', fontSize: '13px', background: '#fff', minWidth: 70 }}
                         >
                           {categoryList.map(cat => (
                             <option key={cat} value={cat}>{cat}</option>
                           ))}
                         </select>
-                      </>
-                    ) : (
-                      <>카테고리: {ing.category || '기타'}</>
-                    )}
-                  </div>
-                  <span className="frozen-radio">
-                    냉동여부: 
-                    <label>
-                      <input
-                        type="radio"
-                        name={`isFrozen-${idx}`}
-                        checked={ing.isFrozen === true}
-                        onChange={() => handleFrozenChange(idx, true, isManual)}
-                      /> O
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name={`isFrozen-${idx}`}
-                        checked={ing.isFrozen === false}
-                        onChange={() => handleFrozenChange(idx, false, isManual)}
-                      /> X
-                    </label>
-                  </span>
-                </div>
-                <div className="ingredient-dates">
-                  <span style={{whiteSpace: 'nowrap'}}>
-                    구매일자: 
-                    <input
-                      type="date"
-                      value={ing.purchaseDate || ''}
-                      onChange={e => handleDateChange(idx, 'purchaseDate', e.target.value, isManual)}
-                    />
-                  </span>
-                </div>
-              </div>
-              {getBtn(ing.status, idx, isManual)}
-            </div>
-          );
-        })}
-      </div>
+                      </div>
+                      {/* 보관 방식 토글 버튼 - 항상 오른쪽 고정 */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '13px' }}>
+                        <span style={{ color: '#888', fontWeight: 500 }}>보관 방식</span>
+                        <div style={{ display: 'flex', alignItems: 'center', background: '#f3f4f6', borderRadius: 16, padding: '1px' }}>
+                          <button
+                            onClick={() => handleFrozenChange(idx, false, isManual)}
+                            style={{
+                              padding: '4px 10px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              border: 'none',
+                              borderRadius: '15px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              background: !ing.isFrozen ? '#f79726' : 'transparent',
+                              color: !ing.isFrozen ? '#fff' : '#666'
+                            }}
+                          >
+                            냉장
+                          </button>
+                          <button
+                            onClick={() => handleFrozenChange(idx, true, isManual)}
+                            style={{
+                              padding: '4px 10px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              border: 'none',
+                              borderRadius: '15px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              background: ing.isFrozen ? '#f79726' : 'transparent',
+                              color: ing.isFrozen ? '#fff' : '#666'
+                            }}
+                          >
+                            냉동
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 16, marginBottom: 8 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <span style={{ fontSize: '12px', color: '#aaa', marginBottom: 1 }}>구매일자</span>
+                        <input
+                          type="date"
+                          value={ing.purchaseDate || ''}
+                          onChange={e => handleDateChange(idx, 'purchaseDate', e.target.value, isManual)}
+                          style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: '4px 8px', fontSize: '13px', background: '#fff', minWidth: 110 }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <span style={{ fontSize: '12px', color: '#aaa', marginBottom: 1 }}>유통기한</span>
+                        <input
+                          type="date"
+                          value={ing.expirationDate || ''}
+                          onChange={e => handleDateChange(idx, 'expirationDate', e.target.value, isManual)}
+                          style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: '4px 8px', fontSize: '13px', background: '#fff', minWidth: 110 }}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
 
-      {/* 저장 버튼 */}
-      <div className="add-btn-row">
-        <button 
-          className="add-btn-main" 
-          onClick={handleAddSelected} 
-          disabled={isLoading}
-        >
-          {isLoading ? '저장 중...' : '선택된 재료 추가하기'}
-        </button>
+              </div>
+            );
+          })}
+        </div>
+        <div className="add-btn-row" style={{ width: '100%', maxWidth: 400, margin: '0 auto' }}>
+          <button className="add-btn-main" onClick={handleAddSelected} disabled={isLoading || selectedIdxs.length === 0} style={{ width: '100%', background: '#f79726', color: '#fff', border: 'none', borderRadius: 12, padding: '16px 0', fontSize: '1.1em', fontWeight: 600, marginTop: 8, cursor: selectedIdxs.length === 0 ? 'not-allowed' : 'pointer', opacity: selectedIdxs.length === 0 ? 0.6 : 1 }}>
+            {isLoading ? '저장 중...' : '선택한 재료 냉장고에 추가하기'}
+          </button>
+        </div>
       </div>
+      <BottomNavigation />
     </div>
   );
 }
