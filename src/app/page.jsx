@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axiosInstance from '../api/axiosInstance'
 import InstallPrompt from '../components/pwa/InstallPrompt'
+import PWADebugPanel from '../components/pwa/PWADebugPanel'
 
 // 비로그인 상태 안내 컴포넌트
 const LoginPrompt = () => {
@@ -206,8 +207,9 @@ export default function Home() {
   }
 
   return (
-    <div className='mainContainer'>
+    <div className='mainContainer' style={{ position: 'relative' }}>
       <InstallPrompt />
+      {process.env.NODE_ENV === 'development' && <PWADebugPanel />}
       <Header />
       <div className='appContainer' style={{ position: 'relative' }}>
         <main style={{

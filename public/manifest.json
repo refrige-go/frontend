@@ -1,7 +1,7 @@
 {
-  "name": "AI 레시피 추천 시스템",
-  "short_name": "AI 레시피",
-  "description": "AI 기반 개인 맞춤형 레시피 추천 서비스",
+  "name": "냉장GO - AI 레시피 추천",
+  "short_name": "냉장GO",
+  "description": "냉장고 재료로 맞춤 레시피 추천하는 AI 앱",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
