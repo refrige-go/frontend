@@ -10,9 +10,9 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    gap: 40px;
-    margin-top: 100px;
-    margin-bottom: 20px;
+    gap: 20px; /* 프로필 이미지와 닉네임 사이 여백 감소 */
+    margin-top: 20px; /* 상단 여백 대폭 감소 */
+    margin-bottom: 20px; /* 하단 여백도 감소 */
      
 }
 
@@ -24,40 +24,55 @@
 
 .mypageset .profile .profile-img{
     width: 120px;
-    height: 120px;
-    background-color: #d9d9d9;
-    border-radius: 50%;
+    height: auto; /* 높이 자동 조정 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px; /* 이미지와 버튼 사이 여백 감소 */
+}
+
+.mypageset .profile .profile-img .image-container{
     position: relative;
+    width: 120px;
+    height: 120px;
 }
 .mypageset .profile .profile-img input{
     position: absolute;
     top: 0;
     left: 0;
-    height: inherit;
-    width: inherit;
+    height: 120px; /* 이미지 영역만큼만 커버 */
+    width: 120px; /* 이미지 영역만큼만 커버 */
     z-index: 10;
     border-radius: 50%;
-    opacity:0 ;
-    
-    
+    opacity: 0;
+    cursor: pointer;
+}
 
+.mypageset .profile .profile-img .img-background{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 120px;
+    width: 120px;
+    background-color: #d9d9d9;
+    border-radius: 50%;
+    z-index: 1;
 }
 .mypageset .profile .profile-img .img-preview{
     position: absolute;
     top: 0;
     left: 0;
-    background-color: #F79726;
-    height: inherit;
-    width: inherit;
+    background-color: transparent; /* 배경색 제거 */
+    height: 120px; /* 고정 크기 */
+    width: 120px; /* 고정 크기 */
     border-radius: 50%;
+    overflow: hidden; /* 이미지가 원 밖으로 나가지 않도록 */
+    z-index: 5; /* 배경보다 위에 */
 }
 
 .mypageset .profile .profile-img button{
-    position: absolute;
+    position: static; /* 정적 위치로 변경 */
     z-index: 20;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
     white-space: nowrap;
     border: none;
     border-radius: 16px;
@@ -69,6 +84,7 @@
     box-shadow: 0 2px 8px rgba(245, 158, 66, 0.14);
     transition: background 0.2s, box-shadow 0.2s;
     cursor: pointer;
+    margin-top: 5px; /* 추가 여백 감소 */
 }
 .mypageset .profile .profile-img button:hover {
     background: #e8892b;
@@ -79,7 +95,7 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 20px; /* 요소들 사이 여백 감소 */
 }
 
 .mypageset .edit-box h1{
@@ -97,7 +113,7 @@
 
 .mypageset form{
    display: flex;
-    gap: 20px;
+    gap: 15px; /* form 요소들 사이 여백 감소 */
     flex-direction: column;
     width: 85%;
 }
@@ -151,7 +167,7 @@ padding-left: 10px;
     display: flex;
     gap: 20px;
     justify-content: center;
-    margin: 20px 0px;
+    margin: 15px 0px; /* 상하 여백 감소 */
 }
 
 .mypageset .btn-gray{

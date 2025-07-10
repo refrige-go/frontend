@@ -124,21 +124,28 @@ export default function MyPageSet() {
       <div className="appContainer mypageset">
         <div className="profile">
           <div className="profile-img">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-            />
-             {preview ? (
-              <div className="img-preview">
-                <img src={preview} alt="미리보기" width={120} height={120} style={{ borderRadius: "50%" }} />
-              </div>
-            ) : profileImageUrl ? (
-              <div className="img-preview">
-                <img src={profileImageUrl} alt="프로필" width={120} height={120} style={{ borderRadius: "50%" }} />
-              </div>
-            ) : null}
+            <div className="image-container">
+              {/* 기본 배경 원 */}
+              <div className="img-background"></div>
+              
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+              />
+              
+               {preview ? (
+                <div className="img-preview">
+                  <img src={preview} alt="미리보기" width={120} height={120} style={{ borderRadius: "50%", objectFit: "cover" }} />
+                </div>
+              ) : profileImageUrl ? (
+                <div className="img-preview">
+                  <img src={profileImageUrl} alt="프로필" width={120} height={120} style={{ borderRadius: "50%", objectFit: "cover" }} />
+                </div>
+              ) : null}
+            </div>
+            
             <button onClick={handleUpload}>이미지수정</button>
           </div>
           <span>{nickname || "닉네임을 불러오는 중..."}</span>
