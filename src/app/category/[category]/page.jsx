@@ -33,6 +33,7 @@ export default function CategoryPage() {
   const isDragging = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
+  const didScroll = useRef(false);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
@@ -54,13 +55,7 @@ export default function CategoryPage() {
 
   useEffect(() => {
     setPage(0);
-    if (category && categoryRefs.current[category]) {
-      categoryRefs.current[category].scrollIntoView({
-        behavior: 'smooth',
-        inline: 'center',
-        block: 'nearest',
-      });
-    }
+    // 카테고리 변경 시 스크롤 이동 제거
   }, [category]);
 
   useEffect(() => {
@@ -83,6 +78,21 @@ export default function CategoryPage() {
       })
       .finally(() => setLoading(false));
   }, [category, page]);
+
+  useEffect(() => {
+    if (
+      !didScroll.current &&
+      category &&
+      categoryRefs.current[category]
+    ) {
+      categoryRefs.current[category].scrollIntoView({
+        behavior: 'auto',
+        inline: 'center',
+        block: 'nearest',
+      });
+      didScroll.current = true;
+    }
+  }, [category]);
 
   const getPageNumbers = () => {
     const maxButtons = 5;
@@ -130,11 +140,11 @@ export default function CategoryPage() {
     <div className="mainContainer">
       <Header />
       <div className="appContainer">
-        <main style={{ padding: '20px 0px', fontFamily: 'sans-serif' }}>
+        <div className="scrollContent">
           {loading ? (
-            <p>불러오는 중...</p>
+            <p style={{ padding: '20px', textAlign: 'center' }}>불러오는 중...</p>
           ) : recipes.length === 0 ? (
-            <p>해당 카테고리의 레시피가 없습니다.</p>
+            <p style={{ padding: '20px', textAlign: 'center' }}>해당 카테고리의 레시피가 없습니다.</p>
           ) : (
             <>
               {/* 카테고리 슬라이드 */}
@@ -145,7 +155,7 @@ export default function CategoryPage() {
                 onMouseLeave={onMouseLeave}
                 onMouseUp={onMouseUp}
                 onMouseMove={onMouseMove}
-                style={{ cursor: 'grab' }}
+                style={{ cursor: 'grab', marginBottom: '20px' }}
               >
                 {categories.map((cat) => (
                   <button
@@ -230,7 +240,7 @@ export default function CategoryPage() {
               </div>
             </>
           )}
-        </main>
+        </div>
       </div>
       <BottomNavigation />
     </div>

@@ -1,18 +1,153 @@
+/* 모바일 최적화를 위한 전역 스타일 */
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; /* 가로 스크롤 방지 */
 }
 
 body {
-  height: 100vh;
-  margin: 0;
+  background: #fff; /* 노란색 그라디언트 제거, 흰색으로 통일 */
   color: #333;
-  font-family: 'Noto Sans KR', sans-serif;
-  font-weight: 300;
+  line-height: 1.6;
   font-size: 15px;
-  background: linear-gradient(to bottom, #fdf1d3 0%, #fcf6e3 50%, #fcf9ef 100%);
-  display: flex;
-  justify-content: center;
+  font-weight: 300;
+  -webkit-tap-highlight-color: rgba(245, 158, 66, 0.3);
+  -webkit-touch-callout: none;
+  position: static;
+  overflow-x: hidden;
+}
 
+/* 🎯 모바일 우선 메인 컨테이너 */
+.mainContainer {
+  width: 100vw; /* 기기 전체 너비 사용 */
+  height: 100vh; /* 기기 전체 높이 고정 */
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  position: relative;
+  overflow: hidden; /* 전체 스크롤 방지 */
+}
+
+/* 🎯 메인 페이지용 앱 컨테이너 (바텀 네비게이션 포함) */
+.appContainer {
+  width: 100%;
+  background-color: #fff;
+  padding: 0 16px; /* 좌우 패딩 */
+  padding-top: 60px; /* 헤더 높이(60px) + 0px 여백 */
+  padding-bottom: 80px; /* 바텀 네비 높이(70px) + 10px 여백 */
+  height: calc(100vh - 60px); /* 헤더 제외한 높이 */
+  overflow-y: auto; /* 스크롤 활성화 */
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1;
+}
+
+.appContainer::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+/* 🎯 서브 페이지용 앱 컨테이너 (바텀 네비게이션 없음) */
+.appContainerSub {
+  width: 100%;
+  background-color: #fff;
+  padding: 0 16px; /* 좌우 패딩 */
+  padding-top: 60px; /* 헤더 높이(60px) + 0px 여백 */
+  padding-bottom: 30px; /* 하단 여백 */
+  height: calc(100vh - 60px); /* 헤더 제외한 높이 */
+  overflow-y: auto; /* 스크롤 활성화 */
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1;
+}
+
+.appContainerSub::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+/* 🎯 스크롤 가능한 콘텐츠 영역 - 이제 불필요 (직접 appContainer에서 처리) */
+.scrollContent {
+  width: 100%;
+}
+
+/* 🎯 고정 콘텐츠 영역 (스크롤 없음) */
+.fixedContent {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* 📱 기기별 세밀한 패딩 조정 */
+
+/* iPhone SE (375px) - 작은 화면이므로 패딩 최소화 */
+@media (max-width: 375px) {
+  .appContainer, .appContainerSub {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+/* iPhone 12/13/14 (390-393px) - 표준 패딩 */
+@media (min-width: 376px) and (max-width: 393px) {
+  .appContainer, .appContainerSub {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* iPhone 14 Pro Max (430px) - 여유 있는 패딩 */
+@media (min-width: 394px) and (max-width: 430px) {
+  .appContainer, .appContainerSub {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}
+
+/* 대형 모바일 기기 (430px+) */
+@media (min-width: 431px) and (max-width: 500px) {
+  .appContainer, .appContainerSub {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* 💻 PC 환경에서만 중앙 정렬 및 고정 너비 적용 */
+@media (min-width: 501px) {
+  body {
+    background: #f0f0f0; /* PC에서는 회색 배경 */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  
+  .mainContainer {
+    width: 430px;
+    height: calc(100vh - 40px); /* 고정 높이 */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff; /* 노란색 그라디언트 제거, 흰색으로 통일 */
+  }
+  
+  .appContainer, .appContainerSub {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 }
 
 /* reset css */
@@ -25,12 +160,7 @@ li {
   list-style: none;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
   margin: 0;
 }
@@ -39,32 +169,158 @@ input {
   outline: none;
 }
 
-.appContainer {
-  max-width: 420px;
-  width: 100%;
-   /* width: 420px; */
-  background-color: #fff;
-  padding: 0 24px;
-  padding-top: 60px;
-  /* Header 높이 */
-  height: calc(100vh - 100px);
-  overflow-y: auto;
-  scrollbar-width: none;      
-  -ms-overflow-style: none;
+/* 터치 친화적 버튼 */
+button {
+  min-height: 44px;
+  min-width: 44px;
+  -webkit-tap-highlight-color: rgba(245, 158, 66, 0.3);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  touch-action: manipulation;
+  pointer-events: auto;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
-.appContainer::-webkit-scrollbar {
-  display: none;              /* Chrome, Safari */
+button:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
-.mainContainer {
-  width: 420px;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
+/* 입력 필드 최적화 */
+input[type="text"], 
+input[type="password"], 
+input[type="email"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 8px;
+  font-size: 16px; /* iOS 줌 방지 */
+  min-height: 44px;
+  padding: 12px 16px;
+}
+
+/* PWA 설치 버튼 숨기기 */
+@media (display-mode: standalone) {
+  .install-prompt {
+    display: none;
+  }
+}
+
+/* 하단 네비게이션 안전 영역 */
+.bottom-navigation {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+
+/* 모바일 드래그 방지 */
+img {
+  -webkit-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* 모바일 선택 방지 */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* 모바일 호버 효과 제거 */
+@media (hover: none) {
+  .hover-effect:hover {
+    background-color: initial;
+  }
+}
+
+/* 키보드 나타날 때 레이아웃 고정 */
+@media (max-height: 500px) {
+  .keyboard-adjust {
+    position: fixed;
+    bottom: 0;
+  }
 }
 
 .react-datepicker__portal {
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* iOS 안전 영역 변수 */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+  --safe-area-inset-right: env(safe-area-inset-right);
+}
+
+/* 안전 영역 대응 - mainContainer만 적용 */
+.mainContainer {
+  padding-top: var(--safe-area-inset-top);
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+}
+
+/* PWA 설치 팝업을 위한 안전 영역 대응 */
+.pwa-install-popup {
+  top: var(--safe-area-inset-top, 0px) !important;
+}
+
+/* 애니메이션 최적화 */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 부드러운 애니메이션 */
+.animate-slide-in {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 성능 최적화 */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* 스크롤 성능 최적화 */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* 60fps 보장 */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
 }

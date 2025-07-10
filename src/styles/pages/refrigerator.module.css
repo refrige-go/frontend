@@ -1,28 +1,22 @@
-/* 전체 wrapper */
-.container {
-  width: 100%;
-  max-width: 420px;      /* globals.css의 mainContainer와 일치 */
-  margin: 0 auto;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
-}
+/* 🎯 냉장고 페이지 레이아웃 최적화 */
 
-/* 내부 content */
-.content {
-  padding: 0 15px;
-  padding-top: 60px;     /* Header 높이 */
-  padding-bottom: 70px;  /* BottomNavigation 높이 */
-  flex: 1;
-  overflow-y: auto;
+/* 고정 헤더 영역 */
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #fff;
+  border-bottom: 1px solid #f3f3f3;
+  box-shadow: none;
+  padding: 16px 20px;
+  margin: 0 -20px; /* scrollContent의 패딩을 무시하고 전체 너비 사용 */
 }
 
 /* 탭 버튼 */
 .tabWrap {
   display: flex;
   gap: 8px;
-  margin: 16px 0;
+  margin-bottom: 16px;
 }
 
 .tabActive {
@@ -30,9 +24,11 @@
   background: #f59e42;
   color: white;
   font-weight: bold;
-  padding: 15px;
-  border-radius: 999px;
+  padding: 12px 16px;
+  border-radius: 24px;
   border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .tabInactive {
@@ -40,39 +36,313 @@
   background: white;
   color: #f59e42;
   font-weight: bold;
-  padding: 10px;
-  border-radius: 999px;
+  padding: 12px 16px;
+  border-radius: 24px;
   border: 1px solid #f59e42;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tabInactive:hover {
+  background: #fef7f0;
+}
+
+/* 선택 모드 관련 스타일 */
+.selectionControls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.selectionModeBtn {
+  flex: 0 1 auto; /* 텍스트 길이에 맞춰 동적 조정 */
+  background: #fff;
+  color: #f59e42;
+  border: 2px solid #f59e42;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.selectionModeBtn:hover {
+  background: #fef7f0;
+}
+
+.selectionModeActive {
+  flex: 1; /* 선택 모드에서는 균등 분할 */
+  background: #f59e42;
+  color: white;
+  border: 2px solid #f59e42;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.selectAllBtn {
+  flex: 1; /* 선택 모드에서는 균등 분할 */
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.selectAllBtn:hover {
+  background: #4b5563;
+}
+
+.bulkDeleteBtn {
+  flex: 1; /* 선택 모드에서는 균등 분할 */
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.bulkDeleteBtn:hover {
+  background: #dc2626;
+}
+
+.bulkDeleteBtn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 재료 추가 및 OCR 버튼 */
+.addIngredientBtn {
+  flex: 1 1 auto; /* 긴 텍스트를 위해 더 많은 공간 할당 */
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.addIngredientBtn:hover {
+  background: #059669;
+}
+
+.ocrBtn {
+  flex: 0 1 auto; /* 짧은 텍스트로 최소 공간만 사용 */
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.ocrBtn:hover {
+  background: #2563eb;
+}
+
+/* 선택된 카드 스타일 */
+.selectedCard {
+  border-color: #f59e42 !important;
+  background-color: #fef7f0 !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 66, 0.2);
+}
+
+/* 체크박스 컨테이너 */
+.checkboxContainer {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+.selectionCheckbox {
+  width: 20px;
+  height: 20px;
+  accent-color: #f59e42;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 2px solid #f59e42;
+}
+
+.selectionCheckbox:checked {
+  background-color: #f59e42;
+}
+
+/* 필터 바 */
+.filterBar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.searchInput {
+  flex: 1.5;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #f59e42;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(245, 158, 66, 0.2);
+}
+
+.sortSelect {
+  flex: 2.5;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.2s ease;
+  min-width: 160px;
+  height: 40px;
+  line-height: 1.2;
+  vertical-align: middle;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  padding-right: 32px;
+}
+
+.sortSelect:focus {
+  outline: none;
+  border-color: #f59e42;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(245, 158, 66, 0.2);
+}
+
+.sortSelect:hover {
+  border-color: #f59e42;
+  background-color: #fff;
+}
+
+/* 정렬 선택창 드롭다운 옵션 스타일 */
+.sortSelect option {
+  background-color: #fff;
+  color: #333;
+  font-size: 14px;
+  padding: 8px 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.sortSelect option:hover {
+  background-color: #f59e42;
+  color: #fff;
+}
+
+.sortSelect option:checked {
+  background-color: #f59e42;
+  color: #fff;
+}
+
+/* 모바일에서 드롭다운 스타일 개선 */
+@media (max-width: 768px) {
+  .sortSelect option {
+    font-size: 16px; /* 모바일에서 터치하기 쉽게 */
+    padding: 12px 16px;
+  }
 }
 
 /* 재료 카드 그리드 */
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 175px);
-  gap: 20px;
-  padding-bottom: 60px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 20px 0;
+  justify-content: center;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .card {
   background: #f9fafb;
-  border-radius: 10px;
+  border-radius: 12px;
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;        
-  max-width: 190px;  
-  margin: 0 auto;    
-  padding: 10px 5px;
+  width: 100%;
+  padding: 12px;
+  min-height: 70px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #f59e42;
+}
+
+.card:active {
+  transform: translateY(0);
 }
 
 .frozenCard {
-  background-color: #f3fbff;
+  background-color: #e0f2fe;
+  border-color: transparent;
+}
+
+.warningCard {
+  background-color: #fef3c7;
+  border-color: transparent;
+}
+
+.expiredCard {
+  background-color: #fef2f2;
+  border-color: transparent;
 }
 
 .cardContent {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  width: 100%;
 }
 
 .textContent {
@@ -80,37 +350,48 @@
   flex-direction: column;
   gap: 4px;
   flex: 1;
+  min-width: 0; /* 텍스트 오버플로우 방지 */
 }
 
 .name {
   font-size: 14px;
-  font-weight: bold;
+  font-weight: 600;
   color: #333;
+  word-break: break-word;
 }
 
 .category {
-  font-size: 12px;
-  color: #999;
-  display: flex;             
-  align-items: center;    
-  white-space: nowrap; 
+  font-size: 11px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nameDday {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
 }
 
 .dDay {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  line-height: 17px;
-  width: 35px;               /* 가로 크기 */
-  height: 17px;              /* 세로 크기 */
-  background-color: white;   /* 배경색 흰색 */
-  color: #f59e42;          /* 텍스트 색 */
-  border: 2px solid #f59e42;/* 테두리 색 */
-  border-radius: 12px;        /* 모서리 둥글게 */
-  font-weight: bold;
+  padding: 3px 8px;
+  background-color: white;
+  color: #f59e42;
+  border: 1px solid #f59e42;
+  border-radius: 12px;
+  font-weight: 600;
   font-size: 10px;
-  margin-left: 5px;          /* 간격 */
-  user-select: none;
+  white-space: nowrap;
+  min-width: 40px;
+  height: 20px;
 }
 
 .frozenIcon {
@@ -118,115 +399,167 @@
   font-size: 12px;
 }
 
-.top {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  border: none;
-  background: transparent;
-  font-size: 14px;
-  color:#f59e42;
-  font-weight: bold;
-  opacity: 0 !important;            /* ← 숨김 상태 강제 적용 */
-  pointer-events: none !important;  /* ← 클릭 막기 */
-  transition: opacity 0.2s ease;
-  z-index: 1;
+.emoji {
+  width: 44px;
+  height: 44px;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  flex-shrink: 0;
 }
 
-.card:hover .top {
-  opacity: 1 !important;            /* ← 마우스 올리면 보이게 */
-  pointer-events: auto !important;  /* ← 다시 클릭 가능 */
+.emojiIcon {
+  width: 44px;
+  height: 44px;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  flex-shrink: 0;
 }
 
-/* 모달 상세 보기 */
+.thumbnail {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  background-color: #f0f0f0;
+  flex-shrink: 0;
+}
+
+/* 모달 상세 보기 - 바텀 네비게이션 위에서 시작 */
 .overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.3);
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  z-index: 9999;
+}
+
+.centeredOverlay {
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .detailContainer {
   background: #fff;
   width: 100%;
-  max-width: 420px;        /* ✅ 폭 제한 */
-  margin: 0 auto;          /* ✅ 중앙 정렬 */
-  padding: 24px 20px;
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 24px 20px 24px 20px;
   border-radius: 24px 24px 0 0;
-  max-height: 60vh;
+  max-height: calc(70vh - 100px); /* 바텀 네비게이션 높이 제외 */
   overflow-y: auto;
-  z-index: 10000;          /* 최상단 보장 */
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  z-index: 10000;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  margin-bottom: 0 !important;
+  padding-bottom: 24px !important;
 }
 
+/* 모바일에서 더 정확한 높이 계산 */
+@media (max-width: 500px) {
+  .overlay {
+    padding-bottom: 0 !important;
+  }
+  
+  .detailContainer {
+    max-height: calc(60vh - 100px); /* 모바일에서 더 작게 */
+  }
+}
+
+/* PC 환경에서 모바일 시뮬레이션 */
+@media (min-width: 501px) {
+  .overlay {
+    padding-bottom: 0 !important;
+  }
+  
+  .detailContainer {
+    max-height: calc(70vh - 100px);
+  }
+}
 
 .detailHeader {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 12px;
-}
-
-.detailHeader img {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  object-fit: cover;
+  margin-bottom: 24px;
 }
 
 .detailInfo {
   flex: 1;
 }
 
-.detailDday {
-  font-size: 24px;
-  font-weight: bold;
-  color: #f59e42;
+.detailInfo .category {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.detailInfo .name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
 }
 
 .frozenText {
-  color: #111;
-  font-weight: bold;
-  font-size: 18px;
+  color: #0ea5e9;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .detailBody {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 20px;
+  margin-bottom: 24px;
 }
 
 .detailBody div {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+}
+
+.detailBody span {
+  font-weight: 500;
+  color: #333;
 }
 
 .detailFooter {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
 .deleteBtn,
 .completeBtn {
   flex: 1;
-  padding: 12px;
-  font-size: 14px;
-  font-weight: bold;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .deleteBtn {
   background: #fff;
-  border: 1px solid #f59e42;
-  color: #f59e42;
+  border: 2px solid #ef4444;
+  color: #ef4444;
+}
+
+.deleteBtn:hover {
+  background: #fef2f2;
 }
 
 .completeBtn {
@@ -234,7 +567,11 @@
   color: white;
 }
 
-/* 스위치 */
+.completeBtn:hover {
+  background: #e8892b;
+}
+
+/* 토글 스위치 */
 .toggleWrap {
   display: flex;
   justify-content: space-between;
@@ -243,8 +580,8 @@
 
 .toggleSwitch {
   position: relative;
-  width: 42px;
-  height: 24px;
+  width: 50px;
+  height: 28px;
 }
 
 .toggleSwitch input {
@@ -261,20 +598,21 @@
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  transition: 0.4s;
-  border-radius: 24px;
+  transition: 0.3s;
+  border-radius: 28px;
 }
 
 .slider::before {
   position: absolute;
   content: '';
-  height: 18px;
-  width: 18px;
+  height: 22px;
+  width: 22px;
   left: 3px;
   bottom: 3px;
   background-color: white;
-  transition: 0.4s;
+  transition: 0.3s;
   border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .toggleSwitch input:checked + .slider {
@@ -282,55 +620,28 @@
 }
 
 .toggleSwitch input:checked + .slider::before {
-  transform: translateX(18px);
+  transform: translateX(22px);
 }
 
-/* 버튼 */
-.recipeRecommendBtn {
-  position: fixed;
-  bottom: 105px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #f59e42;
-  color: white;
-  padding: 18px 24px;
-  border-radius: 24px;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-  z-index: 1000;
-  width: 380px;
-}
-
-.addButton {
-  position: fixed;
-  bottom: 170px;
-  right: 50%;
-  transform: translateX(180px); 
-  background: #f59e42;
-  color: white;
-  width: 48px;
-  height: 48px;
-  border-radius: 9999px;
-  font-size: 28px;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-  z-index: 1000;
-}
-
-/* 달력 */
+/* 날짜 입력 */
 .dateInput {
   text-align: right;
-  padding: 6px 12px;
-  border: none;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  background-color: #f2f2f2;
+  background-color: #f9fafb;
   font-size: 14px;
-  width: 135px;
+  width: 140px;
+  transition: all 0.2s;
 }
 
-/* 달력 중앙 정렬 */
+.dateInput:focus {
+  outline: none;
+  border-color: #f59e42;
+  background-color: #fff;
+}
+
+/* 달력 포털 스타일링 */
 #root-portal .react-datepicker__portal {
   position: fixed;
   top: 50%;
@@ -340,214 +651,463 @@
   background-color: white;
   border-radius: 12px;
   padding: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-/* + 버튼 위에 뜨는 선택지 버튼 박스 */
-.addOptionsFix {
+/* 플로팅 버튼들 - 스크롤과 무관하게 고정 (PC 환경 고려) */
+.recipeRecommendBtn {
   position: fixed;
-  bottom: 230px; /* + 버튼 기준 위로 적당히 띄움 */
-  right: 50%;
-  transform: translateX(180px); /* +버튼 위치에 맞춰 정렬 */
+  bottom: 110px; /* 바텀 네비게이션(70px + 30px) + 10px 여백 */
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f59e42;
+  color: white;
+  padding: 16px 24px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  z-index: 1000;
+  width: calc(100% - 40px);
+  max-width: 350px;
+  box-shadow: 0 4px 16px rgba(245, 158, 66, 0.3);
+  
+  /* 터치 최적화 */
+  touch-action: manipulation;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: rgba(245, 158, 66, 0.3);
+  user-select: none;
+  
+  /* 활성 상태 피드백 */
+  transition: all 0.2s ease;
+  
+  /* 선택 모드일 때 긴 텍스트 처리 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* PC 환경에서 모바일 컨테이너 기준으로 위치 조정 */
+@media (min-width: 501px) {
+  .recipeRecommendBtn {
+    max-width: 390px; /* PC에서 모바일 컨테이너 너비에 맞춤 */
+  }
+}
+
+.recipeRecommendBtn:hover {
+  background: #e8892b;
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 66, 0.4);
+}
+
+.recipeRecommendBtn:active {
+  transform: translateX(-50%) scale(0.98);
+}
+
+.recipeRecommendBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.addButton {
+  position: fixed;
+  bottom: 180px; /* 레시피 추천 버튼 위 오른쪽 */
+  right: calc(50% - 175px); /* 레시피 추천 버튼 오른쪽 끝과 맞춤 */
+  background: #f59e42;
+  color: white;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 4px 16px rgba(245, 158, 66, 0.3);
+  
+  /* 터치 최적화 */
+  touch-action: manipulation;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: rgba(245, 158, 66, 0.3);
+  user-select: none;
+  
+  /* 활성 상태 피드백 */
+  transition: all 0.2s ease;
+}
+
+/* 모바일에서는 단순하게 오른쪽 20px */
+@media (max-width: 500px) {
+  .addButton {
+    right: 20px;
+  }
+}
+
+.addButton:hover {
+  background: #e8892b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 66, 0.4);
+}
+
+.addButton:active {
+  transform: scale(0.95);
+}
+
+/* 플로팅 추가 옵션 메뉴 */
+.addOptionsFloating {
+  position: fixed;
+  bottom: 250px; /* + 버튼 위로 70px 여백 */
+  right: calc(50% - 195px + 20px); /* 모바일 컨테이너 기준 오른쪽 20px */
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  z-index: 1050;
+  gap: 12px;
+  z-index: 1001;
   align-items: flex-end;
+  animation: slideInUp 0.3s ease-out;
 }
 
-/* 선택지 버튼 스타일 */
+/* 모바일에서는 단순하게 오른쪽 20px */
+@media (max-width: 500px) {
+  .addOptionsFloating {
+    right: 20px;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .addOptionBtn {
   background-color: #f59e42;
   color: #ffffff;
   border: none;
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-weight: bold;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-weight: 600;
   font-size: 14px;
   white-space: nowrap;
   cursor: pointer;
+  min-width: 140px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(245, 158, 66, 0.3);
+  
+  /* 터치 최적화 */
+  touch-action: manipulation;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: rgba(245, 158, 66, 0.3);
 }
 
 .addOptionBtn:hover {
-  background-color:#f59e42;
+  background-color: #e8892b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 158, 66, 0.4);
 }
 
-/* 모달 배경 어둡게 */
+.addOptionBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(245, 158, 66, 0.3);
+}
+
+/* 레시피 추천 모달 - 바퉀 네비게이션 위에서 시작 */
+.recommendModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 20000;
+  padding: 0;
+}
+
+.recommendModalContent {
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 24px 20px;
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  max-height: calc(70vh - 100px);
+  overflow-y: auto;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.recommendModalContent h2 {
+  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 20px;
+  color: #f59e42;
+  text-align: center;
+}
+
+.ingredientSelectList {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.ingredientSelectItem {
+  display: flex;
+  align-items: center;
+  padding: 12px 8px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ingredientSelectItem:hover {
+  background: #f9fafb;
+}
+
+.ingredientSelectItem input[type="checkbox"] {
+  margin-right: 12px;
+  width: 18px;
+  height: 18px;
+}
+
+.ingredientSelectName {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+}
+
+.ingredientSelectInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.frozenBadge {
+  font-size: 12px;
+  color: #0ea5e9;
+  font-weight: 600;
+}
+
+.expiryBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.expiryBadge.expired {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fca5a5;
+}
+
+.expiryBadge.warning {
+  background: #fffbeb;
+  color: #f59e0b;
+  border: 1px solid #fcd34d;
+}
+
+.expiryBadge.safe {
+  background: #f0fdf4;
+  color: #10b981;
+  border: 1px solid #86efac;
+}
+
+.noExpiryBadge {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.noIngredients {
+  text-align: center;
+  color: #666;
+  margin: 40px 0;
+  line-height: 1.6;
+}
+
+.recommendModalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.recommendBtn {
+  padding: 12px 20px;
+  background: #f59e42;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.recommendBtn:hover {
+  background: #e8892b;
+}
+
+.recommendBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* 삭제 확인 모달 - 바퉀 네비게이션 위에서 시작 */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  align-items: flex-start;  
-  padding-top: 350px;    
-  z-index: 11000;
+  align-items: flex-end;
+  z-index: 21000;
+  padding: 0;
 }
 
-/* 모달 박스 중앙 */
 .modalBox {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10001;
   background-color: #fff;
   padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   text-align: center;
-  min-width: 260px;
-  z-index: 11001;
-}
-
-/* 버튼 묶음 */
-.modalButtons {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-/* 취소 버튼 */
-.cancelBtn {
-  background-color: #fff;
-  color: #f59e42;
-  border: 1px solid #f59e42;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-/* 삭제 버튼 */
-.confirmBtn {
-  background-color: #f59e42;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-weight: bold;
-  cursor: pointer;
+  min-width: 280px;
 }
 
 .modalText {
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 600;
   text-align: center;
   margin-bottom: 20px;
   color: #333;
 }
 
-.hideDDayCircle {
-  display: none 
-}
-
-.emoji {
-  width: 40px;
-  height: 40px;
-  font-size: 28px;
+.modalButtons {
   display: flex;
-  align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  background-color: #f0f0f0;
-  margin-left: 5px;
-}
-
-.emojiIcon {
-  width: 40px;
-  height: 40px;
-  font-size: 28px;       
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;       
-  background-color: #f0f0f0;
-  margin-left: 5px;
-}
-
-.thumbnail {
-  width: 40px;
-  height: 40px;
-  font-size: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  object-fit: cover;
-  background-color: #f0f0f0;
-}
-
-/* D-day 3일 이하 카드 */
-.warningCard {
-  background-color: #FFE9DD;
-}
-
-/* 유통기한 지난 카드 */
-.expiredCard {
-  background-color: 	#D1D5DB;
-}
-
-.addOptionsOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: transparent;
-  z-index: 1000;
-}
-
-.scrollArea {
-overflow: scroll;
-height: 50vh;
-
-
-}
-
-.scrollArea::-webkit-scrollbar {
-  display: none;              
-}
-
-/* styles/pages/refrigerator.module.css 안에 추가 */
-.filterBar {
-  display: flex;
   gap: 12px;
-  margin: 20px 0;
-  justify-content: space-between;
-  align-items: center;
 }
 
-.searchInput {
-  flex: 1;
-  padding: 10px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-  background-color: #f9fafb;
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.searchInput:focus {
-  outline: none;
-  border-color: #f59e42;
+.cancelBtn {
   background-color: #fff;
-  box-shadow: 0 0 0 2px rgba(37, 33, 30, 0.2);
+  color: #666;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.sortSelect {
-  padding: 10px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-  background-color: #f9fafb;
-  font-size: 14px;
-  color: #333;
-  transition: all 0.2s ease;
+.cancelBtn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
 }
 
-.sortSelect:focus {
-  outline: none;
-  border-color: #f59e42;
-  background-color: #fff;
-  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+.confirmBtn {
+  background-color: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirmBtn:hover {
+  background-color: #dc2626;
+}
+
+/* 반응형 최적화 */
+@media (max-width: 375px) {
+  .grid {
+    gap: 12px;
+  }
+  
+  .card {
+    padding: 10px;
+    min-height: 60px;
+  }
+  
+  .emoji, .emojiIcon, .thumbnail {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+  
+  .name {
+    font-size: 13px;
+  }
+  
+  .category {
+    font-size: 10px;
+  }
+  
+  .addButton {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  
+  .recipeRecommendBtn {
+    width: 90%;
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+}
+
+/* PC 환경에서 스크롤바 스타일링 */
+@media (min-width: 431px) {
+  .ingredientSelectList::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .ingredientSelectList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  .ingredientSelectList::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+  }
+  
+  .ingredientSelectList::-webkit-scrollbar-thumb:hover {
+    background: #999;
+  }
+}
+
+.bottomWhiteCover {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 80px; /* 바텀네비 높이만큼 */
+  background: #fff;
+  z-index: 21001;
+  pointer-events: none;
 }

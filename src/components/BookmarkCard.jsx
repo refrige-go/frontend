@@ -35,7 +35,14 @@ export default function BookmarkCard({ recipe, onUnbookmark, onBookmark }) {
     <Link href={`/recipe-detail/${recipe.recipeId ?? recipe.rcpSeq}`}>
       <div className={styles.card}>
         <div className={styles.imageWrapper}>
-          <img src={recipe.image} alt={recipe.rcpNm} className={styles.recipeImg} />
+          <img 
+            src={recipe.image || '/images/default.jpg'} 
+            alt={recipe.rcpNm} 
+            className={styles.recipeImg} 
+            onError={(e) => {
+              e.target.src = '/images/default.jpg';
+            }}
+          />
           <button className={styles.heart} onClick={handleToggleBookmark}>
             {recipe.bookmarked ? '🧡' : '🤍'}
           </button>

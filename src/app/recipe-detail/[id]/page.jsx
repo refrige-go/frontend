@@ -7,6 +7,7 @@ import BottomNavigation from '../../../components/layout/BottomNavigation';
 import axiosInstance from '../../../api/axiosInstance';
 import RecipeCard from '../../../components/RecipeCard';
 import styles from '../../../styles/pages/RecipeDetail.module.css';
+import SubPageHeader from '../../../components/layout/SubPageHeader';
 
 export default function RecipeDetailPage() {
   const router = useRouter();
@@ -189,14 +190,8 @@ export default function RecipeDetailPage() {
 
   if (loading) {
     return (
-      <div className={styles.mainContainer}>
-        <div className={styles.navBar}>
-          <button className={styles.backButton} onClick={() => router.back()}>
-            ←
-          </button>
-          <h2 className={styles.navTitle}>레시피 상세</h2>
-          <div style={{ width: '18px' }}></div>
-        </div>
+      <div className="mainContainer">
+        <SubPageHeader title="레시피 상세" onBack={() => router.back()} />
 
         <div className={`${styles.appContainer} ${isCookingMode ? styles.cookingModeActive : ''}`}>
           <div className={styles.loadingContainer}>
@@ -211,14 +206,8 @@ export default function RecipeDetailPage() {
 
   if (!recipe) {
     return (
-      <div className={styles.mainContainer}>
-        <div className={styles.navBar}>
-          <button className={styles.backButton} onClick={() => router.back()}>
-            ←
-          </button>
-          <h2 className={styles.navTitle}>레시피 상세</h2>
-          <div style={{ width: '18px' }}></div>
-        </div>
+      <div className="mainContainer">
+        <SubPageHeader title="레시피 상세" onBack={() => router.back()} />
 
         <div className={`${styles.appContainer} ${isCookingMode ? styles.cookingModeActive : ''}`}>
           <div className={styles.errorMessage}>레시피를 찾을 수 없습니다.</div>
@@ -229,16 +218,9 @@ export default function RecipeDetailPage() {
   }
 
   return (
-    <div className={styles.mainContainer}>
-      <div className={styles.navBar}>
-        <button className={styles.backButton} onClick={() => router.back()}>
-          ←
-        </button>
-        <h2 className={styles.navTitle}>레시피 상세</h2>
-        <div style={{ width: '18px' }}></div>
-      </div>
-
-      <div className={`${styles.appContainer} ${isCookingMode ? styles.cookingModeActive : ''}`}>
+    <div className="mainContainer">
+      <SubPageHeader title="레시피 상세" onBack={() => router.back()} />
+      <div className="appContainer" style={{ paddingTop: '70px', paddingBottom: '80px' }}>
         {/* 요리 모드일 때 재료 사용 체크 - header 바로 아래에 고정 위치 */}
         {isCookingMode && (
           <div className={styles.cookingModeFixed}>
@@ -406,11 +388,6 @@ export default function RecipeDetailPage() {
                 />
               ))}
             </div>
-            {displayCount < similarRecipes.length && (
-              <div className={styles.scrollMessage}>
-                스크롤을 내려 더 많은 레시피를 확인하세요
-              </div>
-            )}
           </div>
         )}
 

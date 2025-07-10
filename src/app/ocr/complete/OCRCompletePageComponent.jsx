@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import SubPageHeader from '../../../components/layout/SubPageHeader.jsx';
+import BottomNavigation from '../../../components/layout/BottomNavigation.jsx';
 
 export default function CompletePage() {
   const router = useRouter();
@@ -19,144 +21,133 @@ export default function CompletePage() {
   }, []);
 
   return (
-    <div className="container">
-      <style jsx>{`
-        .container { 
-          background: #f7faff; 
-          min-height: 100vh; 
-          padding: 0 0 32px 0; 
-        }
-        .header { 
-          background: #f79726; 
-          color: #fff; 
-          font-weight: bold; 
-          font-size: 1.3em; 
-          text-align: center; 
-          border-radius: 0 0 18px 18px; 
-          padding: 18px 0 14px 0; 
-          margin-bottom: 18px; 
-        }
-        .success-box { 
-          background: #e6fff2; 
-          color: #22c55e; 
-          border-radius: 12px; 
-          padding: 16px 18px; 
-          margin: 0 auto 18px auto; 
-          width: 92vw; 
-          max-width: 400px; 
-          font-size: 1.1em; 
-          display: flex; 
-          align-items: center; 
-          justify-content: center; 
-          gap: 10px;
-        }
-        .success-check { 
-          background: #f79726; 
-          color: #fff; 
-          border-radius: 50%; 
-          width: 32px; 
-          height: 32px; 
-          display: flex; 
-          align-items: center; 
-          justify-content: center; 
-          font-size: 1.3em; 
-        }
-        .ingredient-list { 
-          width: 92vw; 
-          max-width: 400px; 
-          margin: 0 auto 18px auto; 
-        }
-        .ingredient-item { 
-          background: #fff; 
-          border-radius: 14px; 
-          margin-bottom: 12px; 
-          padding: 16px 18px; 
-          display: flex; 
-          align-items: flex-start; 
-          justify-content: space-between; 
-          box-shadow: 0 2px 8px #0001; 
-          border: 2px solid #f79726; 
-        }
-        .ingredient-info {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-        .ingredient-name { 
-          font-weight: bold; 
-          font-size: 1.1em; 
-          color: #222; 
-        }
-        .ingredient-details {
-          display: flex;
-          gap: 16px;
-          color: #666;
-          font-size: 0.9em;
-        }
-        .ingredient-dates {
-          display: flex;
-          gap: 16px;
-          color: #666;
-          font-size: 0.9em;
-        }
-        .ingredient-check { 
-          background: #f79726; 
-          color: #fff; 
-          border-radius: 50%; 
-          width: 28px; 
-          height: 28px; 
-          display: flex; 
-          align-items: center; 
-          justify-content: center; 
-          font-size: 1.1em; 
-          margin-left: 12px;
-        }
-        .footer-btn-main { 
-          width: 92vw; 
-          max-width: 400px; 
-          margin: 32px auto 0 auto; 
-          display: block; 
-          background: #f79726; 
-          color: #fff; 
-          border: none; 
-          border-radius: 12px; 
-          padding: 16px 0; 
-          font-size: 1.15em; 
-          font-weight: bold; 
-          cursor: pointer; 
-          text-align: center; 
-        }
-      `}</style>
+    <div className="mainContainer">
+      <SubPageHeader title="재료 추가 완료" />
+      
+      <div className="appContainer" style={{ paddingTop: 76 }}>
+        {/* 성공 메시지 */}
+        <div style={{
+          background: '#e6fff2',
+          color: '#22c55e',
+          borderRadius: 12,
+          padding: '16px 18px',
+          margin: '18px auto 24px auto',
+          width: '100%',
+          maxWidth: 400,
+          fontSize: '1.1em',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          textAlign: 'center'
+        }}>
+          <span style={{
+            background: '#f79726',
+            color: '#fff',
+            borderRadius: '50%',
+            width: 32,
+            height: 32,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.3em'
+          }}>✓</span>
+          <span>재료가 성공적으로 추가되었습니다!</span>
+        </div>
 
-      <div className="header">재료 추가 완료</div>
-      <div className="success-box">
-        <span className="success-check">✓</span>
-        <span>재료가 성공적으로 추가되었습니다!</span>
-      </div>
-      <div className="ingredient-list">
-        {ingredients.map((ing, idx) => (
-          <div key={idx} className="ingredient-item">
-            <div className="ingredient-info">
-              <span className="ingredient-name">
-                {typeof ing.name === 'object' && ing.name !== null ? ing.name.matchedName : ing.name}
-              </span>
-              <div className="ingredient-details">
-                <span>카테고리: {ing.category || '미분류'}</span>
-                <span>냉동여부: {ing.isFrozen ? 'O' : 'X'}</span>
+        {/* 재료 목록 */}
+        <div style={{
+          width: '100%',
+          maxWidth: 400,
+          margin: '0 auto 24px auto'
+        }}>
+          {ingredients.map((ing, idx) => (
+            <div key={idx} style={{
+              background: '#fff',
+              borderRadius: 14,
+              marginBottom: 12,
+              padding: '16px 18px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              border: '2px solid #f79726'
+            }}>
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8
+              }}>
+                <span style={{
+                  fontWeight: 'bold',
+                  fontSize: '1.1em',
+                  color: '#222'
+                }}>
+                  {typeof ing.name === 'object' && ing.name !== null ? ing.name.matchedName : ing.name}
+                </span>
+                <div style={{
+                  display: 'flex',
+                  gap: 16,
+                  color: '#666',
+                  fontSize: '0.9em'
+                }}>
+                  <span>카테고리: {ing.category || '미분류'}</span>
+                  <span>보관: {ing.isFrozen ? '냉동' : '냉장'}</span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  gap: 16,
+                  color: '#666',
+                  fontSize: '0.9em'
+                }}>
+                  <span>유통기한: {ing.expirationDate || '미입력'}</span>
+                  <span>구매일자: {ing.purchaseDate || '미입력'}</span>
+                </div>
               </div>
-              <div className="ingredient-dates">
-                <span>유통기한: {ing.expirationDate || '미입력'}</span>
-                <span>구매일자: {ing.purchaseDate || '미입력'}</span>
-              </div>
+              <span style={{
+                background: '#f79726',
+                color: '#fff',
+                borderRadius: '50%',
+                width: 28,
+                height: 28,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.1em',
+                marginLeft: 12
+              }}>✓</span>
             </div>
-            <span className="ingredient-check">✓</span>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {/* 하단 버튼 */}
+        <div style={{
+          width: '100%',
+          maxWidth: 400,
+          margin: '0 auto'
+        }}>
+          <button 
+            onClick={() => router.push('/refrigerator')}
+            style={{
+              width: '100%',
+              background: '#f79726',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 12,
+              padding: '16px 0',
+              fontSize: '1.15em',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              textAlign: 'center'
+            }}
+          >
+            내 냉장고 보기
+          </button>
+        </div>
       </div>
-      <button className="footer-btn-main" onClick={() => router.push('/refrigerator')}>
-        내 냉장고 보기
-      </button>
+      
+      <BottomNavigation />
     </div>
   );
 }

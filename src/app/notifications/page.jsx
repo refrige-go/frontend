@@ -58,24 +58,28 @@ const NotificationsPage = () => {
     <div className="mainContainer">
       <Header />
       <div className="appContainer">
-        <div className={styles.pageContainer}>
-          <div className={styles.contentWrapper}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {notifications.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  notification={notification}
-                  onClick={handleNotificationClick}
-                />
-              ))}
-              {notifications.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
-                  알림이 없습니다
-                </div>
-              )}
+        <main style={{
+            fontFamily: 'sans-serif',
+            }}>
+          <div className={styles.pageContainer}>
+            <div className={styles.contentWrapper}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {notifications.map((notification) => (
+                  <NotificationItem
+                    key={notification.id}
+                    notification={notification}
+                    onClick={handleNotificationClick}
+                  />
+                ))}
+                {notifications.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
+                    알림이 없습니다
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
       <BottomNavigation />
     </div>

@@ -1,12 +1,12 @@
 .pageContainer {
-    min-height: 100vh;
+    /* min-height 제거로 스크롤 방지 */
   }
   
   .contentWrapper {
     max-width: 1024px;
     margin: 0 auto;
     padding: 20px;
-    padding-bottom: 80px;
+    padding-bottom: 20px; /* 하단 여백 축소 */
   }
 
   .notificationItem {

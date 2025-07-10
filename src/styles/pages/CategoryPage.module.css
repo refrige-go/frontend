@@ -9,6 +9,7 @@
   /* IE 10+ */
   user-select: none;
   /* 드래그 중 텍스트 선택 방지 */
+  padding-top: 20px;
 }
 
 .categorySlider::-webkit-scrollbar {
@@ -17,6 +18,10 @@
 }
 
 .categoryButton {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
   border: none;
   background-color: #f0f0f0;
   padding: 6px 14px;
@@ -40,22 +45,43 @@
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 20px;
-  margin-top: 24px;
+  margin-top: 28px; /* 기존 24px + 4px 여백 */
 }
 
 .pagination {
   margin-top: 2rem;
   text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 8px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pagination::-webkit-scrollbar {
+  display: none;
 }
 
 .pageButton {
-  margin: 0 2px;
-  padding: 8px 8px;
+  margin: 0;
+  padding: 8px 12px;
   background-color: #eee;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 36px;
+  min-height: 36px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pageButton:disabled {
@@ -67,4 +93,19 @@
   background-color: #f59e42;
   color: #fff;
   font-weight: bold;
+}
+
+/* 모바일에서 페이지네이션 최적화 */
+@media (max-width: 430px) {
+  .pagination {
+    gap: 2px;
+    padding: 4px 0;
+  }
+  
+  .pageButton {
+    padding: 6px 10px;
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 13px;
+  }
 }

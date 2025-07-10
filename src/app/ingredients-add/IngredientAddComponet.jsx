@@ -8,6 +8,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
 import api from '../../lib/api';
 import { format } from 'date-fns';
+import BottomNavigation from '../../components/layout/BottomNavigation';
+import SubPageHeader from '../../components/layout/SubPageHeader';
 
 // 영어 enum → 한글 매핑
 const categoryMap = {
@@ -148,111 +150,113 @@ export default function IngredientAddComponent() {
 
   return (
     <div className="mainContainer">
-      <div className="appContainer">
-        <div className={styles.headerRow}>
-          <button onClick={() => router.back()} className={styles.backBtn}>←</button>
-          <h2 className={styles.pageTitle}>직접 추가</h2>
+      <SubPageHeader
+        title="직접 추가"
+        rightAction={
           <button onClick={handleSubmit} className={styles.doneBtn}>완료</button>
-        </div>
-
+        }
+        onBack={() => router.back()}
+      />
+      <div className="appContainer" style={{paddingTop: 70, paddingBottom: 100, minHeight: 'calc(100vh - 70px)'}}>
         <div className={styles.form}>
-          <div className={styles.imageBox}>
-            <label>재료 사진</label>
-            <div className={styles.imagePlaceholder}>
-              {imagePreview === '/images/default.jpg' ? (
-                <span className={styles.plusIcon}>+</span>
-              ) : (
-                <img src={imagePreview} alt="미리보기" />
-              )}
-              <input type="file" accept="image/*" onChange={handleImageChange} />
+            <div className={styles.imageBox}>
+              <label>재료 사진</label>
+              <div className={styles.imagePlaceholder}>
+                {imagePreview === '/images/default.jpg' ? (
+                  <span className={styles.plusIcon}>+</span>
+                ) : (
+                  <img src={imagePreview} alt="미리보기" />
+                )}
+                <input type="file" accept="image/*" onChange={handleImageChange} />
+              </div>
             </div>
-          </div>
 
-          <div className={styles.inputGroup}>
-            <label>재료명</label>
-            <input
-              type="text"
-              maxLength={6}
-              placeholder="최대 6자까지 입력할 수 있어요!"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-
-          <div className={styles.inputGroup}>
-            <label>카테고리</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)}>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {categoryMap[cat] || cat}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className={styles.row}>
-            <span className={styles.label}>구매일자</span>
-            <span onClick={togglePurchasePicker} className={styles.value}>
-              {format(purchaseDate, 'yyyy년 MM월 dd일')}
-            </span>
-          </div>
-          {showPurchasePicker && (
-            <div className={styles.datePickerWrapper}>
-              <DatePicker
-                selected={purchaseDate}
-                onChange={(date) => {
-                  setPurchaseDate(date);
-                  setShowPurchasePicker(false);
-                }}
-                inline
-                locale={ko}
-              />
-            </div>
-          )}
-
-          <div className={styles.row}>
-            <span className={styles.label}>소비기한</span>
-            <span
-              onClick={toggleExpiryPicker}
-              className={styles.value}
-              style={{
-                color: isFrozen ? '#ccc' : 'inherit',
-                cursor: isFrozen ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {format(expiryDate, 'yyyy년 MM월 dd일')}
-            </span>
-          </div>
-          {showExpiryPicker && (
-            <div className={styles.datePickerWrapper}>
-              <DatePicker
-                selected={expiryDate}
-                onChange={(date) => {
-                  setExpiryDate(date);
-                  setShowExpiryPicker(false);
-                }}
-                inline
-                locale={ko}
-                disabled={isFrozen}
-              />
-            </div>
-          )}
-
-          <div className={styles.toggleGroup}>
-            <label>냉동실 보관</label>
-            <label className={styles.toggleSwitch}>
+            <div className={styles.inputGroup}>
+              <label>재료명</label>
               <input
-                type="checkbox"
-                checked={isFrozen}
-                onChange={(e) => setIsFrozen(e.target.checked)}
+                type="text"
+                maxLength={6}
+                placeholder="최대 6자까지 입력할 수 있어요!"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
-              <span className={styles.slider}></span>
-            </label>
-          </div>
+            </div>
 
-          <p className={styles.tip}>Tip: 냉동 보관 시 소비기한이 자동으로 비활성화돼요!</p>
+            <div className={styles.inputGroup}>
+              <label>카테고리</label>
+              <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {categoryMap[cat] || cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.row}>
+              <span className={styles.label}>구매일자</span>
+              <span onClick={togglePurchasePicker} className={styles.value}>
+                {format(purchaseDate, 'yyyy년 MM월 dd일')}
+              </span>
+            </div>
+            {showPurchasePicker && (
+              <div className={styles.datePickerWrapper}>
+                <DatePicker
+                  selected={purchaseDate}
+                  onChange={(date) => {
+                    setPurchaseDate(date);
+                    setShowPurchasePicker(false);
+                  }}
+                  inline
+                  locale={ko}
+                />
+              </div>
+            )}
+
+            <div className={styles.row}>
+              <span className={styles.label}>소비기한</span>
+              <span
+                onClick={toggleExpiryPicker}
+                className={styles.value}
+                style={{
+                  color: isFrozen ? '#ccc' : 'inherit',
+                  cursor: isFrozen ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {format(expiryDate, 'yyyy년 MM월 dd일')}
+              </span>
+            </div>
+            {showExpiryPicker && (
+              <div className={styles.datePickerWrapper}>
+                <DatePicker
+                  selected={expiryDate}
+                  onChange={(date) => {
+                    setExpiryDate(date);
+                    setShowExpiryPicker(false);
+                  }}
+                  inline
+                  locale={ko}
+                  disabled={isFrozen}
+                />
+              </div>
+            )}
+
+            <div className={styles.toggleGroup}>
+              <label>냉동실 보관</label>
+              <label className={styles.toggleSwitch}>
+                <input
+                  type="checkbox"
+                  checked={isFrozen}
+                  onChange={(e) => setIsFrozen(e.target.checked)}
+                />
+                <span className={styles.slider}></span>
+              </label>
+            </div>
+
+            <p className={styles.tip}>Tip: 냉동 보관 시 소비기한이 자동으로 비활성화돼요!</p>
+          </div>
         </div>
-      </div>
+      <BottomNavigation />
     </div>
   );
 }
