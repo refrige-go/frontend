@@ -9,24 +9,38 @@ export default function TypeRecommendationsSection({ userId, onBookmark, onUnboo
   const [loading, setLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, scrollLeft: 0 });
+  const [error, setError] = useState(null);
 
   const scrollContainerRef = useRef(null);
 
   const fetchRecommendations = useCallback(async () => {
+    if (!userId) {
+      console.log('[TypeRecommendationsSection] userId가 없어서 요청하지 않음');
+      setLoading(false);
+      return;
+    }
+
+    console.log('[TypeRecommendationsSection] API 요청 시작, userId:', userId);
     setLoading(true);
+    setError(null);
+    
     try {
       const res = await axiosInstance.get('/api/bookmark/bookmark-recommend');
-      setRecipes(res.data.slice(0, 7));
+      console.log('[TypeRecommendationsSection] API 응답 성공:', res.data);
+      const recipesData = res.data || [];
+      setRecipes(Array.isArray(recipesData) ? recipesData.slice(0, 7) : []);
     } catch (error) {
-      console.error('추천 레시피 가져오기 실패:', error);
+      console.error('[TypeRecommendationsSection] API 에러:', error);
+      setError(error.message || '알 수 없는 에러');
+      setRecipes([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     fetchRecommendations();
-  }, [userId, fetchRecommendations]);
+  }, [fetchRecommendations]);
 
   const handleBookmark = async (recipeId) => {
     await onBookmark(recipeId);
@@ -57,35 +71,62 @@ export default function TypeRecommendationsSection({ userId, onBookmark, onUnboo
     },
   };
 
-  if (loading) return <p>불러오는 중입니다...</p>;
-  if (recipes.length === 0) return null;
+  // 로그인 상태일 때만 섹션 표시
+  if (!userId) {
+    return null;
+  }
+
+  // 로딩 중이거나 레시피가 없으면 섹션을 표시하지 않음
+  if (loading || (!loading && recipes.length === 0)) {
+    return null;
+  }
 
   return (
     <section style={{ marginTop: '2rem' }}>
-      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
+      <h2 style={{ 
+        fontSize: '1.2rem', 
+        marginBottom: '1rem',
+        fontWeight: '600',
+        color: '#333'
+      }}>
         사용자님의 취향 저격 레시피를 모아봤어요!
       </h2>
 
-      <div
-        ref={scrollContainerRef}
-        className="scroll-container no-scrollbar"
-        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-        {...dragHandlers}
-      >
-        {recipes.map((recipe) => (
-          <div className="slide-item" key={recipe.rcpSeq}>
-            <BookmarkCard
-              recipe={{
-                ...recipe,
-                bookmarked: recipe.bookmarked
-              }}
-              userId={userId}
-              onUnbookmark={handleUnbookmark}
-              onBookmark={handleBookmark}
-            />
-          </div>
-        ))}
-      </div>
+      {error && (
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '2rem', 
+          color: '#666',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
+          margin: '1rem 0'
+        }}>
+          추천 레시피를 불러오는 중 문제가 발생했습니다.
+        </div>
+      )}
+
+      {!error && recipes.length > 0 && (
+        <div
+          ref={scrollContainerRef}
+          className="scroll-container no-scrollbar"
+          style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+          {...dragHandlers}
+        >
+          {recipes.map((recipe) => (
+            <div className="slide-item" key={recipe.rcpSeq}>
+              <BookmarkCard
+                recipe={{
+                  ...recipe,
+                  bookmarked: recipe.bookmarked
+                }}
+                userId={userId}
+                onUnbookmark={handleUnbookmark}
+                onBookmark={handleBookmark}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       <style jsx>{`
         .scroll-container {

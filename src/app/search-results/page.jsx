@@ -104,8 +104,10 @@ export default function SearchResults() {
       <Header />
       
       <div className='appContainer'>
-        <main style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
-          
+        <main style={{
+            fontFamily: 'sans-serif',
+            }}>
+          <div className="scrollContent">
           {/* 검색바 */}
           <div style={searchBarContainerStyle}>
             <SearchBarComponent 
@@ -139,7 +141,7 @@ export default function SearchResults() {
 
           {/* 검색 결과 */}
           {!isLoading && !error && renderSearchResults()}
-          
+        </div>
         </main>
       </div>
       
@@ -177,6 +179,7 @@ function SearchBarComponent({ initialValue, onSearch }) {
 
 // 스타일 정의
 const searchBarContainerStyle = {
+  marginTop: '20px',
   marginBottom: '24px'
 };
 

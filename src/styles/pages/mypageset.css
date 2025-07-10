@@ -60,9 +60,19 @@
     transform: translateX(-50%);
     white-space: nowrap;
     border: none;
-    border-radius: 10px;
+    border-radius: 16px;
     font-size: 11px;
-    color: #888;
+    color: #fff;
+    background: #f59e42;
+    padding: 8px 16px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(245, 158, 66, 0.14);
+    transition: background 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+.mypageset .profile .profile-img button:hover {
+    background: #e8892b;
+    box-shadow: 0 4px 12px rgba(245, 158, 66, 0.22);
 }
 
 .mypageset .edit-box{

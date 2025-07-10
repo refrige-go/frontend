@@ -32,6 +32,7 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
   };
 
   const sendLocation = async (lat, lon) => {
+    console.log('[WeatherRecommend] sendLocation 시작, userId:', userId);
     try {
       const res = await axiosInstance.post('/api/weather/location', {
         latitude: lat,
@@ -39,18 +40,19 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
       });
 
       const recipesData = res.data.recipes;
+      console.log('[WeatherRecommend] API 응답:', res.data);
       setRecipes(Array.isArray(recipesData) ? recipesData : []); // 안전하게 설정
-      console.log('서버 응답:', res.data);
-
+      console.log('[WeatherRecommend] 서버 응답:', res.data);
 
       setWeather(res.data.weather);
       setStatus('추천 완료');
     } catch (error) {
-      setStatus('서버 전송 실패');
-      console.error('날씨 기반 추천 실패:', error);
+      console.error('[WeatherRecommend] 날씨 기반 추천 실패:', error);
+      // 비로그인 상태이거나 다른 이유로 실패한 경우 조용히 처리
+      setStatus('추천 완료');
+      setRecipes([]);
     }
   };
-
 
   const handleBookmark = async (recipeId) => {
     try {
@@ -103,7 +105,7 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setStatus('위치 정보를 지원하지 않는 브라우저입니다.');
+      setStatus('추천 완료');
       return;
     }
 
@@ -113,15 +115,23 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
         console.log('위치 좌표:', latitude, longitude);
         sendLocation(latitude, longitude);
       },
-      () => setStatus('위치 정보를 가져올 수 없습니다.')
+      () => {
+        setStatus('추천 완료');
+        setRecipes([]);
+      }
     );
   }, []);
 
-  if (status !== '추천 완료') {
-    return <div>{status}</div>;
-  }
-
-  if (!recipes || recipes.length === 0) {
+  // 로딩 중이거나 레시피가 없으면 숨김
+  console.log('[WeatherRecommend] 렌더링 조건 체크:', {
+    status,
+    recipes,
+    recipesLength: recipes ? recipes.length : 0,
+    userId
+  });
+  
+  if (status !== '추천 완료' || !recipes || recipes.length === 0) {
+    console.log('[WeatherRecommend] 숨김 조건 충족');
     return null;
   }
 
@@ -144,7 +154,7 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
                 rcpNm: recipe.recipeNm,
                 rcpSeq: recipe.rcpSeq,
                 rcpCategory: recipe.category,
-                image: recipe.image,
+                image: recipe.image || '/images/default.jpg',
                 rcpPartsDtls: recipe.rcpPartsDtls,
                 cuisineType: recipe.cuisineType,
                 rcpWay2: recipe.rcpWay2,
