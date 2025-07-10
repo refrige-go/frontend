@@ -28,28 +28,17 @@ export default function SignupPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const { userId, userName, userPassword } = form;
-
     try {
-      const res = await fetch('http://localhost:8080/user/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          userName,
-          userPassword,
-          role: 'USER', // 기본 권한
-        }),
-      });
+      // /join 엔드포인트로 POST 요청 (JSON body)
+      const res = await axios.post(
+        `${baseUrl}/join`,
+        form,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      alert(res.data); // "회원가입이 완료되었습니다." 메시지
 
-      const result = await res.text();
-      alert(result);
-
-       router.push('/login');
-       
+      // 회원가입 성공 후 로그인 페이지로 이동
+      router.push('/login');
     } catch (err) {
       const message = err?.response?.data || '회원가입 실패';
       alert(message);
