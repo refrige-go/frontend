@@ -1,6 +1,7 @@
 'use client';
 
-import Header from '../../components/layout/Header';
+import SubPageHeader from '../../components/layout/SubPageHeader';
+import BottomNavigation from '../../components/layout/BottomNavigation';
 import React, { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Webcam from 'react-webcam';
@@ -12,7 +13,6 @@ export default function OCRPage() {
   const [preview, setPreview] = useState(null);
   const [useCamera, setUseCamera] = useState(true); // 카메라 사용 여부
   const [token, setToken] = useState(null);  // 토큰 상태 추가
-
 
    // 토큰 로드
   useEffect(() => {
@@ -48,9 +48,8 @@ export default function OCRPage() {
     }
   };
 
-  // OCR 서버로 전송 (촬영/업로드된 이미지를 백엔드로 보내는 함수)
+  // OCR 서버로 전송
   const goToResultWithGoodBill = async () => {
-
     if (!token) {
       alert('로그인이 필요합니다.');
       router.push('/login');
@@ -60,327 +59,286 @@ export default function OCRPage() {
     let file;
 
     if (preview) {
-      // [1] 미리보기(preview)에 저장된 이미지는 dataURL(base64) 문자열임
-      // 이걸 실제 이미지 파일(Blob)로 변환해야 서버에 전송 가능
-      // fetch(preview)는 dataURL을 받아 Blob 객체로 변환해줌
       const res = await fetch(preview);
       file = await res.blob();
     } else {
-      // [2] 만약 미리보기 이미지가 없으면(촬영/업로드 안 했으면) 경고 후 함수 종료
       alert('사진을 먼저 촬영하거나 업로드하세요!');
       return;
     }
-      // [3] FormData 객체 생성 (multipart/form-data 방식으로 서버에 파일 전송)
-      // 'image'라는 key로 Blob 파일을 form에 추가
-      // 'billbill.jpg'는 서버에서 파일명 필요할 때 사용(실제 파일명은 중요하지 않음)
+
     const formData = new FormData();
     formData.append('image', file); 
 
     try {
-      // [4] fetch로 Spring Boot 백엔드 서버에 POST 요청
-      // - 주소: http://localhost:8080/api/ocr/process
-      // - method: POST
-      // - body: formData (이미지 파일이 포함된 multipart/form-data)
-      // Content-Type은 자동으로 multipart/form-data로 설정됨
-      console.log('서버로 요청 전송 시작...'); // 디버깅용 로그
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
+      console.log('서버로 요청 전송 시작...');
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:8080';
       const response = await fetch(`${baseUrl}/api/ocr/process`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`  // 토큰 헤더 추가
+          'Authorization': `Bearer ${token}`
         },
         body: formData
       });
 
-      console.log('서버 응답 상태:', response.status); // HTTP 상태 코드 확인
+      console.log('서버 응답 상태:', response.status);
 
       if (response.ok) {
-        // [5] 서버에서 받은 응답을 JSON으로 파싱
-        // (서버가 OCR 결과를 JSON 형태로 반환한다고 가정)
         const result = await response.json();
-        console.log('서버 응답 데이터:', result); // 응답 데이터 확인
+        console.log('서버 응답 데이터:', result);
 
-        // 디버깅: ingredient_id 확인
-        console.log('AI 서버에서 받은 ingredients:', result.ingredients);
-        result.ingredients.forEach((item, index) => {
-          console.log(`재료 ${index + 1}:`, {
-            original_text: item.original_text,
-            matched_name: item.matched_name,
-            ingredient_id: item.ingredient_id,
-            confidence: item.confidence
-          });
-        });
-
-        // [6] OCR 결과(ingredients, purchaseDate 등)를 sessionStorage에 저장
-        // - sessionStorage는 브라우저의 임시 저장소(새로고침/탭 닫으면 사라짐)
-        // - JSON.stringify로 JS 객체를 문자열로 변환해서 저장
-        // - 나중에 결과 페이지에서 JSON.parse로 다시 객체로 꺼내서 사용
         const storageData = {
           ingredients: result.ingredients.map(item => ({
             ...item,
-            ingredient_id: item.ingredient_id || null  // ingredient_id 필드 명시적 포함
+            ingredient_id: item.ingredient_id || null
           })),
           purchaseDate: result.purchaseDate
         };
         
         console.log('sessionStorage에 저장할 데이터:', storageData);
         sessionStorage.setItem('ocr_ingredients', JSON.stringify(storageData));
-         // [7] 결과 페이지로 이동 (예: /ocr/result)
         router.push('/ocr/result');
       } else {
-        const errorText = await response.text(); // 또는 response.json()
+        const errorText = await response.text();
         console.error('서버 응답 상태:', response.status);
         console.error('서버 응답:', errorText);
-        // [8] 서버에서 오류 응답이 오면 경고창 표시
         alert('OCR 서버 오류가 발생했습니다.');
       }
     } catch (error) {
       alert('OCR 처리 중 오류가 발생했습니다.');
       console.error(error);
-      // [9] 네트워크 오류 등 예외 발생 시 경고창 표시 및 콘솔 출력
     }
   };
-    return (
-    <div className="container">
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Header />
-      </div>
-      <style jsx>{`
-        body, .container {
-          background: #f7faff;
-        }
-        .container {
-          width: 420px;         /* 헤더와 동일하게 */
-          max-width: 98vw;      /* 모바일 대응 */
-          margin: 0 auto;       /* 중앙 정렬 */
-          min-height: 100vh;    /* 필요시 전체 높이 */
-        }
-        .header-wrap {
-          width: 92vw;
-          max-width: 400px;
-          margin: 0 auto;
-          margin-top: 50px; 
-        }
-        .header {
-          background: #f97316;
-          color: #fff;
-          padding: 20px 24px 14px 24px;
-          border-radius: 0 0 18px 18px;
-          box-shadow: 0 2px 8px #0001;
-          text-align: left;
-          width: 100%;
-          box-sizing: border-box;
-        }
-        .header-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .header-title {
-          font-size: 1.5em;
-          font-weight: bold;
-        }
-        .header-info {
-          background: #fff3;
-          border-radius: 50%;
-          width: 22px; height: 22px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1em;
-          font-weight: bold;
-        }
-        .header-desc {
-          font-size: 1em;
-          margin-top: 6px;
-          opacity: 0.95;
-        }
-        .camera-area {
-          margin: 22px auto 0 auto;
-          width: 92vw;
-          max-width: 400px;
-          aspect-ratio: 1/1.1;
-          background: #f3f6fa;
-          border: 2px dashed #b3c6e0;
-          border-radius: 18px;
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-        }
-        .footer-btn {
-          margin: 0 8px;
-          padding: 12px 24px;
-          font-size: 1.08em;
-          border: none;
-          border-radius: 12px;
-          background: #f3f6fa;
-          color: #f79726;
-          font-weight: bold;
-          cursor: pointer;
-          transition: background 0.2s;
-          min-width: 120px; 
-        }
-        .footer-btn:active {
-          background: #ffe0a3;
-        }
-        .main-btn {
-          background: #fff;
-          color: #f79726;
-          font-size: 2.1em;
-          border-radius: 50%;
-          width: 64px;
-          height: 64px;
-          min-width: 64px;
-          min-height: 64px;
-          max-width: 64px;
-          max-height: 64px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 12px;
-          box-shadow: 0 2px 8px #0002;
-          border: 4px solid #f79726;
-          padding: 0;
-          flex: none;
-        }
-        .main-btn:active {
-          background: #d17a00;
-        }
-        @media (max-width: 500px) {
-          .header-wrap, .header, .camera-area, .footer { max-width: 98vw; }
-        }
-      `}</style>
 
-      {/* 상단 헤더 */}
-      <div className="header-wrap">
-        <div className="header">
-          <div className="header-row">
-            <span className="header-title">재료 사진 인식</span>
-            <span className="header-info">i</span>
-          </div>
-          <div className="header-desc">
-            AI가 재료를 자동으로 찾아드려요!<br />
-            영수증이나 재료 사진을 찍어보세요
-          </div>
-        </div>
-      </div>
-
-      {/* 카메라/미리보기 영역 */}
-      <div className="camera-area" style={{ position: "relative" }}>
-        {useCamera ? (
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            onUserMediaError={err => { console.error("카메라 에러:", err); }}
-            onUserMedia={() => { console.log("카메라 접근 성공"); }}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              borderRadius: 18,
-              position: "absolute",
-              top: 0, left: 0,
-            }}
-            videoConstraints={{
-              facingMode: "environment"
-            }}
-          />
-        ) : (
-          preview && (
-            <img
-              src={preview}
-              alt="미리보기"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                borderRadius: 18,
-                position: "absolute",
-                top: 0, left: 0,
-              }}
-            />
-          )
-        )}
-      </div>
-
-      {/* 버튼 영역 */}
-      {useCamera ? (
+  return (
+    <div className="mainContainer">
+      <SubPageHeader title="재료 사진 인식" />
+      
+      <div className="appContainerSub" style={{ paddingBottom: '0px', overflow: 'hidden' }}>
+        {/* 안내 메시지 */}
         <div style={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "15px",
-          marginTop: "24px",
-          position: "fixed",
-          left: 0,
-          bottom: "20px",
-          zIndex: 100
+          background: '#f97316',
+          color: '#fff',
+          borderRadius: 12,
+          padding: '16px 18px',
+          margin: '18px auto 24px auto',
+          width: '100%',
+          maxWidth: 400,
+          fontSize: '1.1em',
+          textAlign: 'center',
         }}>
-          {/* 뒤로가기(메인으로) 버튼 */}
-          <button
-            className="footer-btn"
-            onClick={() => router.push('/refrigerator')}
-            style={{ background: "#f3f6fa", color: "#f79726" }}
-          >
-            뒤로가기
-          </button>
-          {/* 촬영 버튼 */}
-          <button className="footer-btn main-btn" onClick={capture}>  
-            <span style={{ fontSize: "1.2em", fontWeight: "bold", lineHeight: 1, transform: "translateY(-5px)" }}>📷</span>
-          </button>
-          {/* 갤러리 버튼 */}
-          <button className="footer-btn" onClick={openGallery}>
-            <span style={{ fontSize: "1em", fontWeight: "bold" }}>갤러리</span>
-          </button>
-          {/* 숨겨진 파일 input */}
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-          />
+          <h2 style={{
+            fontSize: '18px',
+            fontWeight: '600',
+            marginBottom: '6px',
+            margin: 0,
+          }}>
+            AI가 재료를 자동으로 찾아드려요!
+          </h2>
+          <p style={{
+            fontSize: '14px',
+            opacity: 0.9,
+            lineHeight: 1.4,
+            margin: 0,
+          }}>
+            영수증 사진을 찍어보세요
+          </p>
         </div>
-      ) : (
-        <div style={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          gap: "10px",
-          marginTop: "24px",
-          position: "fixed",
-          left: 0,
-          bottom: "20px",
-          zIndex: 100
+
+        {/* 카메라/미리보기 영역 */}
+        <div className="scrollContent" style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          padding: '0 20px',
+          flex: 1,
+          height: 'calc(100vh - 200px)',
         }}>
-          {/* 뒤로가기 버튼 (카메라로 복귀) */}
-          <button
-            className="footer-btn"
-            onClick={() => setUseCamera(true)}
-            style={{ background: "#f3f6fa", color: "#f79726" }}
-          >
-            뒤로가기
-          </button>
+          <div style={{
+            width: '100%',
+            maxWidth: '320px',
+            aspectRatio: '1/1.4',
+            background: '#f3f6fa',
+            border: '2px dashed #b3c6e0',
+            borderRadius: '16px',
+            position: 'relative',
+            overflow: 'hidden',
+            marginTop: '0px',
+            marginBottom: '16px',
+          }}>
+            {useCamera ? (
+              <Webcam
+                audio={false}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+                onUserMediaError={err => { console.error("카메라 에러:", err); }}
+                onUserMedia={() => { console.log("카메라 접근 성공"); }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: 14,
+                }}
+                videoConstraints={{
+                  facingMode: "environment"
+                }}
+              />
+            ) : (
+              preview && (
+                <img
+                  src={preview}
+                  alt="미리보기"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    borderRadius: 14,
+                  }}
+                />
+              )
+            )}
+          </div>
 
-          {/* OCR인식 버튼 */}
-          <button className="footer-btn main-btn" onClick={goToResultWithGoodBill}>
-            <span style={{ fontSize: "0.6em", fontWeight: "bold", lineHeight: 1 }}>
-              OCR<br />인식
-            </span>
-          </button>
+          {/* 버튼 영역 */}
+          <div style={{
+            position: 'fixed',
+            bottom: '130px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '12px',
+            width: 'calc(100% - 40px)',
+            maxWidth: '400px',
+            padding: '0',
+            zIndex: 10,
+            flexWrap: 'nowrap', // 줄바꿈 방지
+          }}>
+            {useCamera ? (
+              <>
+                {/* 촬영 버튼 */}
+                <button
+                  onClick={capture}
+                  style={{
+                    background: '#f97316',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '70px',
+                    height: '70px',
+                    fontSize: '24px',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 16px rgba(249, 115, 22, 0.3)',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    lineHeight: 1,
+                  }}
+                  onMouseDown={(e) => e.target.style.transform = 'scale(0.95)'}
+                  onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
+                  onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                >
+                  📷
+                </button>
+                
+                {/* 갤러리 버튼 */}
+                <button
+                  onClick={openGallery}
+                  style={{
+                    background: '#fff',
+                    color: '#f97316',
+                    border: '2px solid #f97316',
+                    borderRadius: '12px',
+                    padding: '10px 16px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    whiteSpace: 'nowrap',
+                    flex: '0 0 auto',
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = '#fef7f0';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = '#fff';
+                  }}
+                >
+                  갤러리
+                </button>
+                
+                {/* 숨겨진 파일 input */}
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+              </>
+            ) : (
+              <>
+                {/* 다시 촬영 버튼 */}
+                <button
+                  onClick={() => setUseCamera(true)}
+                  style={{
+                    background: '#fff',
+                    color: '#666',
+                    border: '2px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '10px 16px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    whiteSpace: 'nowrap',
+                    flex: '0 0 auto',
+                  }}
+                >
+                  다시 촬영
+                </button>
 
-          {/* 다시 촬영 버튼 */}
-          <button className="footer-btn" onClick={() => setUseCamera(true)}>
-            다시 촬영
-          </button>
-          
+                {/* OCR인식 버튼 */}
+                <button
+                  onClick={goToResultWithGoodBill}
+                  style={{
+                    background: '#f97316',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '12px 20px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 16px rgba(249, 115, 22, 0.3)',
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap',
+                    flex: '1 1 auto',
+                    minWidth: '140px',
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = '#ea580c';
+                    e.target.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = '#f97316';
+                    e.target.style.transform = 'translateY(0)';
+                  }}
+                >
+                  🔍 OCR 인식하기
+                </button>
+              </>
+            )}
+          </div>
         </div>
-      )}
+      </div>
+      
+      <BottomNavigation />
     </div>
   );
 }

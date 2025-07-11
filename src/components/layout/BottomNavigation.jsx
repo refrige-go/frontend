@@ -73,17 +73,16 @@ const BottomNavigation = ({ className = '' }) => {
     <nav
       style={{
         position: 'fixed',
-        maxWidth:'390px',
-        width: '100%',
-        bottom: 20,
-        left: 0,
-        right: 0,
+        bottom: 30,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        maxWidth: '390px',
+        width: 'calc(100% - 40px)',
         background: '#fff',
         borderRadius: '12px',
         boxShadow: '0px 0px 17px 0px rgb(13 10 44 / 9%)',
-        zIndex: 1000,
+        zIndex: 1002, /* 헤더와 동일한 z-index */
         height: 70,
-        margin: '0 auto',
       }}
       className={className}
     >
