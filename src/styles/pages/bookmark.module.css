@@ -1,7 +1,6 @@
 
 .contentWrapper {
   padding-top: 20px;
-  margin: 0 auto; 
 }
 
 .titleSection {
@@ -70,13 +69,14 @@
   grid-template-columns: repeat(2, 1fr); 
   gap: 20px;
   animation: fadeIn 0.3s ease-in-out;
-
 }
+
 
 .recipeGrid a{
   display: flex;
   justify-content: center;
 }
+
 
 @keyframes fadeIn {
   from {
@@ -92,7 +92,7 @@
 
 @media (max-width: 768px) {
   .contentWrapper {
-    padding: 16px;
+    padding: 16px 0 16px 0 !important;  /* 좌우 패딩 완전 제거 */
   }
 
   .titleSection {
@@ -101,6 +101,8 @@
   }
 
   .recipeGrid {
-    gap: 16px;
+    gap: 8px;
+    margin: 0 8px;
   }
+
 }

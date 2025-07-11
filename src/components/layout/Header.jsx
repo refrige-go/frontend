@@ -17,7 +17,7 @@ const Header = () => {
         position: 'fixed',
         top: 0,
         left: 0, /* 중앙 정렬 제거 */
-        width: '100vw', /* 전체 너비 사용 */
+        width: '100%', /* 전체 너비 사용 */
         height: '60px',
         background: '#fff',
         display: 'flex',
