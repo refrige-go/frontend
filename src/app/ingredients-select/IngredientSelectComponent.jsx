@@ -57,6 +57,7 @@ export default function IngredientSelectComponent() {
   const router = useRouter();
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [allIngredients, setALLIngredients] = useState([]); //사용자가 선택한 재료들 저장
   const [ingredients, setIngredients] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [token, setToken] = useState(null);
@@ -124,6 +125,7 @@ export default function IngredientSelectComponent() {
         if (selectedCategory === '전체') {
           const shuffled = [...items].sort(() => Math.random() - 0.5);
           setIngredients(shuffled);
+          setALLIngredients(items);
         } else {
           setIngredients(items);
         }
@@ -158,7 +160,7 @@ export default function IngredientSelectComponent() {
     }
 
     const today = new Date();
-    const selectedIngredients = ingredients.filter((item) =>
+    const selectedIngredients = allIngredients.filter((item) =>
       selectedIds.includes(item.id)
     );
 
