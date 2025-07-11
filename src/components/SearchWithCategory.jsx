@@ -39,8 +39,10 @@ export default function SearchWithCategory({ value, onChange, placeholder = "Sea
           <button
             key={cat.label}
             style={{
-              width: 75,
-              height: 75,
+              width: '100%',        
+              aspectRatio: '1/1',  // 정사각형 유지
+              minWidth: '60px',    // 최소 크기 보장
+              height: 'auto',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',

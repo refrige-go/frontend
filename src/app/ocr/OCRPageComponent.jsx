@@ -70,6 +70,7 @@ export default function OCRPage() {
     formData.append('image', file); 
 
     try {
+
       console.log('서버로 요청 전송 시작...');
       const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:8080';
       const response = await fetch(`${baseUrl}/api/ocr/process`, {

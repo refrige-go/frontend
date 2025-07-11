@@ -175,7 +175,7 @@ export default function Page() {
         return;
       }
 
-      const baseUrl= process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:8080';
+      const baseUrl= process.env.NEXT_PUBLIC_BASE_API_URL;
       const response = await fetch(`${baseUrl}/api/ocr/confirm`, {
         method: 'POST',
         headers: {
