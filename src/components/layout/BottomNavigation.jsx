@@ -72,17 +72,18 @@ const BottomNavigation = ({ className = '' }) => {
   return (
     <nav
       style={{
-        position: 'fixed',
-        bottom: 30,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        maxWidth: '390px',
-        width: 'calc(100% - 40px)',
-        background: '#fff',
-        borderRadius: '12px',
-        boxShadow: '0px 0px 17px 0px rgb(13 10 44 / 9%)',
-        zIndex: 1002, /* 헤더와 동일한 z-index */
-        height: 70,
+      position: 'fixed',
+      bottom: 0,                    // 30에서 0으로 변경
+      left: 0,                      // 중앙 정렬 방식 변경
+      right: 0,
+      width: '100%',                // 전체 너비 사용
+      maxWidth: '430px',            // 최대 너비 증가
+      margin: '0 auto',             // 중앙 정렬
+      background: '#fff',
+      borderRadius: '12px 12px 0 0', // 하단 모서리는 직각으로
+      boxShadow: '0px -2px 10px 0px rgb(13 10 44 / 9%)',
+      zIndex: 1002,
+      height: 60,
       }}
       className={className}
     >

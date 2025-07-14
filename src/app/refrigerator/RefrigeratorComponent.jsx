@@ -557,7 +557,7 @@ export default function RefrigeratorComponent() {
                     className={styles.addIngredientBtn}
                     onClick={() => router.push('/ingredients-select')}
                   >
-                    재료 목록에서 선택하여 추가
+                    재료 목록에서{'\n'}선택하여 추가
                   </button>
                   <button
                     className={styles.ocrBtn}
