@@ -47,7 +47,7 @@ body {
   background-color: #fff;
   padding: 0 16px; /* 좌우 패딩 */
   padding-top: 60px; /* 헤더 높이(60px) + 0px 여백 */
-  padding-bottom: 80px; /* 바텀 네비 높이(70px) + 10px 여백 */
+  padding-bottom: 65px; /* 바텀 네비 높이(70px) + 10px 여백 */
   height: calc(100vh - 60px); /* 헤더 제외한 높이 */
   overflow-y: auto; /* 스크롤 활성화 */
   overflow-x: hidden;
