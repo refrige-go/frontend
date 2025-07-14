@@ -113,19 +113,19 @@ export default function RecipeDetailPage() {
 
   const handleStartCooking = () => {
     setIsCookingMode(true);
-    // 초기 상태: 모든 재료를 "남음"으로 설정
+    // 초기 상태: 모든 재료를 false(남음)로 설정
     const initialUsage = {};
-    userIngredients.forEach(ingredient => {
-      initialUsage[ingredient.id] = 'remaining'; // 'remaining' or 'used'
+    getMatchedIngredients().forEach(ingredient => {
+      initialUsage[ingredient.id] = false; // false = 남음, true = 다씀
     });
     setIngredientUsage(initialUsage);
   };
 
   const handleFinishCooking = async () => {
     try {
-      // 사용된 재료들의 ID 수집
+      // 사용된 재료들의 ID 수집 (true인 것들)
       const usedIngredientIds = Object.entries(ingredientUsage)
-        .filter(([_, status]) => status === 'used')
+        .filter(([_, isUsed]) => isUsed === true)
         .map(([id, _]) => parseInt(id));
 
       if (usedIngredientIds.length === 0) {
@@ -139,19 +139,19 @@ export default function RecipeDetailPage() {
         recipeId: id
       });
 
-      alert('요리 완료! 사용된 재료가 냉장고에서 차감되었습니다.');
+      alert('정리 완료! 사용된 재료가 냉장고에서 차감되었습니다.');
       setIsCookingMode(false);
       router.push('/refrigerator');
     } catch (error) {
-      console.error('요리 완료 처리 실패:', error);
-      alert('요리 완료 처리 중 오류가 발생했습니다.');
+      console.error('정리 완료 처리 실패:', error);
+      alert('정리 중 오류가 발생했습니다.');
     }
   };
 
   const toggleIngredientUsage = (ingredientId) => {
     setIngredientUsage(prev => ({
       ...prev,
-      [ingredientId]: prev[ingredientId] === 'remaining' ? 'used' : 'remaining'
+      [ingredientId]: !prev[ingredientId] // 불린값으로 토글
     }));
   };
 
@@ -225,7 +225,7 @@ export default function RecipeDetailPage() {
         {isCookingMode && (
           <div className={styles.cookingModeFixed}>
             <div className={styles.cookingMode}>
-              <h3 className={styles.cookingModeTitle}>🍳 요리 진행 중</h3>
+              <h3 className={styles.cookingModeTitle}>✅ 재료 사용 체크</h3>
               <p className={styles.cookingModeDescription}>
                 사용한 재료를 체크해주세요. 요리 완료 후 냉장고에서 자동으로 차감됩니다.
               </p>
@@ -241,13 +241,17 @@ export default function RecipeDetailPage() {
                         </span>
                       )}
                     </div>
-                    <button
-                      onClick={() => toggleIngredientUsage(ingredient.id)}
-                      className={`${styles.ingredientButton} ${ingredientUsage[ingredient.id] === 'used' ? styles.used : ''
-                        }`}
-                    >
-                      {ingredientUsage[ingredient.id] === 'used' ? '다씀' : '남음'}
-                    </button>
+                    <div className={styles.toggleContainer}>
+                      <div 
+                        className={`${styles.toggle} ${ingredientUsage[ingredient.id] === true ? styles.toggleOn : styles.toggleOff}`}
+                        onClick={() => toggleIngredientUsage(ingredient.id)}
+                      >
+                        <div className={styles.toggleHandle}></div>
+                        <span className={styles.toggleText}>
+                          {ingredientUsage[ingredient.id] === true ? '다씀' : '남음'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -257,7 +261,7 @@ export default function RecipeDetailPage() {
                   취소
                 </button>
                 <button className={styles.completeButton} onClick={handleFinishCooking}>
-                  요리 완료
+                  정리 완료
                 </button>
               </div>
             </div>
@@ -398,7 +402,7 @@ export default function RecipeDetailPage() {
         {!isCookingMode && (
           <div className={styles.bottomButton}>
             <button className={styles.startCookingBottomButton} onClick={handleStartCooking}>
-              🍳 요리 시작하기
+              🥬 재고 소진 체크
             </button>
           </div>
         )}
