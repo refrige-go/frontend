@@ -44,12 +44,34 @@ const NotificationsPage = () => {
   };
 
   const handleNotificationClick = async (notification) => {
+    console.log('알림 클릭:', notification);
+    console.log('recipeId:', notification.recipeId);
+
     if (!notification.isRead) {
       try {
         await axiosInstance.post(`/notifications/${notification.id}/read`);
         fetchNotifications(); // 읽음 처리 후 목록 갱신
       } catch (error) {
         console.error('알림 읽음 처리 실패:', error);
+      }
+    }
+
+    // 레시피 ID가 있으면 해당 레시피의 상세 페이지로 이동
+    if(notification.recipeId){
+      console.log('레시피 상세 페이지로 이동:', notification.recipeId);
+      router.push(`/recipe-detail/${notification.recipeId}`);
+    }else{
+      //recipeId가 없으면 알림 내용에서 레시피 이름 추출해서 검색
+      const extractRecipeName = (content) =>{
+        const match = content.match(/^(.+?)\s+어때요\?/);
+        return match ? match[1].trim() : null;
+      };
+
+      const recipeName = extractRecipeName(notification.content);
+      console.log('추출된 레시피 이름:', recipeName);
+      
+      if(recipeName){
+        //router.push(`/search-results?q=${encodeURIComponent(recipeName)}`);
       }
     }
   };

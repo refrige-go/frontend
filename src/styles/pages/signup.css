@@ -2,8 +2,10 @@
 .appContainer.singup{
     display: flex;
     flex-direction: column;
-    justify-content: center;
-   
+    justify-content: flex-start;  
+    padding-top: 80px;              
+    min-height: 100vh;          
+    padding-bottom: 100px;    
 }
 
 .appContainer.singup>div{
@@ -16,7 +18,8 @@
 .singup h1{
     font-size: 26px;
     text-align: center;
-    margin-bottom: 80px;
+    margin-bottom: 20px;
+    margin-top: 0;
     color: #F79726;
     
 }
@@ -35,6 +38,8 @@
     color: #333;
     font-weight: 400;
     font-size: 13px;
+    position: relative;
+    margin-bottom: 15px;
 }
 .singup input{
  width: 100%;
@@ -61,7 +66,7 @@ padding-left: 10px;
     align-items: center;
     justify-content: center;
     border-radius: 30px;
-    margin-top: 40px ;
+    margin-top: 0px ;
     border: none;
     color: #fff;
     background-color: #F79726;
@@ -70,8 +75,8 @@ padding-left: 10px;
 
 .singup .btn-gray{
     width: 85%;
-    background-color: #d9d9d9;
-    margin-top: 20px;
+    background-color: #F79726; /*"이전" 버튼*/
+    margin-top: 5px;
     text-align: center;
     height: 50px;
     border-radius: 30px;
@@ -84,4 +89,95 @@ padding-left: 10px;
     background-color: transparent;
     color: #fff; 
     cursor: pointer;  
+}
+
+/* 에러 메시지 스타일 */
+.error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 2px;
+    margin-bottom: -5px;
+}
+
+.error-message.general {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* 에러 상태 input 스타일 */
+.singup input.error {
+    border: 1px solid #dc3545 !important;
+    background-color: #fff5f5;
+}
+
+.singup input.error:focus {
+    border: 1px solid #dc3545 !important;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+/* 제출 중 버튼 스타일 */
+.singup .btn-org:disabled {
+    background-color: #cccccc !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.success-message {
+  color: #28a745;
+  font-size: 12px;
+  margin-top: 2px;
+  margin-bottom: -5px;
+  display: block;
+}
+
+.singup input.valid {
+  border: 1px solid #28a745 !important;
+  background-color: #f8fff9;
+}
+
+.error-space {
+    min-height: 20;        /* 에러 메시지 공간 확보 */
+    margin-bottom: 15px;     /* 다음 필드와의 간격 */
+}
+
+.error-space .error-message {
+    margin-bottom: 5px;
+    line-height: 1.2;        /* 줄 간격 줄이기 */
+}
+
+.error-space .success-message {
+    margin-bottom: 5px;
+    line-height: 1.2;        /* 줄 간격 줄이기 */
+}
+
+.singup .form-field {
+    position: relative;
+    margin-bottom: 10px;     /* 각 필드 간격 */
+}
+
+/* 비밀번호 그룹 스타일 */
+.password-group {
+  margin-bottom: 0px;
+}
+
+/* 비밀번호 필드들 간격 줄이기 */
+.form-field.no-margin {
+  margin-bottom: 8px;      /* 매우 작은 간격 */
+}
+
+/* 비밀번호 메시지 영역 */
+.password-messages {
+  margin-top: 5px;
+  min-height: 20px;
+  margin-bottom: -5px;
+}
+
+.password-messages .error-message,
+.password-messages .success-message {
+  margin-top: 2px;
+  margin-bottom: 3px;      /* 여러 메시지 간격 */
 }
