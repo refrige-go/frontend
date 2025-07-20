@@ -56,8 +56,9 @@
   width: 100%;
 }
 
+/* 재료 선택 버튼 - 크기 고정 */
 .selectionModeBtn {
-  flex: 0 1 auto; /* 텍스트 길이에 맞춰 동적 조정 */
+  flex: 0 0 auto; /* 크기 고정으로 변경 */
   background: #fff;
   color: #f59e42;
   border: 2px solid #f59e42;
@@ -134,28 +135,44 @@
   opacity: 0.6;
 }
 
-/* 재료 추가 및 OCR 버튼 */
+/* 재료 추가 버튼 - 반응형 */
 .addIngredientBtn {
-  flex: 1 1 auto; /* 긴 텍스트를 위해 더 많은 공간 할당 */
+  flex: 1 1 auto;
   background: #10b981;
   color: white;
   border: none;
   border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  white-space: nowrap;
   min-width: 0;
+
+  /* 반응형 폰트 크기 */
+  font-size: clamp(8px, 3.5vw, 14px);
+  
+  /* 반응형 패딩 */
+  padding: clamp(4px, 2vw, 8px) clamp(6px, 3vw, 12px);
+
+  /* 줄바꿈 설정 */
+  white-space: pre-line; /* \n 문자를 줄바꿈으로 인식 */
+  line-height: 1.2;
+  height: auto;
+  min-height: 44px;
+  
+  /* 텍스트 중앙 정렬 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .addIngredientBtn:hover {
   background: #059669;
 }
 
+/* 영수증 인식 버튼 - 크기 고정 */
 .ocrBtn {
-  flex: 0 1 auto; /* 짧은 텍스트로 최소 공간만 사용 */
+  flex: 0 0 auto; /* 짧은 텍스트로 최소 공간만 사용 */
   background: #3b82f6;
   color: white;
   border: none;
@@ -657,7 +674,7 @@
 /* 플로팅 버튼들 - 스크롤과 무관하게 고정 (PC 환경 고려) */
 .recipeRecommendBtn {
   position: fixed;
-  bottom: 110px; /* 바텀 네비게이션(70px + 30px) + 10px 여백 */
+  bottom: 65px; /* 바텀 네비게이션(70px + 30px) + 10px 여백 */
   left: 50%;
   transform: translateX(-50%);
   background: #f59e42;
