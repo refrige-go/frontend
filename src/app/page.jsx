@@ -207,7 +207,10 @@ export default function Home() {
   }
 
   return (
-    <div className='mainContainer' style={{ position: 'relative' }}>
+    <div className='mainContainer' style={{ 
+      position: 'relative',
+      boxSizing: 'border-box'
+    }}>
       <InstallPrompt />
       {process.env.NODE_ENV === 'development' && <PWADebugPanel />}
       <Header />
