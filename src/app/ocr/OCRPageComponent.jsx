@@ -13,6 +13,7 @@ export default function OCRPage() {
   const [preview, setPreview] = useState(null);
   const [useCamera, setUseCamera] = useState(true); // 카메라 사용 여부
   const [token, setToken] = useState(null);  // 토큰 상태 추가
+  const [isLoading, setIsLoading] = useState(false); //로딩중 상태 관리
 
    // 토큰 로드
   useEffect(() => {
@@ -66,6 +67,9 @@ export default function OCRPage() {
       return;
     }
 
+    // 로딩 시작
+    setIsLoading(true);
+
     const formData = new FormData();
     formData.append('image', file); 
 
@@ -107,6 +111,9 @@ export default function OCRPage() {
     } catch (error) {
       alert('OCR 처리 중 오류가 발생했습니다.');
       console.error(error);
+    } finally {
+      //로딩 종류
+      setIsLoading(false);
     }
   };
 
@@ -203,7 +210,7 @@ export default function OCRPage() {
           {/* 버튼 영역 */}
           <div style={{
             position: 'fixed',
-            bottom: '130px',
+            bottom: '100px',
             left: '50%',
             transform: 'translateX(-50%)',
             display: 'flex',
@@ -306,20 +313,25 @@ export default function OCRPage() {
                 {/* OCR인식 버튼 */}
                 <button
                   onClick={goToResultWithGoodBill}
+                  disabled={isLoading} // 로딩 중 비활성화
                   style={{
-                    background: '#f97316',
+                    background: isLoading ? '#ffa06c' : '#f97316',
                     color: 'white',
                     border: 'none',
                     borderRadius: '12px',
                     padding: '12px 20px',
                     fontSize: '15px',
                     fontWeight: '600',
-                    cursor: 'pointer',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
                     boxShadow: '0 4px 16px rgba(249, 115, 22, 0.3)',
                     transition: 'all 0.2s',
                     whiteSpace: 'nowrap',
                     flex: '1 1 auto',
                     minWidth: '140px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
                   }}
                   onMouseOver={(e) => {
                     e.target.style.background = '#ea580c';
@@ -330,7 +342,14 @@ export default function OCRPage() {
                     e.target.style.transform = 'translateY(0)';
                   }}
                 >
-                  🔍 OCR 인식하기
+                    {isLoading ? (
+                    <>
+                      <div className="button-spinner"></div>
+                      분석중...
+                    </>
+                  ) : (
+                    '🔍 OCR 인식하기'
+                  )}
                 </button>
               </>
             )}
@@ -339,6 +358,59 @@ export default function OCRPage() {
       </div>
       
       <BottomNavigation />
+
+           {/* 로딩 오버레이 추가 */}
+      {isLoading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+        }}>
+          <div className="spinner"></div>
+          <div style={{
+            color: 'white',
+            marginTop: '20px',
+            fontSize: '18px',
+            fontWeight: '600',
+          }}>
+            영수증 분석중...
+          </div>
+        </div>
+      )}
+
+      {/* 스피너 스타일 추가 */}
+      <style jsx>{`
+        .spinner {
+          width: 40px;
+          height: 40px;
+          border: 4px solid #ffffff;
+          border-top: 4px solid transparent;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+       .button-spinner {
+          width: 20px;
+          height: 20px;
+          border: 2px solid #ffffff;
+          border-top: 2px solid transparent;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }        
+      `}</style>
     </div>
   );
 }
