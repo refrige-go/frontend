@@ -28,17 +28,22 @@ body {
   -webkit-touch-callout: none;
   position: static;
   overflow-x: hidden;
+  overflow: hidden; /* 전체 스크롤 방지 추가 */
+  max-height: 100vh; /* 최대 높이 제한 추가 */
 }
 
 /* 🎯 모바일 우선 메인 컨테이너 */
 .mainContainer {
   width: 100vw; /* 기기 전체 너비 사용 */
   height: 100vh; /* 기기 전체 높이 고정 */
+  height: -webkit-fill-available; /* iOS Safari에서 전체 높이 확보 */
   display: flex;
   flex-direction: column;
   background: #fff;
   position: relative;
   overflow: hidden; /* 전체 스크롤 방지 */
+  box-sizing: border-box;
+  border-radius: 0 0 12px 12px;
 }
 
 /* 🎯 메인 페이지용 앱 컨테이너 (바텀 네비게이션 포함) */
@@ -138,6 +143,7 @@ body {
     align-items: flex-start;
     padding: 20px;
     min-height: 100vh;
+    overflow: hidden;
   }
   
   .mainContainer {
@@ -147,6 +153,7 @@ body {
     border-radius: 12px;
     overflow: hidden;
     background: #fff; /* 노란색 그라디언트 제거, 흰색으로 통일 */
+    position: relative;
   }
   
   .appContainer, .appContainerSub {
@@ -335,4 +342,30 @@ img {
 .gpu-accelerated {
   transform: translateZ(0);
   will-change: transform;
+}
+
+/* PC에서 네비게이션 바 위치 조정 */
+@media (min-width: 501px) {
+  .bottom-nav {
+    bottom: 20px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    max-width: 430px !important;
+    border-radius: 0 0 12px 12px !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+/* 모바일에서 네비게이션 바 위치 */
+@media (max-width: 500px) {
+  .bottom-nav {
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
 }
