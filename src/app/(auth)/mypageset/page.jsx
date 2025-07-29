@@ -16,25 +16,50 @@ export default function MyPageSet() {
   const [preview, setPreview] = useState(null);
   const fileInputRef = useRef();
 
-  const handleEditSubmit = async (e) => {
+  // 닉네임만 수정하는 함수
+  const handleNicknameSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!nickname.trim()) {
+      alert("닉네임을 입력해주세요.");
+      return;
+    }
 
     try {
-      // 회원정보 수정
       await axiosInstance.put("/user/mypage-update", {
         nickname: nickname,
-        password: password,
+        password: "", // 비밀번호는 변경하지 않음
       });
-      alert("회원정보가 수정되었습니다.");
+      alert("닉네임이 수정되었습니다.");
       router.replace("/mypage");
     } catch (err) {
-      alert("회원정보 수정에 실패했습니다.");
+      alert("닉네임 수정에 실패했습니다.");
     }
   };
 
+  // 비밀번호만 수정하는 함수
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!password.trim()) {
+      alert("새 비밀번호를 입력해주세요.");
+      return;
+    }
+
+    try {
+      await axiosInstance.put("/user/mypage-update", {
+        nickname: "", // 닉네임은 변경하지 않음
+        password: password,
+      });
+      alert("비밀번호가 수정되었습니다.");
+      setPassword(""); // 비밀번호 필드 초기화
+      router.replace("/mypage");
+    } catch (err) {
+      alert("비밀번호 수정에 실패했습니다.");
+    }
+  };
 
   useEffect(() => {
-
     axiosInstance.get("/user/mypage")
       .then(res => {
         setNickname(res.data.nickname);
@@ -49,7 +74,6 @@ export default function MyPageSet() {
     const accessToken = localStorage.getItem('accessToken');
 
     if (accessToken) {
-
       const payloadBase64 = accessToken.split('.')[1];
       const payloadJson = atob(payloadBase64);
       const payload = JSON.parse(payloadJson);
@@ -69,7 +93,6 @@ export default function MyPageSet() {
       console.log('accessToken이 없습니다!');
     }
 
-
     // 프론트에서 토큰을 검증하는 코드 (인증이 필요한 모든 페이지에 필수, axios 사용 )
     if (!accessToken) {
       alert("로그인 후 이용 가능합니다.");
@@ -83,8 +106,6 @@ export default function MyPageSet() {
         router.replace("/login");
       });
   }, [router]);
-
- 
 
   // 파일 미리보기
   const handleFileChange = (e) => {
@@ -115,8 +136,6 @@ export default function MyPageSet() {
       alert("업로드 실패");
     }
   };
-
-
 
   return (
     <div className="mainContainer">
@@ -150,34 +169,61 @@ export default function MyPageSet() {
           </div>
           <span>{nickname || "닉네임을 불러오는 중..."}</span>
         </div>
+        
         <div className="edit-box">
           <h1>회원정보 수정</h1>
-          <form id="editForm" onSubmit={handleEditSubmit}>
-            <label htmlFor="username">
+          
+          {/* 아이디 표시 */}
+          <div className="user-info">
+            <label>
               <span>아이디</span>
               <span>{username || "아이디를 불러오는 중..."}</span>
             </label>
-            <label htmlFor="nickname">
-              <input
-                id="nickname"
-                type="text"
-                name="nickname"
-                value={nickname}
-                onChange={e => setNickname(e.target.value)}
-                placeholder="닉네임"
-                required /><span>닉네임</span></label>
-            <label htmlFor="password">
-              <input
-                id="password"
-                type="password"
-                name="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="비밀번호"
-                required /><span>비밀번호</span></label>
-          </form>
+          </div>
+
+          {/* 닉네임 수정 섹션 */}
+          <div className="edit-section">
+            <h3>닉네임 수정</h3>
+            <form id="nicknameForm" onSubmit={handleNicknameSubmit}>
+              <label htmlFor="nickname">
+                <input
+                  id="nickname"
+                  type="text"
+                  name="nickname"
+                  value={nickname}
+                  onChange={e => setNickname(e.target.value)}
+                  placeholder="닉네임"
+                />
+                <span>닉네임</span>
+              </label>
+              <button className='btn-org' type="submit" form="nicknameForm">
+                닉네임 수정
+              </button>
+            </form>
+          </div>
+
+          {/* 비밀번호 수정 섹션 */}
+          <div className="edit-section">
+            <h3>비밀번호 수정</h3>
+            <form id="passwordForm" onSubmit={handlePasswordSubmit}>
+              <label htmlFor="password">
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="새 비밀번호"
+                />
+                <span>새 비밀번호</span>
+              </label>
+              <button className='btn-org' type="submit" form="passwordForm">
+                비밀번호 수정
+              </button>
+            </form>
+          </div>
+
           <div className="btns">
-            <button className='btn-org' type="submit" form="editForm">회원정보 수정</button>
             <button className='btn-gray' onClick={() => router.back()}>이전</button>
           </div>
         </div>

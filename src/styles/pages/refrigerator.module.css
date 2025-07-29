@@ -674,7 +674,7 @@
 /* 플로팅 버튼들 - 스크롤과 무관하게 고정 (PC 환경 고려) */
 .recipeRecommendBtn {
   position: fixed;
-  bottom: 65px; /* 바텀 네비게이션(70px + 30px) + 10px 여백 */
+  bottom: 95px; /* 바텀 네비게이션(70px + 30px) + 10px 여백 */
   left: 50%;
   transform: translateX(-50%);
   background: #f59e42;
