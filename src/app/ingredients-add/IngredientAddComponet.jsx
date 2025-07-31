@@ -123,7 +123,7 @@ export default function IngredientAddComponent() {
 
     const formData = new FormData();
     formData.append('customName', name);
-    formData.append('customCategory', categoryMap[category]); // ✅ 한글로 변환해서 전송
+    formData.append('customCategory', categoryMap[category]);
     formData.append('purchaseDate', purchaseDate.toISOString().split('T')[0]);
     formData.append('expiryDate', expiryDate.toISOString().split('T')[0]);
     formData.append('isFrozen', isFrozen.toString());
