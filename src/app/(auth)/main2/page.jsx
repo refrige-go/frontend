@@ -11,16 +11,12 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 export default function Main2Page() {
   const router = useRouter();
 
-  useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    console.log("accessToken in Main2Page:", accessToken);
-    
+  useEffect(() => { 
     if (!accessToken) {
       alert("로그인 후 이용 가능합니다.");
       router.replace("/login");
       return;
     }
-
     axiosInstance.get("/secure/ping") 
       .then(() => {
       })

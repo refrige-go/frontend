@@ -70,22 +70,24 @@ const BottomNavigation = ({ className = '' }) => {
   };
 
   return (
-    <nav
-      style={{
-        position: 'fixed',
-        width: '420px',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: '#fff',
-        borderTop: '2px solid #e5e7eb',
-        zIndex: 1000,
-        height: 70,
-        maxWidth: '100%',
-        margin: '0 auto',
-      }}
-      className={className}
-    >
+      <nav
+        style={{
+          position: 'fixed',
+          bottom: 0, // 기본값
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100%',
+          maxWidth: '430px',
+          background: '#fff',
+          borderRadius: '0 0 12px 12px',
+          boxShadow: '0px -2px 10px 0px rgb(13 10 44 / 9%)',
+          zIndex: 1002,
+          height: 70,
+          boxSizing: 'border-box',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
+        className={`${className} bottom-nav`} // 클래스 추가
+      >
       <ul
         style={{
           display: 'flex',
@@ -135,8 +137,8 @@ const BottomNavigation = ({ className = '' }) => {
                         src={item.icon}
                         alt={item.label}
                         style={{
-                          width: 24,
-                          height: 24,
+                          width: 20,
+                          height: 20,
                           marginBottom: 4,
                           filter: isActive
                             ? 'invert(67%) sepia(51%) saturate(1022%) hue-rotate(346deg) brightness(101%) contrast(87%)'
@@ -146,7 +148,7 @@ const BottomNavigation = ({ className = '' }) => {
                       />
                       <span
                         style={{
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: isActive ? 'bold' : 'normal',
                           color: isActive ? item.activeColor : '#666',
                           marginTop: 2,
@@ -182,8 +184,8 @@ const BottomNavigation = ({ className = '' }) => {
                         src={item.icon}
                         alt={item.label}
                         style={{
-                          width: 24,
-                          height: 24,
+                          width: 20,
+                          height: 20,
                           marginBottom: 4,
                           filter: isActive
                             ? 'invert(67%) sepia(51%) saturate(1022%) hue-rotate(346deg) brightness(101%) contrast(87%)'
@@ -193,7 +195,7 @@ const BottomNavigation = ({ className = '' }) => {
                       />
                       <span
                         style={{
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: isActive ? 'bold' : 'normal',
                           color: isActive ? item.activeColor : '#666',
                           marginTop: 2,
@@ -240,8 +242,8 @@ const BottomNavigation = ({ className = '' }) => {
                     src={item.icon}
                     alt={item.label}
                     style={{
-                      width: 24,
-                      height: 24,
+                      width: 20,
+                      height: 20,
                       marginBottom: 4,
                       filter: isActive
                         ? 'invert(67%) sepia(51%) saturate(1022%) hue-rotate(346deg) brightness(101%) contrast(87%)'
@@ -251,7 +253,7 @@ const BottomNavigation = ({ className = '' }) => {
                   />
                   <span
                     style={{
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: isActive ? 'bold' : 'normal',
                       color: isActive ? item.activeColor : '#666',
                       marginTop: 2,

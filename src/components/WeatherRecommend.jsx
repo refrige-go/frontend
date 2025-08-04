@@ -47,6 +47,7 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
   };
 
   const sendLocation = async (lat, lon) => {
+    console.log('[WeatherRecommend] sendLocation 시작, userId:', userId);
     try {
       const res = await axiosInstance.post('/api/weather/location', {
         latitude: lat,
@@ -72,7 +73,6 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
       setRecipes([]);
     }
   };
-
 
   const handleBookmark = async (recipeId) => {
     try {
@@ -136,7 +136,7 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setStatus('위치 정보를 지원하지 않는 브라우저입니다.');
+      setStatus('추천 완료');
       return;
     }
 
@@ -146,7 +146,10 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
         console.log('위치 좌표:', latitude, longitude);
         sendLocation(latitude, longitude);
       },
-      () => setStatus('위치 정보를 가져올 수 없습니다.')
+      () => {
+        setStatus('추천 완료');
+        setRecipes([]);
+      }
     );
   }, [bookmarkedRecipeIds]); // bookmarkedRecipeIds가 변경될 때마다 다시 실행
 
@@ -182,7 +185,7 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
                 rcpNm: recipe.recipeNm,
                 rcpSeq: recipe.rcpSeq,
                 rcpCategory: recipe.category,
-                image: recipe.image,
+                image: recipe.image || '/images/default.jpg',
                 rcpPartsDtls: recipe.rcpPartsDtls,
                 cuisineType: recipe.cuisineType,
                 rcpWay2: recipe.rcpWay2,

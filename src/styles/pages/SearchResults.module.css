@@ -1,0 +1,122 @@
+/* 검색 결과 페이지 스타일 */
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.search-results-container {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  animation: slideInUp 0.6s ease-out 0.2s both;
+}
+
+.recipe-card {
+  animation: slideInUp 0.4s ease-out both;
+}
+
+.recipe-card:nth-child(1) { animation-delay: 0.1s; }
+.recipe-card:nth-child(2) { animation-delay: 0.15s; }
+.recipe-card:nth-child(3) { animation-delay: 0.2s; }
+.recipe-card:nth-child(4) { animation-delay: 0.25s; }
+.recipe-card:nth-child(5) { animation-delay: 0.3s; }
+.recipe-card:nth-child(6) { animation-delay: 0.35s; }
+
+.search-type-button {
+  transition: all 0.3s ease;
+}
+
+.search-type-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(247, 151, 38, 0.3);
+}
+
+.ingredient-tag {
+  animation: fadeIn 0.5s ease-out both;
+}
+
+.ingredient-tag:nth-child(1) { animation-delay: 0.1s; }
+.ingredient-tag:nth-child(2) { animation-delay: 0.15s; }
+.ingredient-tag:nth-child(3) { animation-delay: 0.2s; }
+.ingredient-tag:nth-child(4) { animation-delay: 0.25s; }
+.ingredient-tag:nth-child(5) { animation-delay: 0.3s; }
+
+/* 로딩 스피너 */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .recipe-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .search-options {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .search-type-buttons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-form {
+    max-width: 100%;
+  }
+  
+  .search-type-buttons {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .search-type-button {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+/* 카드 호버 효과 */
+.recipe-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recipe-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* 점수 표시 애니메이션 */
+.score-animation {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 에러 및 빈 결과 스타일 */
+.empty-state {
+  animation: fadeIn 0.5s ease-out;
+}
