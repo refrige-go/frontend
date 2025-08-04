@@ -8,6 +8,7 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
   const [status, setStatus] = useState('위치를 가져오는 중...');
   const [recipes, setRecipes] = useState([]);
   const [weather, setWeather] = useState(null);
+  const [bookmarkedRecipeIds, setBookmarkedRecipeIds] = useState(new Set());
   const scrollContainerRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, scrollLeft: 0 });
@@ -31,6 +32,20 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
     return '오늘 같은 날씨엔 이런 요리 어때요?';
   };
 
+  // 사용자의 북마크 목록을 가져오는 함수
+  const fetchUserBookmarks = async () => {
+    if (!userId) return;
+
+    try {
+      const response = await axiosInstance.get('/api/bookmark/list');
+      const bookmarkedIds = new Set(response.data.map(bookmark => bookmark.rcpSeq));
+      setBookmarkedRecipeIds(bookmarkedIds);
+      console.log('[WeatherRecommend] 북마크된 레시피 ID들:', Array.from(bookmarkedIds));
+    } catch (error) {
+      console.error('[WeatherRecommend] 북마크 목록 가져오기 실패:', error);
+    }
+  };
+
   const sendLocation = async (lat, lon) => {
     try {
       const res = await axiosInstance.post('/api/weather/location', {
@@ -39,15 +54,22 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
       });
 
       const recipesData = res.data.recipes;
-      setRecipes(Array.isArray(recipesData) ? recipesData : []); // 안전하게 설정
-      console.log('서버 응답:', res.data);
+      console.log('[WeatherRecommend] API 응답:', res.data);
 
+      // 북마크된 레시피를 필터링하여 설정
+      const filteredRecipes = Array.isArray(recipesData)
+        ? recipesData.filter(recipe => !bookmarkedRecipeIds.has(recipe.rcpSeq))
+        : [];
+
+      setRecipes(filteredRecipes);
+      console.log('[WeatherRecommend] 필터링된 레시피 수:', filteredRecipes.length);
 
       setWeather(res.data.weather);
       setStatus('추천 완료');
     } catch (error) {
-      setStatus('서버 전송 실패');
-      console.error('날씨 기반 추천 실패:', error);
+      console.error('[WeatherRecommend] 날씨 기반 추천 실패:', error);
+      setStatus('추천 완료');
+      setRecipes([]);
     }
   };
 
@@ -55,13 +77,13 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
   const handleBookmark = async (recipeId) => {
     try {
       await onBookmark(recipeId);
-      setRecipes(prevRecipes =>
-        prevRecipes.map(recipe =>
-          recipe.rcpSeq === recipeId
-            ? { ...recipe, bookmarked: true }
-            : recipe
-        )
+      // 북마크 추가 시, 해당 아이템을 목록에서 즉시 제거
+      setRecipes((prevRecipes) =>
+        prevRecipes.filter((recipe) => recipe.rcpSeq !== recipeId)
       );
+      // 북마크된 ID 목록에 추가
+      setBookmarkedRecipeIds(prev => new Set([...prev, recipeId]));
+      console.log('[WeatherRecommend] 북마크 추가 후 레시피 제거됨:', recipeId);
     } catch (error) {
       console.error('북마크 추가 실패:', error);
     }
@@ -77,6 +99,12 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
             : recipe
         )
       );
+      // 북마크된 ID 목록에서 제거
+      setBookmarkedRecipeIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(recipeId);
+        return newSet;
+      });
     } catch (error) {
       console.error('북마크 삭제 실패:', error);
     }
@@ -102,6 +130,11 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
   };
 
   useEffect(() => {
+    // 컴포넌트 마운트 시 사용자의 북마크 목록을 가져옴
+    fetchUserBookmarks();
+  }, [userId]);
+
+  useEffect(() => {
     if (!navigator.geolocation) {
       setStatus('위치 정보를 지원하지 않는 브라우저입니다.');
       return;
@@ -115,13 +148,18 @@ export default function WeatherRecommend({ userId, onBookmark, onUnbookmark }) {
       },
       () => setStatus('위치 정보를 가져올 수 없습니다.')
     );
-  }, []);
+  }, [bookmarkedRecipeIds]); // bookmarkedRecipeIds가 변경될 때마다 다시 실행
 
-  if (status !== '추천 완료') {
-    return <div>{status}</div>;
-  }
+  // 로딩 중이거나 레시피가 없으면 숨김
+  console.log('[WeatherRecommend] 렌더링 조건 체크:', {
+    status,
+    recipes,
+    recipesLength: recipes ? recipes.length : 0,
+    userId
+  });
 
-  if (!recipes || recipes.length === 0) {
+  if (status !== '추천 완료' || !recipes || recipes.length === 0) {
+    console.log('[WeatherRecommend] 숨김 조건 충족');
     return null;
   }
 

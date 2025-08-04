@@ -62,7 +62,12 @@ export default function TypeRecommendationsSection({ userId, onBookmark, onUnboo
 
   return (
     <section style={{ marginTop: '2rem' }}>
-      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
+      <h2 style={{
+        fontSize: '1.2rem',
+        marginBottom: '1rem',
+        fontWeight: '600',
+        color: '#333'
+      }}>
         사용자님의 취향 저격 레시피를 모아봤어요!
       </h2>
 
