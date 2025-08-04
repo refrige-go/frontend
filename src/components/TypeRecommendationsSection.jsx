@@ -23,7 +23,7 @@ export default function TypeRecommendationsSection({ userId, onBookmark, onUnboo
     console.log('[TypeRecommendationsSection] API 요청 시작, userId:', userId);
     setLoading(true);
     setError(null);
-    
+
     try {
       const res = await axiosInstance.get('/api/bookmark/bookmark-recommend');
       console.log('[TypeRecommendationsSection] API 응답 성공:', res.data);
@@ -83,8 +83,8 @@ export default function TypeRecommendationsSection({ userId, onBookmark, onUnboo
 
   return (
     <section style={{ marginTop: '2rem' }}>
-      <h2 style={{ 
-        fontSize: '1.2rem', 
+      <h2 style={{
+        fontSize: '1.2rem',
         marginBottom: '1rem',
         fontWeight: '600',
         color: '#333'
@@ -93,9 +93,9 @@ export default function TypeRecommendationsSection({ userId, onBookmark, onUnboo
       </h2>
 
       {error && (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '2rem', 
+        <div style={{
+          textAlign: 'center',
+          padding: '2rem',
           color: '#666',
           backgroundColor: '#f8f9fa',
           borderRadius: '8px',
